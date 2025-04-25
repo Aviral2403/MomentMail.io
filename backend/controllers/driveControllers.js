@@ -246,7 +246,7 @@ exports.sendBulkEmails = async (req, res) => {
         return res.status(400).json({ message: "Missing required fields" });
       }
   
-      if (!Array.isArray(recipients) {
+      if (!Array.isArray(recipients)) {
         return res.status(400).json({ message: "Recipients must be an array" });
       }
   
