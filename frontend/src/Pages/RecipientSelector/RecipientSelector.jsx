@@ -271,18 +271,28 @@ const RecipientSelector = () => {
   // Handle confirmation and proceed to email sending
   const handleSendEmails = () => {
     if (columnData.length > 0) {
-      navigate(`/templates/${slug}/preview`, {
-        state: {
-          templateContent,
-          recipients: columnData,
-          emailSubject: location.state?.emailSubject || "No Subject",
-          isLocalFile: selectionMethod === "local", // Pass flag to indicate local file
-        },
-      });
+        // Filter out any empty or invalid emails
+        const validRecipients = columnData.filter(email => 
+            typeof email === 'string' && email.includes('@')
+        );
+
+        if (validRecipients.length === 0) {
+            setError("No valid email addresses found in the selected column");
+            return;
+        }
+
+        navigate(`/templates/${slug}/preview`, {
+            state: {
+                templateContent,
+                recipients: validRecipients,
+                emailSubject: location.state?.emailSubject || "No Subject",
+                isLocalFile: selectionMethod === "local", // Pass flag to indicate local file
+            },
+        });
     } else {
-      setError("Please select a column with data");
+        setError("Please select a column with valid email data");
     }
-  };
+};
 
   // Handle disconnect
   const handleDisconnect = () => {
