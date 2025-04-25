@@ -7,7 +7,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 
 const EmailPreview = () => {
   const location = useLocation();
-  const { templateContent, recipients, emailSubject } = location.state;
+  const { templateContent, recipients, emailSubject, isLocalFile } = location.state;
   const navigate = useNavigate();
 
   const [sendingStatus, setSendingStatus] = useState(
@@ -44,7 +44,8 @@ const EmailPreview = () => {
     const sendEmailsSequentially = async () => {
       for (let i = 0; i < recipients.length; i++) {
         try {
-          await sendEmails(templateContent, [recipients[i]], emailSubject);
+          // Pass the isLocalFile flag to sendEmails
+          await sendEmails(templateContent, [recipients[i]], emailSubject, isLocalFile);
           setSendingStatus((prev) =>
             prev.map((item) =>
               item.email === recipients[i] ? { ...item, status: "sent" } : item
@@ -72,7 +73,7 @@ const EmailPreview = () => {
     };
 
     sendEmailsSequentially();
-  }, [templateContent, recipients, emailSubject]);
+  }, [templateContent, recipients, emailSubject, isLocalFile]);
 
   const handleBackToTemplates = () => {
     navigate("/templates");
@@ -223,54 +224,6 @@ const EmailPreview = () => {
               : "Emails sent successfully!"}
           </p>
         )}
-
-        {/* Original functionality - commented out but maintained */}
-        {/* 
-        <div className="hidden-status-panel">
-          <div className="status-header">
-            <h3>Email Sending Status</h3>
-            <span className="status-counter">
-              {stats.sent}/{stats.total}
-            </span>
-          </div>
-
-          <div className="status-progress-bar">
-            <div
-              className="status-progress-fill"
-              style={{ width: `${(stats.sent / stats.total) * 100}%` }}
-            ></div>
-          </div>
-
-          <div className="notification-list">
-            {sendingStatus.map((item, index) => (
-              <div
-                key={`status-${index}`}
-                className={`notification-item ${item.status}`}
-              >
-                <span className="notification-icon">
-                  {getStatusIcon(item.status)}
-                </span>
-                <div className="notification-content">
-                  <span className="notification-email">{item.email}</span>
-                  <span className="notification-status">{item.status}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {allProcessed && (
-            <div className="status-summary">
-              <p>
-                <strong>{stats.sent}</strong> sent successfully,
-                <strong> {stats.failed}</strong> failed
-              </p>
-              <button className="btn-back" onClick={handleBackToTemplates}>
-                Back to Templates
-              </button>
-            </div>
-          )}
-        </div>
-        */}
       </div>
     </div>
   );

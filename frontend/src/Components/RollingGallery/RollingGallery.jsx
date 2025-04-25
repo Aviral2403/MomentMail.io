@@ -63,7 +63,7 @@ const RollingGallery = ({ autoplay = false, pauseOnHover = false, images = [] })
       controls.start({
         rotateY: [rotation.get(), rotation.get() - 360],
         transition: { 
-          duration: 40, // Slow continuous rotation that takes 30 seconds for full 360°
+          duration: 25, // Slow continuous rotation that takes 30 seconds for full 360°
           ease: "linear", // Linear for continuous smooth rotation
           repeat: Infinity, // Loop infinitely
           repeatType: "loop"

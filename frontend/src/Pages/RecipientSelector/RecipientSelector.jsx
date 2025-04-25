@@ -29,36 +29,35 @@ const RecipientSelector = () => {
   const location = useLocation();
   const templateContent = location.state?.templateContent || "";
 
-  // Check drive connection on mount
+  // Check drive connection on mount when method is drive
   useEffect(() => {
-    const checkDriveConnection = () => {
-      try {
-        const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-        if (userInfo.driveAccess && userInfo.driveToken) {
-          // Verify token is still valid
-          const tokenData = JSON.parse(atob(userInfo.driveToken.split(".")[1]));
-          const isTokenValid = tokenData.exp * 1000 > Date.now();
-          setIsDriveConnected(isTokenValid);
+    if (selectionMethod === "drive") {
+      const checkDriveConnection = () => {
+        try {
+          const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+          if (userInfo.driveAccess && userInfo.driveToken) {
+            // Verify token is still valid
+            const tokenData = JSON.parse(atob(userInfo.driveToken.split(".")[1]));
+            const isTokenValid = tokenData.exp * 1000 > Date.now();
+            setIsDriveConnected(isTokenValid);
 
-          if (isTokenValid && selectionMethod === "drive") {
-            // Load spreadsheets automatically when connected
-            loadSpreadsheets();
+            if (isTokenValid) {
+              loadSpreadsheets();
+            }
+          } else {
+            setIsDriveConnected(false);
           }
-        } else {
+        } catch (error) {
+          console.error("Error checking drive connection:", error);
           setIsDriveConnected(false);
         }
-      } catch (error) {
-        console.error("Error checking drive connection:", error);
-        setIsDriveConnected(false);
-      }
-    };
+      };
 
-    if (selectionMethod === "drive") {
       checkDriveConnection();
     }
   }, [selectionMethod]);
 
-  // Load spreadsheets directly from API
+  // Load spreadsheets directly from API (Google Drive only)
   const loadSpreadsheets = async () => {
     setIsLoadingSpreadsheets(true);
     setError(null);
@@ -186,8 +185,7 @@ const RecipientSelector = () => {
       setIsConnecting(false);
     },
     flow: "auth-code",
-    scope: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.events",
-  });
+    scope: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.events",  });
 
   // Handle spreadsheet selection
   const handleSpreadsheetSelect = async (spreadsheet) => {
@@ -278,6 +276,7 @@ const RecipientSelector = () => {
           templateContent,
           recipients: columnData,
           emailSubject: location.state?.emailSubject || "No Subject",
+          isLocalFile: selectionMethod === "local", // Pass flag to indicate local file
         },
       });
     } else {
