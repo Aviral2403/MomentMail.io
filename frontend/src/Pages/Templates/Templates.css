@@ -2,6 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display+SC:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Sacramento&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quintessential&display=swap');
 
 
 .templates-page {
@@ -92,6 +93,11 @@
 
 .template-message div {
   color: #2555eb;
+  font-family: "Quintessential"
+}
+
+.template-message div span{
+  font-family: 'Montserrat';
 }
 
 .choose-create {
@@ -128,12 +134,12 @@
 }
 
 .library-text, .template-text {
-  font-family: 'Montserrat';
+  /* font-family: 'Montserrat'; */
   font-size: clamp(1.5rem, 4vw, 4.5rem);
   color: rgba(37, 85, 235, 1);
   position: relative;
   transition: color 0.3s ease;
-  font-style: italic;
+  font-family: "Quintessential"
 }
 
 
