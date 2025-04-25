@@ -235,144 +235,148 @@ exports.sendBulkEmails = async (req, res) => {
     const { templateContent, recipients, templateName, isLocalFile } = req.body;
     
     console.log("Received request to send emails:", { 
-      templateName, 
-      recipientCount: recipients.length, 
-      isLocalFile 
+        templateName, 
+        recipientCount: recipients.length, 
+        isLocalFile 
     });
-    
+
     try {
-      // Validate required fields
-      if (!templateContent || !recipients || !templateName) {
-        return res.status(400).json({ message: "Missing required fields" });
-      }
-  
-      if (!Array.isArray(recipients)) {
-        return res.status(400).json({ message: "Recipients must be an array" });
-      }
-  
-      // Get token from authorization header
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ message: "Authorization token required" });
-      }
-      
-      const token = authHeader.split(' ')[1];
-      
-      // Configure OAuth client
-      const oauth2Client = new google.auth.OAuth2(
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_REDIRECT_URI
-      );
-      
-      if (isLocalFile) {
-        // For local files, just use the provided token directly
-        oauth2Client.setCredentials({ access_token: token });
-      } else {
-        // For Drive files, we need to verify the drive token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        oauth2Client.setCredentials(decoded.tokens);
-      }
-      
-      // Get sender email
-      const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
-      const userInfo = await oauth2.userinfo.get();
-      const senderEmail = userInfo.data.email;
-      
-      console.log("Sender email retrieved:", senderEmail);
-      
-      // Initialize Gmail API
-      const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
-      
-      // Track successful and failed emails
-      const results = {
-        success: [],
-        failed: []
-      };
-      
-      // Send emails to all recipients
-      for (const recipient of recipients) {
-        try {
-          // Validate recipient email
-          if (!recipient || typeof recipient !== 'string' || !recipient.includes('@')) {
-            console.error(`Invalid recipient email: ${recipient}`);
-            results.failed.push(recipient);
-            continue;
-          }
-  
-          const emailLines = [];
-          emailLines.push(`From: ${senderEmail}`);
-          emailLines.push(`To: ${recipient}`);
-          emailLines.push('Content-Type: text/html; charset=utf-8');
-          emailLines.push('MIME-Version: 1.0');
-          emailLines.push(`Subject: ${templateName}`);
-          emailLines.push('');
-          emailLines.push(templateContent);
-          
-          const email = emailLines.join('\n');
-          const base64Email = Buffer.from(email).toString('base64')
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/, '');
-          
-          console.log(`Sending email to ${recipient}...`);
-          
-          const response = await gmail.users.messages.send({
-            userId: 'me',
-            requestBody: {
-              raw: base64Email,
-            },
-          });
-          
-          console.log(`Email sent to ${recipient}:`, response.data);
-          results.success.push(recipient);
-        } catch (emailErr) {
-          console.error(`Error sending email to ${recipient}:`, emailErr);
-          results.failed.push({
-            email: recipient,
-            error: emailErr.message
-          });
+        // Validate required fields
+        if (!templateContent || !recipients || !templateName) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        if (!Array.isArray(recipients)) {
+            return res.status(400).json({ message: "Recipients must be an array" });
+        }
+
+        // Get token from authorization header
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ message: "Authorization token required" });
         }
         
-        // Add a delay to avoid hitting rate limits (500ms between emails)
-        if (recipients.indexOf(recipient) < recipients.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+        const token = authHeader.split(' ')[1];
+        
+        // Configure OAuth client
+        const oauth2Client = new google.auth.OAuth2(
+            process.env.GOOGLE_CLIENT_ID,
+            process.env.GOOGLE_CLIENT_SECRET,
+            process.env.GOOGLE_REDIRECT_URI
+        );
+
+        // Decode the JWT token to get the stored tokens
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
+        if (!decoded.tokens) {
+            return res.status(401).json({ message: "No authentication tokens found" });
         }
-      }
-      
-      // Prepare response
-      const response = {
-        message: 'Email sending complete',
-        results: {
-          totalSent: results.success.length,
-          totalFailed: results.failed.length,
-          successRate: `${Math.round((results.success.length / recipients.length) * 100)}%`,
-          failedRecipients: results.failed
+
+        // Always use the tokens from the JWT payload
+        oauth2Client.setCredentials({
+            access_token: decoded.tokens.access_token,
+            refresh_token: decoded.tokens.refresh_token
+        });
+
+        // Get sender email
+        const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
+        const userInfo = await oauth2.userinfo.get();
+        const senderEmail = userInfo.data.email;
+        
+        console.log("Sender email retrieved:", senderEmail);
+        
+        // Initialize Gmail API
+        const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+        
+        // Track successful and failed emails
+        const results = {
+            success: [],
+            failed: []
+        };
+        
+        // Send emails to all recipients
+        for (const recipient of recipients) {
+            try {
+                // Validate recipient email
+                if (!recipient || typeof recipient !== 'string' || !recipient.includes('@')) {
+                    console.error(`Invalid recipient email: ${recipient}`);
+                    results.failed.push(recipient);
+                    continue;
+                }
+
+                const emailLines = [];
+                emailLines.push(`From: ${senderEmail}`);
+                emailLines.push(`To: ${recipient}`);
+                emailLines.push('Content-Type: text/html; charset=utf-8');
+                emailLines.push('MIME-Version: 1.0');
+                emailLines.push(`Subject: ${templateName}`);
+                emailLines.push('');
+                emailLines.push(templateContent);
+                
+                const email = emailLines.join('\n');
+                const base64Email = Buffer.from(email).toString('base64')
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
+                
+                console.log(`Sending email to ${recipient}...`);
+                
+                const response = await gmail.users.messages.send({
+                    userId: 'me',
+                    requestBody: {
+                        raw: base64Email,
+                    },
+                });
+                
+                console.log(`Email sent to ${recipient}:`, response.data);
+                results.success.push(recipient);
+            } catch (emailErr) {
+                console.error(`Error sending email to ${recipient}:`, emailErr);
+                results.failed.push({
+                    email: recipient,
+                    error: emailErr.message
+                });
+            }
+            
+            // Add a delay to avoid hitting rate limits (500ms between emails)
+            if (recipients.indexOf(recipient) < recipients.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
         }
-      };
-  
-      // Log final results
-      console.log('Email sending completed:', response);
-      
-      res.status(200).json(response);
+        
+        // Prepare response
+        const response = {
+            message: 'Email sending complete',
+            results: {
+                totalSent: results.success.length,
+                totalFailed: results.failed.length,
+                successRate: `${Math.round((results.success.length / recipients.length) * 100)}%`,
+                failedRecipients: results.failed
+            }
+        };
+
+        // Log final results
+        console.log('Email sending completed:', response);
+        
+        return res.status(200).json(response);
     } catch (err) {
-      console.error('Error sending emails:', err);
-      
-      // Handle specific error cases
-      let statusCode = 500;
-      let errorMessage = "Failed to send emails";
-      
-      if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
-        statusCode = 401;
-        errorMessage = "Invalid or expired token";
-      } else if (err.code === 403) {
-        statusCode = 403;
-        errorMessage = "Insufficient permissions to send emails";
-      }
-      
-      res.status(statusCode).json({
-        message: errorMessage,
-        error: process.env.NODE_ENV === 'development' ? err.message : undefined,
-      });
+        console.error('Error sending emails:', err);
+        
+        // Handle specific error cases
+        let statusCode = 500;
+        let errorMessage = "Failed to send emails";
+        
+        if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+            statusCode = 401;
+            errorMessage = "Invalid or expired token";
+        } else if (err.code === 403) {
+            statusCode = 403;
+            errorMessage = "Insufficient permissions to send emails";
+        }
+        
+        return res.status(statusCode).json({
+            message: errorMessage,
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined,
+        });
     }
-  };
+};
