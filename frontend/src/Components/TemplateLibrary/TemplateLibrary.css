@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* Dark Theme Email CSS with namespace prefix */
+.template-lib-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  margin-bottom: 8rem;
+  margin-top: 2rem;
+}
+
+.template-lib-content-wrapper {
+  display: flex;
+  max-width: 1200px;
+  width: 100%;
+  align-items: center;
+  gap: 40px;
+}
+
+.template-lib-image-container {
+  flex: 0 0 40%;
+  max-width: 450px;
+}
+
+.template-lib-hero-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.template-lib-text-container {
+  flex: 1;
+  padding: 20px 0;
+}
+
+.template-lib-heading {
+    display: flex;
+    flex-direction: column;
+  font-size: 2.8rem;
+  font-weight: 500;
+  margin-bottom: 24px;
+  line-height: 1.2;
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.template-lib-highlight {
+  color: #2555eb;
+  display: inline-block;
+}
+
+.template-lib-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 650px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 900px) {
+  .template-lib-content-wrapper {
+    flex-direction: column-reverse;
+    text-align: center;
+  }
+    
+  .template-lib-image-container {
+    margin: 0 auto;
+  }
+    
+  .template-lib-text-container {
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .template-lib-description {
+    text-align: center;
+    margin: 0 auto;
+  }
+    
+  .template-lib-heading {
+    font-size: 2.2rem;
+    text-align: center;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .template-lib-heading {
+    font-size: 1.8rem;
+  }
+    
+  .template-lib-description {
+    font-size: 1rem;
+  }
+}
