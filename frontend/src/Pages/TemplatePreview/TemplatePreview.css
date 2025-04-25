@@ -611,9 +611,7 @@
     color: white;
   }
 
-  /* .back-button span {
-    display: none; /* Hide text on small screens */
-  } */
+  
 
   .back-icon {
     font-size: 24px; /* Even larger icon for mobile */
