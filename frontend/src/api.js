@@ -69,76 +69,37 @@ export const fetchColumnData = (spreadsheetId, column) => {
 };
 
 
-// export const sendEmails = async (templateContent, recipients, templateName) => {
-//     const token = getDriveToken();
-//     if (!token) {
-//         console.error("No drive token found");
-//         return Promise.reject(new Error("No drive token found"));
-//     }
-
-//     try {
-//         console.log("Sending emails with subject:", templateName); // Debugging: Log the subject
-//         const response = await axios.post(`${API_BASE_URL}/drive/send-emails`, {
-//             templateContent,
-//             recipients,
-//             templateName, // Ensure this is passed correctly
-//         }, {
-//             headers: {
-//                 Authorization: `Bearer ${token}`,
-//             },
-//         });
-
-//         console.log("Email sending response:", response.data);
-//         return response.data;
-//     } catch (error) {
-//         console.error("Error sending emails:", error.response?.data?.error || error.message);
-//         throw error;
-//     }
-// };
-
-
-
 // Updated sendEmails function in api.js
-export const sendEmails = async (templateContent, recipients, templateName, isLocalFile = false) => {
-  // Get appropriate token based on whether we're using a local file
-  let token;
-  const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-  
-  if (isLocalFile) {
-    // Use regular auth token for local files
-    token = userInfo.token;
-    if (!token) {
-      console.error("No authentication token found");
-      return Promise.reject(new Error("Authentication required"));
-    }
-  } else {
-    // Use drive token for Google Drive files
-    token = userInfo.driveToken;
-    if (!token) {
-      console.error("No drive token found");
-      return Promise.reject(new Error("No drive token found"));
-    }
-  }
-  
+export const sendEmails = async (templateContent, recipients, templateName) => {
   try {
-    console.log("Sending emails with subject:", templateName);
-    console.log("Email Payload Size:", JSON.stringify({ templateContent, recipients, templateName }).length);
-    
-    const response = await axios.post(`${API_BASE_URL}/drive/send-emails`, {
-      templateContent,
-      recipients,
-      templateName,
-      isLocalFile // Pass flag to backend to know which auth to use
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    
-    console.log("Email sending response:", response.data);
-    return response.data;
+      // Get user info from localStorage
+      const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+      
+      if (!userInfo.token) {
+          console.error("No authentication token found");
+          return Promise.reject(new Error("Authentication required"));
+      }
+
+      console.log("Sending emails with subject:", templateName);
+      
+      const response = await axios.post(`${API_BASE_URL}/drive/send-emails`, {
+          templateContent,
+          recipients,
+          templateName
+      }, {
+          headers: {
+              Authorization: `Bearer ${userInfo.token}`,
+          },
+      });
+      
+      console.log("Email sending response:", response.data);
+      return response.data;
   } catch (error) {
-    console.error("Error sending emails:", error.response?.data?.error || error.message);
-    throw error;
+      console.error("Error sending emails:", error.response?.data?.error || error.message);
+      if (error.response) {
+          console.error("Response status:", error.response.status);
+          console.error("Response data:", error.response.data);
+      }
+      throw error;
   }
 };
