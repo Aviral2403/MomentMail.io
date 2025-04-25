@@ -247,3 +247,6 @@
   transition: background 0.3s ease;
 }
 
+.connect-icon {
+  margin-top: 2px;
+}

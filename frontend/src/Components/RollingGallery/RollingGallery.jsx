@@ -9,10 +9,18 @@ const IMGS = [
   "template-1.webp",
   "template-7.jpg",
   "template-4.webp",
-  "template-5.jpg",
-  "template-6.jpeg",
-  "template-8.png",
+  // "template-5.jpg",
+  // "template-6.jpeg",
   "template-9.jpg",
+  "template-10.webp",
+  // "templates-1.webp",
+  // "templates-2.webp",
+  "templates-3.webp",
+  // "templates-4.webp",
+
+
+
+
 ];
 
 const RollingGallery = ({ autoplay = false, pauseOnHover = false, images = [] }) => {
