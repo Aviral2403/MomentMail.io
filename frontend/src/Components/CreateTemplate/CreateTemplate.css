@@ -1,0 +1,313 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+.custom-template-card {
+    position: relative;
+    /* background-color: #ffffff; */
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 490px;
+    width: 100%;
+    margin-bottom: 40px;
+    max-width: 100%;
+}
+  
+.custom-template-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+  
+.custom-template-preview {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+  
+.custom-template-header {
+    background-color: #f5f7fa;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+  
+.custom-email-from,
+.custom-email-subject {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    flex-wrap: wrap;
+}
+  
+.custom-label {
+    width: 70px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+  
+.custom-value {
+    color: black;
+    font-size: 14px;
+    word-break: break-word;
+    max-width: calc(100% - 70px);
+}
+  
+.custom-subject-input {
+    flex: 1;
+    padding: 6px 10px;
+    font-size: 14px;
+    outline: none;
+    width: calc(100% - 70px);
+    border: none;
+    background-color: inherit;
+    box-sizing: border-box;
+}
+  
+.custom-subject-input:focus {
+    border-color: #5046e5;
+}
+  
+.custom-template-content {
+    flex: 1;
+    overflow: auto;
+    padding: 0;
+    position: relative;
+    width: 100%;
+}
+  
+.custom-template-editor {
+    width: 100%;
+    height: 100%;
+    border: none;
+    padding: 15px;
+    padding-bottom: 45px; 
+    resize: none;
+    font-size: 14px;
+    line-height: 1.5;
+    outline: none;
+    box-sizing: border-box;
+    background-color: white;
+    color: black!important;
+    font-weight: 400;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+  
+.custom-template-info {
+    padding: 20px;
+    background-color: #1a1a1a;
+}
+  
+.custom-template-description {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #c9c9ce;
+    margin-bottom: 20px;
+    margin-top: 0;
+}
+  
+.custom-overlay-actions {
+    display: flex;
+    gap: 10px;
+}
+  
+.custom-btn-preview,
+.custom-btn-use {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+  
+.custom-btn-preview {
+    background-color: transparent;
+    color: #2555eb;
+    border: 1px solid #2555eb;
+    font-weight: 500;
+    font-family: 'Montserrat';
+    cursor: pointer;
+}
+  
+.custom-btn-preview:hover {
+    cursor: pointer;
+    color: #c9c9ce;
+    border: 1px solid #c9c9ce;
+}
+  
+.custom-btn-use {
+    background-color: #2555eb;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    font-family: 'Montserrat';
+}
+  
+.custom-btn-use:hover {
+    background-color: #4338ca;
+    cursor: pointer;
+}
+  
+/* Placeholder styling */
+.custom-template-editor::placeholder {
+    color: #9ca3af;
+}
+  
+.custom-subject-input::placeholder {
+    color: #9ca3af;
+}
+  
+.create-template-section {
+    margin-top: 60px;
+    margin-bottom: 40px;
+    padding: 0 20px;
+    width: 100%;
+}
+  
+.create-template-heading {
+    font-size: 28px;
+    color: whitesmoke;
+    margin-bottom: 30px;
+    text-align: center;
+    position: relative;
+    font-family: 'Montserrat';
+    font-weight: 400;
+}
+  
+.create-template-heading:after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 2px;
+    width: 20%;
+    background: #2555eb;
+}
+  
+.create-template-wrapper {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+  
+/* Responsive styles */
+@media screen and (max-width: 768px) {
+    .custom-template-card {
+        min-height: 575px;
+    }
+    
+    .create-template-section {
+        margin-top: 40px;
+    }
+    
+    .custom-email-from,
+    .custom-email-subject {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .custom-label {
+        margin-bottom: 5px;
+    }
+    
+    .custom-subject-input {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    .custom-template-card {
+        min-height: 625px;
+    }
+    
+    .custom-template-description {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    
+    .custom-btn-preview, 
+    .custom-btn-use {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .custom-template-card {
+        min-height: 500px;
+    }
+    
+    .custom-template-header {
+        padding: 8px 12px;
+    }
+    
+    .custom-label {
+        width: 50px;
+        font-size: 12px;
+    }
+    
+    .custom-value {
+        font-size: 12px;
+        max-width: calc(100% - 50px);
+    }
+    
+    .custom-subject-input {
+        padding: 4px 8px;
+        font-size: 12px;
+        width: 100%;
+    }
+    
+    .custom-template-editor {
+        padding: 12px;
+        font-size: 12px;
+    }
+    
+    .custom-template-info {
+        padding: 15px;
+    }
+    
+    .custom-template-description {
+        font-size: 13px;
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+    
+    .custom-btn-preview, 
+    .custom-btn-use {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+    
+    .create-template-heading {
+        font-size: 22px;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .custom-template-card {
+        min-height: 450px;
+    }
+    
+    .custom-template-description {
+        font-size: 12px;
+        line-height: 1.6;
+    }
+    
+    .custom-btn-preview, 
+    .custom-btn-use {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+}
+.custom-template-description .custom-strong{
+  color: whitesmoke;
+}
