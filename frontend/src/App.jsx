@@ -12,6 +12,9 @@ import RecipientSelector from "./Pages/RecipientSelector/RecipientSelector";
 import EmailPreview from "./Pages/EmailPreview/EmailPreview";
 import Chatbot from "./Pages/Chatbot/Chatbot";
 import { useEffect } from "react";
+import Footer from "./Components/Footer/Footer";
+import PrivacyPolicy from "./Pages/PrivacyPolicy/PrivacyPolicy";
+import Terms from "./Pages/Terms/Terms";
 
 // Scroll to top component with smooth scrolling
 const ScrollToTop = () => {
@@ -21,7 +24,7 @@ const ScrollToTop = () => {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: "smooth"
+      behavior: "smooth",
     });
   }, [pathname]);
 
@@ -42,6 +45,7 @@ const Layout = ({ children }) => {
     <>
       <Navbar />
       {children}
+      <Footer />
     </>
   );
 };
@@ -114,6 +118,23 @@ function App() {
           element={
             <Layout>
               <Chatbot />
+            </Layout>
+          }
+        />
+        <Route
+          path="/privacy"
+          element={
+            <Layout>
+              <PrivacyPolicy />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/terms"
+          element={
+            <Layout>
+              <Terms />
             </Layout>
           }
         />

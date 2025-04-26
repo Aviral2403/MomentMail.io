@@ -360,9 +360,9 @@ const RecipientSelector = () => {
                 onClick={() => handleMethodChange("drive")}
               >
                 <svg className="method-icon" viewBox="0 0 24 24" width="20" height="20">
-                  <path fill="currentColor" d="M4.5 14.5l2.5 4.5h10l2.5-4.5-5-8.5h-5l-5 8.5z" />
-                  <path fill="currentColor" d="M14.5 21l5-9h-10l5 9z" />
-                  <path fill="currentColor" d="M4.5 14.5L9.5 3H15l-5 8.5-5.5 3z" />
+                  <path fill="#4285F4" d="M4.5 14.5l2.5 4.5h10l2.5-4.5-5-8.5h-5l-5 8.5z" />
+                  <path fill="#34A853" d="M14.5 21l5-9h-10l5 9z" />
+                  <path fill="#FBBC05" d="M4.5 14.5L9.5 3H15l-5 8.5-5.5 3z" />
                 </svg>
                 Google Drive
               </button>
@@ -371,7 +371,7 @@ const RecipientSelector = () => {
                 onClick={() => handleMethodChange("local")}
               >
                 <svg className="method-icon" viewBox="0 0 24 24" width="20" height="20">
-                  <path fill="currentColor" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
+                  <path  fill="#4285F4" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
                 </svg>
                 Local File
               </button>
