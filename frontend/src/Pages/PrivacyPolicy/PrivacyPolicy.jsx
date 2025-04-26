@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import './privacyPolicy.css';
+import './PrivacyPolicy.css';
 
 const PrivacyPolicy = () => {
   const sections = {
