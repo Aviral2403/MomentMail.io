@@ -5,7 +5,7 @@ import {
   fetchSpreadsheetColumns,
   fetchColumnData,
 } from "../../api";
-import Navbar from "../../Components/Navbar/Navbar";
+// import Navbar from "./Navbar/Navbar";
 import { useGoogleLogin } from "@react-oauth/google";
 import { connectGoogleDrive } from "../../api";
 import * as XLSX from "xlsx";
@@ -22,30 +22,31 @@ const RecipientSelector = () => {
   const [isDriveConnected, setIsDriveConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isLoadingSpreadsheets, setIsLoadingSpreadsheets] = useState(false);
-  const [selectionMethod, setSelectionMethod] = useState("drive"); // 'drive' or 'local'
+  const [selectionMethod, setSelectionMethod] = useState("drive");
 
   const navigate = useNavigate();
   const { slug } = useParams();
   const location = useLocation();
-  const templateContent = location.state?.templateContent || "";
+  const { templateContent, emailSubject, isScheduled, scheduledAt } = location.state || {};
 
-  // Check drive connection on mount when method is drive
   useEffect(() => {
     if (selectionMethod === "drive") {
       const checkDriveConnection = () => {
         try {
           const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
           if (userInfo.driveAccess && userInfo.driveToken) {
-            // Verify token is still valid
             const tokenData = JSON.parse(atob(userInfo.driveToken.split(".")[1]));
             const isTokenValid = tokenData.exp * 1000 > Date.now();
             setIsDriveConnected(isTokenValid);
 
             if (isTokenValid) {
               loadSpreadsheets();
+            } else {
+              const updatedUserInfo = { ...userInfo };
+              delete updatedUserInfo.driveAccess;
+              delete updatedUserInfo.driveToken;
+              localStorage.setItem("user-info", JSON.stringify(updatedUserInfo));
             }
-          } else {
-            setIsDriveConnected(false);
           }
         } catch (error) {
           console.error("Error checking drive connection:", error);
@@ -57,24 +58,21 @@ const RecipientSelector = () => {
     }
   }, [selectionMethod]);
 
-  // Load spreadsheets directly from API (Google Drive only)
   const loadSpreadsheets = async () => {
     setIsLoadingSpreadsheets(true);
     setError(null);
 
     try {
       const result = await fetchSpreadsheets();
-      setSpreadsheets(result.data.files || []);
+      setSpreadsheets(result.files || []);
 
-      if (result.data.files.length === 0) {
-        setError(
-          "No spreadsheets found in your Google Drive. Please create one first."
-        );
+      if (result.files.length === 0) {
+        setError("No spreadsheets found in your Google Drive. Please create one first.");
       }
     } catch (err) {
       console.error("Error fetching spreadsheets:", err);
 
-      if (err.response && err.response.status === 401) {
+      if (err.response?.status === 401) {
         setIsDriveConnected(false);
         setError("Your Google Drive connection has expired. Please reconnect.");
       } else {
@@ -85,7 +83,6 @@ const RecipientSelector = () => {
     }
   };
 
-  // Handle local file upload
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -107,16 +104,12 @@ const RecipientSelector = () => {
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
         if (jsonData.length === 0) {
-          setError("The uploaded file is empty.");
-          setIsLoading(false);
-          return;
+          throw new Error("The uploaded file is empty.");
         }
 
         const headers = jsonData[0];
         if (!headers || headers.length === 0) {
-          setError("No columns found in the spreadsheet.");
-          setIsLoading(false);
-          return;
+          throw new Error("No columns found in the spreadsheet.");
         }
 
         setSelectedSpreadsheet({
@@ -128,7 +121,7 @@ const RecipientSelector = () => {
         setColumns(headers);
       } catch (err) {
         console.error("Error processing file:", err);
-        setError("Failed to process the file. Please try again.");
+        setError(err.message || "Failed to process the file.");
       } finally {
         setIsLoading(false);
       }
@@ -136,7 +129,6 @@ const RecipientSelector = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  // Handle Google Drive authentication response
   const handleDriveResponse = async (authResult) => {
     setIsConnecting(true);
     setError(null);
@@ -150,22 +142,18 @@ const RecipientSelector = () => {
           ...userInfo,
           driveAccess: true,
           driveToken: result.data.token,
-          driveConnectedAt: new Date().toISOString(),
         };
 
         localStorage.setItem("user-info", JSON.stringify(updatedUserInfo));
         setIsDriveConnected(true);
-
-        // Load spreadsheets immediately after connection
         await loadSpreadsheets();
       } else {
-        throw new Error(authResult);
+        throw new Error("Authorization failed");
       }
     } catch (e) {
       console.error("Error while connecting Google Drive:", e);
       setError("Failed to connect Google Drive. Please try again.");
 
-      // Clear any invalid drive data
       const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
       const updatedUserInfo = { ...userInfo };
       delete updatedUserInfo.driveAccess;
@@ -176,7 +164,6 @@ const RecipientSelector = () => {
     }
   };
 
-  // Initialize Google login
   const googleDriveLogin = useGoogleLogin({
     onSuccess: handleDriveResponse,
     onError: (error) => {
@@ -185,9 +172,9 @@ const RecipientSelector = () => {
       setIsConnecting(false);
     },
     flow: "auth-code",
-    scope: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.events",  });
+    scope: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets.readonly",
+  });
 
-  // Handle spreadsheet selection
   const handleSpreadsheetSelect = async (spreadsheet) => {
     setSelectedSpreadsheet(spreadsheet);
     setSelectedColumn(null);
@@ -197,18 +184,14 @@ const RecipientSelector = () => {
 
     try {
       if (spreadsheet.localFile) {
-        // Local file already processed in handleFileUpload
-        return;
+        return; // Already processed in handleFileUpload
       }
 
-      // Google Drive file
       const result = await fetchSpreadsheetColumns(spreadsheet.id);
-      setColumns(result.data.columns || []);
+      setColumns(result.columns || []);
 
-      if (result.data.columns.length === 0) {
-        setError(
-          "This spreadsheet doesn't have any columns. Please choose another one."
-        );
+      if (result.columns.length === 0) {
+        setError("This spreadsheet doesn't have any columns. Please choose another one.");
       }
     } catch (err) {
       console.error("Error fetching columns:", err);
@@ -218,7 +201,6 @@ const RecipientSelector = () => {
     }
   };
 
-  // Handle column selection
   const handleColumnSelect = async (column) => {
     setSelectedColumn(column);
     setIsLoading(true);
@@ -226,7 +208,6 @@ const RecipientSelector = () => {
 
     try {
       if (selectedSpreadsheet.localFile) {
-        // Process local file data
         const jsonData = selectedSpreadsheet.data;
         const headers = jsonData[0];
         const columnIndex = headers.indexOf(column);
@@ -245,19 +226,14 @@ const RecipientSelector = () => {
         setColumnData(values);
 
         if (values.length === 0) {
-          setError(
-            "This column doesn't contain any data. Please select a different column."
-          );
+          setError("This column doesn't contain any data. Please select a different column.");
         }
       } else {
-        // Google Drive file
         const result = await fetchColumnData(selectedSpreadsheet.id, column);
-        setColumnData(result.data.values || []);
+        setColumnData(result.values || []);
 
-        if (result.data.values.length === 0) {
-          setError(
-            "This column doesn't contain any data. Please select a different column."
-          );
+        if (result.values.length === 0) {
+          setError("This column doesn't contain any data. Please select a different column.");
         }
       }
     } catch (err) {
@@ -268,33 +244,32 @@ const RecipientSelector = () => {
     }
   };
 
-  // Handle confirmation and proceed to email sending
   const handleSendEmails = () => {
     if (columnData.length > 0) {
-        // Filter out any empty or invalid emails
-        const validRecipients = columnData.filter(email => 
-            typeof email === 'string' && email.includes('@')
-        );
+      const validRecipients = columnData.filter(email => 
+        typeof email === 'string' && email.includes('@')
+      );
 
-        if (validRecipients.length === 0) {
-            setError("No valid email addresses found in the selected column");
-            return;
-        }
+      if (validRecipients.length === 0) {
+        setError("No valid email addresses found in the selected column");
+        return;
+      }
 
-        navigate(`/templates/${slug}/preview`, {
-            state: {
-                templateContent,
-                recipients: validRecipients,
-                emailSubject: location.state?.emailSubject || "No Subject",
-                isLocalFile: selectionMethod === "local", // Pass flag to indicate local file
-            },
-        });
+      navigate(`/templates/${slug}/preview`, {
+        state: {
+          templateContent,
+          recipients: validRecipients,
+          emailSubject: emailSubject || "No Subject",
+          isLocalFile: selectionMethod === "local",
+          isScheduled,
+          scheduledAt
+        },
+      });
     } else {
-        setError("Please select a column with valid email data");
+      setError("Please select a column with valid email data");
     }
-};
+  };
 
-  // Handle disconnect
   const handleDisconnect = () => {
     const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
     const updatedUserInfo = { ...userInfo };
@@ -309,17 +284,14 @@ const RecipientSelector = () => {
     setSpreadsheets([]);
   };
 
-  // Handle back button
   const handleBack = () => {
     navigate(`/templates/${slug}/edit`);
   };
 
-  // Handle refresh spreadsheets
   const handleRefreshSpreadsheets = () => {
     loadSpreadsheets();
   };
 
-  // Handle selection method change
   const handleMethodChange = (method) => {
     setSelectionMethod(method);
     setSelectedSpreadsheet(null);
@@ -331,9 +303,26 @@ const RecipientSelector = () => {
 
   return (
     <div className="dark-theme-container">
-      <Navbar />
+      {/* <Navbar /> */}
       <div className="recipient-selector-page">
         <main className="recipient-selector-main">
+          <div className="stepper">
+
+          
+          {isScheduled && (
+            <div className="schedule-steps">
+              <div className="schedule-step">
+                <div className="schedule-step-circle schedule-step-circle-done">1</div>
+                <span className="schedule-step-text">Schedule </span>
+              </div>
+              <div className="schedule-step-connector"></div>
+              <div className="schedule-step schedule-step-active">
+                <div className="schedule-step-circle">2</div>
+                <span className="schedule-step-text">Recipients</span>
+              </div>
+            </div>
+          )}
+          </div>
           <div className="recipient-selector-container">
             <div className="recipient-selector-header">
               <h1>Select Email Recipients</h1>
@@ -371,7 +360,7 @@ const RecipientSelector = () => {
                 onClick={() => handleMethodChange("local")}
               >
                 <svg className="method-icon" viewBox="0 0 24 24" width="20" height="20">
-                  <path  fill="#4285F4" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
+                  <path fill="#4285F4" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
                 </svg>
                 Local File
               </button>
@@ -414,18 +403,10 @@ const RecipientSelector = () => {
             ) : (
               <div className="selection-container">
                 <div className="stepper">
-                  <div
-                    className={`step step-card ${
-                      selectedSpreadsheet ? "completed" : "active"
-                    }`}
-                  >
+                  <div className={`step step-card ${selectedSpreadsheet ? "completed" : "active"}`}>
                     <div className="step-header">
                       <div className="step-number">1</div>
-                      <h2>
-                        {selectionMethod === "drive"
-                          ? "Select a Spreadsheet"
-                          : "Upload a Spreadsheet"}
-                      </h2>
+                      <h2>{selectionMethod === "drive" ? "Select a Spreadsheet" : "Upload a Spreadsheet"}</h2>
                     </div>
                     <div className="step-content">
                       {selectedSpreadsheet ? (
@@ -437,15 +418,10 @@ const RecipientSelector = () => {
                             </svg>
                             <div className="selected-details">
                               <span className="selected-label">Selected:</span>
-                              <span className="selected-value">
-                                {selectedSpreadsheet.name}
-                              </span>
+                              <span className="selected-value">{selectedSpreadsheet.name}</span>
                             </div>
                           </div>
-                          <button
-                            className="btn-change"
-                            onClick={() => setSelectedSpreadsheet(null)}
-                          >
+                          <button className="btn-change" onClick={() => setSelectedSpreadsheet(null)}>
                             Change
                           </button>
                         </div>
@@ -481,9 +457,7 @@ const RecipientSelector = () => {
                                           <div
                                             key={sheet.id}
                                             className="spreadsheet-item"
-                                            onClick={() =>
-                                              handleSpreadsheetSelect(sheet)
-                                            }
+                                            onClick={() => handleSpreadsheetSelect(sheet)}
                                           >
                                             <div className="spreadsheet-icon-container">
                                               <svg className="spreadsheet-icon" viewBox="0 0 24 24" width="24" height="24">
@@ -492,9 +466,7 @@ const RecipientSelector = () => {
                                               </svg>
                                             </div>
                                             <div className="spreadsheet-details">
-                                              <div className="spreadsheet-name">
-                                                {sheet.name}
-                                              </div>
+                                              <div className="spreadsheet-name">{sheet.name}</div>
                                               <div className="spreadsheet-modified">
                                                 Last Modified: {new Date(sheet.modifiedTime).toLocaleDateString()}
                                               </div>
@@ -510,10 +482,7 @@ const RecipientSelector = () => {
                                         <path fill="currentColor" d="M12 17l-5-5 1.41-1.41L12 14.17l4.59-4.58L18 11l-6 6z" />
                                       </svg>
                                       <span>No spreadsheets found.</span>
-                                      <button
-                                        className="btn-refresh-inline"
-                                        onClick={handleRefreshSpreadsheets}
-                                      >
+                                      <button className="btn-refresh-inline" onClick={handleRefreshSpreadsheets}>
                                         Refresh
                                       </button>
                                     </div>
@@ -546,23 +515,13 @@ const RecipientSelector = () => {
                     </div>
                   </div>
 
-                  <div
-                    className={`step step-card ${
-                      selectedColumn
-                        ? "completed"
-                        : selectedSpreadsheet
-                        ? "active"
-                        : "disabled"
-                    }`}
-                  >
+                  <div className={`step step-card ${selectedColumn ? "completed" : selectedSpreadsheet ? "active" : "disabled"}`}>
                     <div className="step-header">
                       <div className="step-number">2</div>
                       <h2>Select an Email Column</h2>
                     </div>
                     <div className="step-content">
-                      {isLoading &&
-                      selectedSpreadsheet &&
-                      columns.length === 0 ? (
+                      {isLoading && selectedSpreadsheet && columns.length === 0 ? (
                         <div className="loading">
                           <span className="spinner"></span>
                           Loading columns...
@@ -577,18 +536,11 @@ const RecipientSelector = () => {
                                     <path fill="#4285F4" d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
                                   </svg>
                                   <div className="selected-details">
-                                    <span className="selected-label">
-                                      Selected:
-                                    </span>
-                                    <span className="selected-value">
-                                      {selectedColumn}
-                                    </span>
+                                    <span className="selected-label">Selected:</span>
+                                    <span className="selected-value">{selectedColumn}</span>
                                   </div>
                                 </div>
-                                <button
-                                  className="btn-change"
-                                  onClick={() => setSelectedColumn(null)}
-                                >
+                                <button className="btn-change" onClick={() => setSelectedColumn(null)}>
                                   Change
                                 </button>
                               </div>
@@ -632,23 +584,13 @@ const RecipientSelector = () => {
                     </div>
                   </div>
 
-                  <div
-                    className={`step step-card ${
-                      columnData.length > 0
-                        ? "completed"
-                        : selectedColumn
-                        ? "active"
-                        : "disabled"
-                    }`}
-                  >
+                  <div className={`step step-card ${columnData.length > 0 ? "completed" : selectedColumn ? "active" : "disabled"}`}>
                     <div className="step-header">
                       <div className="step-number">3</div>
                       <h2>Review Recipients</h2>
                     </div>
                     <div className="step-content">
-                      {isLoading &&
-                      selectedColumn &&
-                      columnData.length === 0 ? (
+                      {isLoading && selectedColumn && columnData.length === 0 ? (
                         <div className="loading">
                           <span className="spinner"></span>
                           Loading data...
@@ -660,8 +602,7 @@ const RecipientSelector = () => {
                               <svg className="user-icon" viewBox="0 0 24 24" width="24" height="24">
                                 <path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
                               </svg>
-                              Total recipients:{" "}
-                              <strong>{columnData.length}</strong>
+                              Total recipients: <strong>{columnData.length}</strong>
                             </div>
                             <div className="email-list">
                               {columnData.slice(0, 5).map((item, index) => (
@@ -719,7 +660,7 @@ const RecipientSelector = () => {
                     <svg className="send-icon" viewBox="0 0 24 24" width="16" height="16">
                       <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                     </svg>
-                    Send to {columnData.length || 0} Recipients
+                    {isScheduled ? "Schedule" : "Send"} to {columnData.length || 0} Recipients
                   </button>
                 </div>
               </div>

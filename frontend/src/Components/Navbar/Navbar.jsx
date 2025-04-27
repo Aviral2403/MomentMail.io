@@ -58,6 +58,10 @@ const Navbar = () => {
               Templates
             </Link>
 
+            <Link to="/dashboard" className="nav-link">
+              Dashboard
+            </Link>
+
             <Link to="/ask-ai" className="nav-link">
               Ask AI
             </Link>
@@ -84,6 +88,10 @@ const Navbar = () => {
           <div className="sidebar-links">
             <Link to="/templates" className="nav-link" onClick={closeMenu}>
               Templates
+            </Link>
+
+            <Link to="/dashboard" className="nav-link" onClick={closeMenu}>
+              Dashboard
             </Link>
             <Link to="/ask-ai" className="nav-link" onClick={closeMenu}>
               Ask AI

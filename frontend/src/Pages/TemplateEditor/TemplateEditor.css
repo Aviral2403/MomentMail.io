@@ -705,3 +705,111 @@
       flex-direction: column;
     }
   }
+
+
+
+
+  /* Send Email Actions Container */
+.send-email-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 24px 0;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  /* Button Base Styles */
+  .btn-send,
+  .btn-schedule {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    gap: 8px;
+    min-width: 180px;
+  }
+  
+  /* Send Button Specific Styles */
+  .btn-send {
+    background-color: #2555eb;
+    color: white;
+  }
+  
+  .btn-send:hover {
+    background-color: #1e47c8;
+  }
+  
+  /* Schedule Button Specific Styles */
+  .btn-schedule {
+    background-color: transparent;
+    border: 1px solid #2555eb;
+    color: #2555eb;
+  }
+  
+  .btn-schedule:hover {
+    background-color: #5276e0;
+    color: white;
+    scale: 1.05;
+  }
+  
+  /* Icon Styles */
+  .send-icon,
+  .schedule-icon {
+    width: 18px;
+    height: 18px;
+  }
+  
+  /* Medium screens */
+  @media (max-width: 768px) {
+    .send-email-actions {
+      padding: 20px 16px;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .btn-send,
+    .btn-schedule {
+      width: 100%;
+      max-width: 320px;
+      padding: 10px 20px;
+      font-size: 15px;
+    }
+  }
+  
+  /* Small screens */
+  @media (max-width: 500px) {
+    .send-email-actions {
+      padding: 16px 12px;
+    }
+    
+    .btn-send,
+    .btn-schedule {
+      font-size: 14px;
+      padding: 10px 16px;
+      min-width: unset;
+      width: 100%;
+    }
+    
+    .send-icon,
+    .schedule-icon {
+      width: 16px;
+      height: 16px;
+    }
+  }
+  
+  /* Very small screens */
+  @media (max-width: 375px) {
+    .btn-send,
+    .btn-schedule {
+      font-size: 13px;
+      padding: 8px 12px;
+    }
+  }

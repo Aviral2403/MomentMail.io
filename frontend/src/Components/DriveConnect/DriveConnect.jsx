@@ -55,7 +55,7 @@ const DriveConnect = () => {
         const updatedUserInfo = {
           ...userInfo,
           driveAccess: true,
-          driveToken: result.data.token,
+          driveToken: result.token,
           driveConnectedAt: new Date().toISOString()
         };
         
@@ -93,7 +93,7 @@ const DriveConnect = () => {
       setError("Google Drive connection failed. Please try again.");
     },
     flow: "auth-code",
-    scope: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.events",
+    scope: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.settings.basic https://www.googleapis.com/auth/calendar.events",
   });
 
   // Check if user is logged in and handle connect button click

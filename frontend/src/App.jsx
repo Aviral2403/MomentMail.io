@@ -15,11 +15,13 @@ import { useEffect } from "react";
 import Footer from "./Components/Footer/Footer";
 import PrivacyPolicy from "./Pages/PrivacyPolicy/PrivacyPolicy";
 import Terms from "./Pages/Terms/Terms";
+import ScheduleDateTime from "./Pages/ScheduleDateTime/ScheduleDateTime";
+import Dashboard from "./Pages/Dashboard/Dashboard";
 
 // Scroll to top component with smooth scrolling
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-
+  
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -27,7 +29,7 @@ const ScrollToTop = () => {
       behavior: "smooth",
     });
   }, [pathname]);
-
+  
   return null;
 };
 
@@ -40,6 +42,7 @@ const GoogleOAuthWrapper = ({ children }) => {
   );
 };
 
+// Layout component with Navbar and Footer
 const Layout = ({ children }) => {
   return (
     <>
@@ -55,6 +58,7 @@ function App() {
     <>
       <ScrollToTop />
       <Routes>
+        {/* Login route without Layout */}
         <Route
           path="/login"
           element={
@@ -63,6 +67,8 @@ function App() {
             </GoogleOAuthWrapper>
           }
         />
+
+        {/* Routes with Layout */}
         <Route
           path="/"
           element={
@@ -92,25 +98,51 @@ function App() {
         <Route
           path="/templates/:slug/edit"
           element={
-            <GoogleOAuthWrapper>
-              <TemplateEditor />
-            </GoogleOAuthWrapper>
+            <Layout>
+              <GoogleOAuthWrapper>
+                <TemplateEditor />
+              </GoogleOAuthWrapper>
+            </Layout>
           }
         />
         <Route
           path="/templates/:slug/recipients"
           element={
-            <GoogleOAuthWrapper>
-              <RecipientSelector />
-            </GoogleOAuthWrapper>
+            <Layout>
+              <GoogleOAuthWrapper>
+                <RecipientSelector />
+              </GoogleOAuthWrapper>
+            </Layout>
           }
         />
         <Route
           path="/templates/:slug/preview"
           element={
-            <GoogleOAuthWrapper>
-              <EmailPreview />
-            </GoogleOAuthWrapper>
+            <Layout>
+              <GoogleOAuthWrapper>
+                <EmailPreview />
+              </GoogleOAuthWrapper>
+            </Layout>
+          }
+        />
+        <Route
+          path="/templates/:slug/schedule"
+          element={
+            <Layout>
+              <GoogleOAuthWrapper>
+                <ScheduleDateTime />
+              </GoogleOAuthWrapper>
+            </Layout>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <Layout>
+              <GoogleOAuthWrapper>
+                <Dashboard />
+              </GoogleOAuthWrapper>
+            </Layout>
           }
         />
         <Route
@@ -129,7 +161,6 @@ function App() {
             </Layout>
           }
         />
-
         <Route
           path="/terms"
           element={

@@ -1,36 +1,52 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { sendEmails } from "../../api";
-import Navbar from "../../Components/Navbar/Navbar";
+// import Navbar from "./Navbar/Navbar";
 import "./EmailPreview.css";
 import { IoMdArrowRoundBack } from "react-icons/io";
 
+const truncateEmail = (email) => {
+  const atIndex = email.indexOf("@");
+  return atIndex !== -1 ? `${email.substring(0, atIndex)}@` : email;
+};
+
 const EmailPreview = () => {
   const location = useLocation();
-  const { templateContent, recipients, emailSubject, isLocalFile } = location.state;
   const navigate = useNavigate();
+  const {
+    templateContent,
+    recipients,
+    emailSubject,
+    isScheduled,
+    scheduledAt,
+  } = location.state || {};
 
   const [sendingStatus, setSendingStatus] = useState(
-    recipients.map((email) => ({ email, status: "pending" }))
+    recipients
+      ? recipients.map((email) => ({
+          email,
+          status: isScheduled ? "scheduled" : "pending",
+        }))
+      : []
   );
+
   const [stats, setStats] = useState({
     sent: 0,
     failed: 0,
-    total: recipients.length,
+    total: recipients ? recipients.length : 0,
   });
+
   const [allProcessed, setAllProcessed] = useState(false);
   const [error, setError] = useState(null);
   const [currentTime] = useState(new Date());
   const [userEmail, setUserEmail] = useState("");
 
-  // Format current time like "3:20 PM"
   const formattedTime = currentTime.toLocaleTimeString([], {
     hour: "numeric",
     minute: "2-digit",
   });
 
   useEffect(() => {
-    // Get user email from local storage
     try {
       const userInfo = localStorage.getItem("user-info");
       if (userInfo) {
@@ -38,42 +54,70 @@ const EmailPreview = () => {
         setUserEmail(userData.email || "");
       }
     } catch (error) {
-      console.error("Error retrieving user info from localStorage:", error);
+      console.error("Error retrieving user info:", error);
     }
 
-    const sendEmailsSequentially = async () => {
-      for (let i = 0; i < recipients.length; i++) {
-        try {
-          // Pass the isLocalFile flag to sendEmails
-          await sendEmails(templateContent, [recipients[i]], emailSubject, isLocalFile);
-          setSendingStatus((prev) =>
-            prev.map((item) =>
-              item.email === recipients[i] ? { ...item, status: "sent" } : item
-            )
-          );
-          setStats((prev) => ({ ...prev, sent: prev.sent + 1 }));
+    if (!isScheduled && recipients && recipients.length > 0) {
+      console.log("Starting immediate email sending process");
+      const sendEmailsSequentially = async () => {
+        for (let i = 0; i < recipients.length; i++) {
+          try {
+            await sendEmails(templateContent, [recipients[i]], emailSubject);
 
+            setSendingStatus((prev) =>
+              prev.map((item) =>
+                item.email === recipients[i]
+                  ? { ...item, status: "sent" }
+                  : item
+              )
+            );
+
+            setStats((prev) => ({ ...prev, sent: prev.sent + 1 }));
+          } catch (err) {
+            console.error(`Error sending to ${recipients[i]}:`, err);
+
+            setSendingStatus((prev) =>
+              prev.map((item) =>
+                item.email === recipients[i]
+                  ? { ...item, status: "failed" }
+                  : item
+              )
+            );
+
+            setStats((prev) => ({ ...prev, failed: prev.failed + 1 }));
+            setError("Failed to send some emails. Please try again.");
+          }
+
+          // Rate limiting
           if (i < recipients.length - 1) {
             await new Promise((resolve) => setTimeout(resolve, 500));
           }
-        } catch (error) {
-          console.error("Error sending email:", error);
-          setSendingStatus((prev) =>
-            prev.map((item) =>
-              item.email === recipients[i]
-                ? { ...item, status: "failed" }
-                : item
-            )
-          );
-          setStats((prev) => ({ ...prev, failed: prev.failed + 1 }));
-          setError("Failed to send some emails. Please try again.");
         }
-      }
-      setAllProcessed(true);
-    };
+        setAllProcessed(true);
+      };
 
-    sendEmailsSequentially();
-  }, [templateContent, recipients, emailSubject, isLocalFile]);
+      sendEmailsSequentially();
+    } else if (isScheduled) {
+      console.log("Displaying scheduled email preview");
+      setAllProcessed(true);
+
+      // Call API to schedule the emails
+      const scheduleEmails = async () => {
+        try {
+          console.log("Scheduling emails for:", scheduledAt);
+          await sendEmails(templateContent, recipients, emailSubject, {
+            isScheduled: true,
+            scheduledAt,
+          });
+        } catch (err) {
+          console.error("Error scheduling emails:", err);
+          setError("Failed to schedule emails. Please try again.");
+        }
+      };
+
+      scheduleEmails();
+    }
+  }, [templateContent, recipients, emailSubject, isScheduled, scheduledAt]);
 
   const handleBackToTemplates = () => {
     navigate("/templates");
@@ -85,6 +129,8 @@ const EmailPreview = () => {
         return <span className="status-icon sent">✓</span>;
       case "failed":
         return <span className="status-icon failed">✕</span>;
+      case "scheduled":
+        return <span className="status-icon scheduled">⏱</span>;
       default:
         return <div className="loading-spinner"></div>;
     }
@@ -92,14 +138,11 @@ const EmailPreview = () => {
 
   return (
     <div className="email-preview-container">
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className="email-preview-content">
         {allProcessed && (
-          <div
-            className="status-summary"
-            style={{ marginTop: "20px", textAlign: "center" }}
-          >
+          <div className="status-summary">
             <div className="back-button">
               <Link to="/templates">
                 <button className="btn-back" onClick={handleBackToTemplates}>
@@ -109,7 +152,7 @@ const EmailPreview = () => {
             </div>
           </div>
         )}
-        {/* Your Mail at a Glance Section */}
+
         <div className="mail-glance-section">
           <h1 className="section-title">Your Mail at a Glance</h1>
           <div className="glance">
@@ -143,6 +186,15 @@ const EmailPreview = () => {
                   <div className="mail-value">{emailSubject}</div>
                 </div>
 
+                {isScheduled && scheduledAt && (
+                  <div className="mail-row">
+                    <div className="mail-label">Time</div>
+                    <div className="mail-value">
+                      {new Date(scheduledAt).toLocaleString()}
+                    </div>
+                  </div>
+                )}
+
                 <div className="mail-row message-row">
                   <div className="mail-label">Message</div>
                   <div className="mail-value message-content">
@@ -156,35 +208,9 @@ const EmailPreview = () => {
           </div>
         </div>
 
-        {/* Connect Google Sheets Section */}
-        <div className="google-sheets-section">
-          <div className="sheets-container">
-            <div className="sheets-image">
-              <img
-                src="/preview.jpg"
-                alt="Google Sheets"
-                className="sheets-icon"
-              />
-            </div>
-
-            <div className="sheets-content">
-              <h2 className="sheets-title">Connect Your Google Sheets</h2>
-
-              <div className="sheets-buttons">
-                <button className="sheets-button">
-                  Select your google sheets
-                </button>
-                <button className="sheets-button">Fetch Emails</button>
-                <button className="sheets-button">Send Emails</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Email Status Section */}
         <div className="status-section">
           <div className="status-container">
-            <h2 className="status-title">Emails :</h2>
+            <h2 className="status-title">Emails Status:</h2>
 
             <div className="email-list">
               {sendingStatus.map((item, index) => (
@@ -192,7 +218,12 @@ const EmailPreview = () => {
                   key={index}
                   className={`email-recipients-list ${item.status}`}
                 >
-                  <div className="email-recipient-name">{item.email}</div>
+                  <div
+                    className="email-recipient-name"
+                    data-domain={item.email.substring(item.email.indexOf("@"))}
+                  >
+                    {item.email}
+                  </div>
                   <div className={`status-badge ${item.status}`}>
                     {item.status === "sent" ? (
                       <>
@@ -200,6 +231,8 @@ const EmailPreview = () => {
                       </>
                     ) : item.status === "failed" ? (
                       "Failed"
+                    ) : item.status === "scheduled" ? (
+                      "Scheduled"
                     ) : (
                       "Pending..."
                     )}
@@ -210,19 +243,38 @@ const EmailPreview = () => {
           </div>
         </div>
 
-        {/* Status message outside the container */}
         {!allProcessed ? (
           <p className="status-footer">Starting to send emails...</p>
+        ) : isScheduled ? (
+          <div className="status-footer-container">
+            <p className="status-footer scheduled">
+              Emails scheduled for {new Date(scheduledAt).toLocaleString()}
+            </p>
+            <button
+              className="btn-dashboard"
+              onClick={() => navigate("/dashboard")}
+            >
+              Go to Dashboard
+            </button>
+          </div>
         ) : (
-          <p
-            className={`status-footer ${
-              stats.failed > 0 ? "status-error" : "status-complete"
-            }`}
-          >
-            {stats.failed > 0
-              ? `${stats.failed} emails failed to send.`
-              : "Emails sent successfully!"}
-          </p>
+          <div className="status-footer-container">
+            <p
+              className={`status-footer ${
+                stats.failed > 0 ? "status-error" : "status-complete"
+              }`}
+            >
+              {stats.failed > 0
+                ? `${stats.failed} emails failed to send.`
+                : "All emails sent successfully!"}
+            </p>
+            <button
+              className="btn-dashboard"
+              onClick={() => navigate("/dashboard")}
+            >
+              Go to Dashboard
+            </button>
+          </div>
         )}
       </div>
     </div>

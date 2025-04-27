@@ -17,7 +17,10 @@ const SCOPES = [
   'https://www.googleapis.com/auth/spreadsheets.readonly', // Access Google Sheets
   'https://www.googleapis.com/auth/gmail.send', // Send emails via Gmail
   'https://www.googleapis.com/auth/userinfo.email', // Access user email
-  'https://www.googleapis.com/auth/calendar.events', // Add calendar scope for scheduling
+  'https://www.googleapis.com/auth/gmail.modify', // New
+  'https://www.googleapis.com/auth/gmail.settings.basic', // New
+  'https://www.googleapis.com/auth/calendar.events', // New
+  'https://www.googleapis.com/auth/calendar' // New
 
 ];
 

@@ -452,3 +452,77 @@ body {
 .back-button a{
   text-decoration: none!important;
 }
+
+/* Styles for scheduled status text */
+.status-badge.scheduled {
+  color: #FFA000;
+}
+
+/* Styles for the scheduled footer message */
+.status-footer.scheduled {
+  color: #3a57e8;
+  padding: 12px 25px;
+  border-radius: 6px;
+  font-weight: 500;
+  margin-top: 20px;
+  text-align: left;
+}
+
+/* Go to Dashboard button styling */
+.btn-dashboard {
+  background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.2s;
+    min-width: 200px;
+    margin-top: 15px;
+    margin-left: 2.2rem;
+}
+
+.btn-dashboard:hover {
+  background-color: #3e8e41;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .status-footer.scheduled {
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+  
+  .bt.status-footern-dashboard {
+    width: 100%;
+    padding: 12px;
+  }
+}
+
+
+/* For email recipient truncation on small screens */
+@media (max-width: 500px) {
+  .email-recipient-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+  }
+  
+  .email-recipient-name::after {
+    content: attr(data-domain);
+    display: none;
+  }
+  
+  .email-recipient-name {
+    position: relative;
+  }
+  
+  .email-recipient-name:hover {
+    overflow: visible;
+    z-index: 1;
+    background: white;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  }
+}

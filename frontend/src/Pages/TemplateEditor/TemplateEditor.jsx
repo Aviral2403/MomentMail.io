@@ -9,10 +9,8 @@ import {
   WEBINAR_TEMPLATE,
   FEEDBACK_TEMPLATE,
   SOCIAL_MEDIA_TEMPLATE,
-  // JOB_APPLICATION_TEMPLATE,
-  // HEALTH_SUBSCRIPTION_TEMPLATE
 } from "../../EmailTemplates";
-import Navbar from "../../Components/Navbar/Navbar";
+// import Navbar from "./Navbar/Navbar";
 import "./TemplateEditor.css";
 import axios from "axios";
 import { Toaster, toast } from "react-hot-toast";
@@ -25,7 +23,8 @@ const TemplateEditor = () => {
   const [saveStatus, setSaveStatus] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [emailSubject, setEmailSubject] = useState("");
-  const [isDriveConnected, setisDriveConnected] = useState(false);
+  const [isDriveConnected, setIsDriveConnected] = useState(false);
+  
   const templateMap = {
     "product-launch": FEATURE_UPDATE_TEMPLATE,
     "flash-sale": FLASH_SALE_TEMPLATE,
@@ -33,26 +32,28 @@ const TemplateEditor = () => {
     invitation: WEBINAR_TEMPLATE,
     feedback: FEEDBACK_TEMPLATE,
     "social-media": SOCIAL_MEDIA_TEMPLATE,
-    // "job-application": JOB_APPLICATION_TEMPLATE,
-    // "health-subscription": HEALTH_SUBSCRIPTION_TEMPLATE,
-    "custom-template": "", // This will be loaded from localStorage
+    "custom-template": "",
   };
 
-  // Access environment variables
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
     if (userInfo.driveAccess && userInfo.driveToken) {
-      const tokenData = JSON.parse(atob(userInfo.driveToken.split(".")[1]));
-      const isTokenValid = tokenData.exp * 1000 > Date.now();
-      setisDriveConnected(isTokenValid);
-      if (!isTokenValid) {
-        const updatedUserInfo = { ...userInfo };
-        delete updatedUserInfo.driveAccess;
-        delete updatedUserInfo.driveToken;
-        localStorage.setItem("user-info", JSON.stringify(updatedUserInfo));
+      try {
+        const tokenData = JSON.parse(atob(userInfo.driveToken.split(".")[1]));
+        const isTokenValid = tokenData.exp * 1000 > Date.now();
+        setIsDriveConnected(isTokenValid);
+        if (!isTokenValid) {
+          const updatedUserInfo = { ...userInfo };
+          delete updatedUserInfo.driveAccess;
+          delete updatedUserInfo.driveToken;
+          localStorage.setItem("user-info", JSON.stringify(updatedUserInfo));
+        }
+      } catch (error) {
+        console.error("Error checking drive token:", error);
+        setIsDriveConnected(false);
       }
     }
   }, []);
@@ -62,7 +63,7 @@ const TemplateEditor = () => {
       const userInfoString = localStorage.getItem("user-info");
       if (userInfoString) {
         const userInfo = JSON.parse(userInfoString);
-        if (userInfo && userInfo.email) {
+        if (userInfo?.email) {
           setUserEmail(userInfo.email);
         }
       }
@@ -111,8 +112,6 @@ const TemplateEditor = () => {
       invitation: "Webinar Invitation Template",
       feedback: "Feedback & Survey Template",
       "social-media": "Social Media Connection Template",
-      // "job-application": "Job Application Status Template",
-      // "health-subscription": "Health Subscription Box Template",
     };
     return names[slug] || "Email Template";
   };
@@ -124,12 +123,9 @@ const TemplateEditor = () => {
     if (savedTemplate) {
       setEditorContent(savedTemplate);
 
-      // For custom template, also update email subject from the saved template name
       if (slug === "custom-template") {
         try {
-          const customTemplateData = localStorage.getItem(
-            "custom_email_template"
-          );
+          const customTemplateData = localStorage.getItem("custom_email_template");
           if (customTemplateData) {
             const parsedTemplate = JSON.parse(customTemplateData);
             setEmailSubject(parsedTemplate.name || "Custom Email Template");
@@ -139,9 +135,7 @@ const TemplateEditor = () => {
         }
       }
     } else {
-      // For custom template with no saved content
       if (slug === "custom-template") {
-        // Create a basic template
         const emptyTemplate = `
         <!DOCTYPE html>
         <html>
@@ -155,7 +149,6 @@ const TemplateEditor = () => {
             <tr>
               <td align="center" style="padding: 20px 0;">
                 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                  <!-- Content -->
                   <tr>
                     <td style="padding: 30px 20px 30px;">
                       <div style="color: #333333; font-size: 16px; line-height: 1.5;">
@@ -163,7 +156,6 @@ const TemplateEditor = () => {
                       </div>
                     </td>
                   </tr>
-                  <!-- Footer -->
                   <tr>
                     <td style="padding: 20px; text-align: center; border-top: 1px solid #e1e4e8; color: #9ca3af; font-size: 12px;">
                       Sent from ${userEmail}
@@ -193,114 +185,89 @@ const TemplateEditor = () => {
       const storageKey = getStorageKey(slug);
       localStorage.setItem(storageKey, editorContent);
 
-      // For custom template, also update the template name and content in the custom template storage
       if (slug === "custom-template") {
         try {
-          const customTemplateData = localStorage.getItem(
-            "custom_email_template"
-          );
-          let templateData = customTemplateData
-            ? JSON.parse(customTemplateData)
-            : {};
+          const customTemplateData = localStorage.getItem("custom_email_template");
+          let templateData = customTemplateData ? JSON.parse(customTemplateData) : {};
 
           templateData = {
             ...templateData,
             name: emailSubject || "Custom Email Template",
           };
 
-          localStorage.setItem(
-            "custom_email_template",
-            JSON.stringify(templateData)
-          );
+          localStorage.setItem("custom_email_template", JSON.stringify(templateData));
         } catch (e) {
           console.error("Error updating custom template data:", e);
         }
       }
 
       setSaveStatus("Saved successfully!");
-      setTimeout(() => {
-        setSaveStatus("");
-      }, 3000);
+      setTimeout(() => setSaveStatus(""), 3000);
     } catch (error) {
-      setSaveStatus("Error saving template. Please try again.");
+      setSaveStatus("Error saving template");
       console.error("Error saving template:", error);
     }
   };
 
   const handleResetTemplate = () => {
-    toast(
-      (t) => (
-        <div className="confirm-toast">
-          <p>
-            Are you sure you want to reset to the original template? All your
-            changes will be lost.
-          </p>
-          <div className="confirm-buttons">
-            <button
-              onClick={() => {
-                const storageKey = getStorageKey(slug);
-                localStorage.removeItem(storageKey);
+    toast((t) => (
+      <div className="confirm-toast">
+        <p>Are you sure you want to reset to the original template? All changes will be lost.</p>
+        <div className="confirm-buttons">
+          <button onClick={() => {
+            const storageKey = getStorageKey(slug);
+            localStorage.removeItem(storageKey);
 
-                if (slug === "custom-template") {
-                  // For custom template, load the empty template
-                  const emptyTemplate = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                  <meta charset="UTF-8">
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>Custom Email Template</title>
-                </head>
-                <body style="margin: 0; padding: 0; background-color: #f5f8fa; font-family: Arial, sans-serif;">
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="min-width: 100%;">
-                    <tr>
-                      <td align="center" style="padding: 20px 0;">
-                        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                          <!-- Content -->
-                          <tr>
-                            <td style="padding: 30px 20px 30px;">
-                              <div style="color: #333333; font-size: 16px; line-height: 1.5;">
-                                Write your email content here...
-                              </div>
-                            </td>
-                          </tr>
-                          <!-- Footer -->
-                          <tr>
-                            <td style="padding: 20px; text-align: center; border-top: 1px solid #e1e4e8; color: #9ca3af; font-size: 12px;">
-                              Sent from ${userEmail}
-                            </td>
-                          </tr>
-                        </table>
-                      </td>
-                    </tr>
-                  </table>
-                </body>
-                </html>
-                `;
-                  setEditorContent(emptyTemplate);
+            if (slug === "custom-template") {
+              const emptyTemplate = `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Custom Email Template</title>
+              </head>
+              <body style="margin: 0; padding: 0; background-color: #f5f8fa; font-family: Arial, sans-serif;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="min-width: 100%;">
+                  <tr>
+                    <td align="center" style="padding: 20px 0;">
+                      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                        <tr>
+                          <td style="padding: 30px 20px 30px;">
+                            <div style="color: #333333; font-size: 16px; line-height: 1.5;">
+                              Write your email content here...
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 20px; text-align: center; border-top: 1px solid #e1e4e8; color: #9ca3af; font-size: 12px;">
+                            Sent from ${userEmail}
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </body>
+              </html>
+              `;
+              setEditorContent(emptyTemplate);
+              localStorage.removeItem("custom_email_template");
+              setEmailSubject("Custom Email Template");
+            } else {
+              setEditorContent(templateMap[slug]);
+            }
 
-                  // Also reset the custom template data
-                  localStorage.removeItem("custom_email_template");
-                  setEmailSubject("Custom Email Template");
-                } else {
-                  setEditorContent(templateMap[slug]);
-                }
-
-                setSaveStatus("Template reset to original!");
-                setTimeout(() => {
-                  setSaveStatus("");
-                }, 3000);
-                toast.dismiss(t.id);
-              }}
-            >
-              Yes, Reset
-            </button>
-            <button onClick={() => toast.dismiss(t.id)}>Cancel</button>
-          </div>
+            setSaveStatus("Template reset!");
+            setTimeout(() => setSaveStatus(""), 3000);
+            toast.dismiss(t.id);
+          }}>
+            Yes, Reset
+          </button>
+          <button onClick={() => toast.dismiss(t.id)}>Cancel</button>
         </div>
-      ),
-      { duration: Infinity }
-    );
+      </div>
+    ), { duration: Infinity });
   };
 
   const handleSendClick = () => {
@@ -312,67 +279,88 @@ const TemplateEditor = () => {
       const storageKey = getStorageKey(slug);
       localStorage.setItem(storageKey, editorContent);
 
-      // For custom template, also update the template name
       if (slug === "custom-template") {
         try {
-          const customTemplateData = localStorage.getItem(
-            "custom_email_template"
-          );
-          let templateData = customTemplateData
-            ? JSON.parse(customTemplateData)
-            : {};
+          const customTemplateData = localStorage.getItem("custom_email_template");
+          let templateData = customTemplateData ? JSON.parse(customTemplateData) : {};
 
           templateData = {
             ...templateData,
             name: emailSubject,
           };
 
-          localStorage.setItem(
-            "custom_email_template",
-            JSON.stringify(templateData)
-          );
+          localStorage.setItem("custom_email_template", JSON.stringify(templateData));
         } catch (e) {
           console.error("Error updating custom template name:", e);
         }
       }
+
+      const state = {
+        templateContent: editorContent,
+        emailSubject,
+        recipients: [],
+        isScheduled: false
+      };
+
+      navigate(`/templates/${slug}/recipients`, { state });
     } catch (error) {
       console.error("Error saving template before navigating:", error);
     }
+  };
 
-    // Log the email content to verify it contains Cloudinary URLs
-    console.log("Email Content:", editorContent);
+  const handleScheduleClick = () => {
+    if (!emailSubject || emailSubject.trim() === "") {
+      toast.error("Please enter a subject for the email.");
+      return;
+    }
+    try {
+      const storageKey = getStorageKey(slug);
+      localStorage.setItem(storageKey, editorContent);
 
-    const state = {
-      templateContent: editorContent,
-      emailSubject,
-      recipients: [],
-    };
+      if (slug === "custom-template") {
+        try {
+          const customTemplateData = localStorage.getItem("custom_email_template");
+          let templateData = customTemplateData ? JSON.parse(customTemplateData) : {};
 
-    console.log("Navigating with state:", state);
-    navigate(`/templates/${slug}/recipients`, { state });
+          templateData = {
+            ...templateData,
+            name: emailSubject,
+          };
+
+          localStorage.setItem("custom_email_template", JSON.stringify(templateData));
+        } catch (e) {
+          console.error("Error updating custom template name:", e);
+        }
+      }
+
+      const state = {
+        templateContent: editorContent,
+        emailSubject,
+        isScheduled: true
+      };
+
+      navigate(`/templates/${slug}/schedule`, { state });
+    } catch (error) {
+      console.error("Error saving template before navigating:", error);
+    }
   };
 
   return (
     <div className="template-editor-page">
-      <Navbar />
+      {/* <Navbar /> */}
       <Toaster position="top-center" />
       <main className="template-editor-main">
         <div className="template-editor-container">
           <div className="editor-header">
-            <Link to='/templates'>
-            <span className="back-button">
-              <IoMdArrowRoundBack />{""}Back
-              
-            </span>
+            <Link to="/templates">
+              <span className="back-button">
+                <IoMdArrowRoundBack /> Back
+              </span>
             </Link>
             <h1 className="template-name">{templateName}</h1>
             <div className="editor-actions">
               {saveStatus && (
-                <span
-                  className={`save-status ${
-                    saveStatus.includes("Error") ? "error" : "success"
-                  }`}
-                >
+                <span className={`save-status ${saveStatus.includes("Error") ? "error" : "success"}`}>
                   {saveStatus}
                 </span>
               )}
@@ -404,121 +392,31 @@ const TemplateEditor = () => {
                 min_height: 650,
                 resize: true,
                 menubar: true,
-                autoresize_bottom_margin: 50 /* Add bottom margin for better scrolling */,
                 plugins: [
-                  "advlist",
-                  "autolink",
-                  "lists",
-                  "link",
-                  "image",
-                  "charmap",
-                  "preview",
-                  "anchor",
-                  "searchreplace",
-                  "visualblocks",
-                  "code",
-                  "fullscreen",
-                  "insertdatetime",
-                  "media",
-                  "table",
-                  "help",
-                  "wordcount",
+                  "advlist", "autolink", "lists", "link", "image", "charmap", "preview",
+                  "anchor", "searchreplace", "visualblocks", "code", "fullscreen",
+                  "insertdatetime", "media", "table", "help", "wordcount"
                 ],
-                toolbar_mode: "wrap", // This setting helps with wrapping on smaller screens
-                toolbar_location: "top",
-                toolbar_sticky: true,
-                toolbar:
-                  "undo redo | blocks | " +
-                  "bold italic forecolor | alignleft aligncenter " +
+                toolbar: "undo redo | blocks | bold italic forecolor | alignleft aligncenter " +
                   "alignright alignjustify | bullist numlist outdent indent | " +
                   "removeformat | image link | help",
-                content_style:
-                  "body { font-family: Arial,sans-serif; font-size: 14px; padding: 20px; }",
+                content_style: "body { font-family: Arial,sans-serif; font-size: 14px; padding: 20px; }",
                 file_picker_types: "image",
                 branding: false,
                 automatic_uploads: true,
-                convert_urls: false,
-                relative_urls: false,
-                remove_script_host: false,
-                statusbar: true,
-                // Apply custom toolbar CSS classes to help with wrapping
-                setup: function (editor) {
-                  editor.on("init", function () {
-                    const isSmallScreen = window.matchMedia(
-                      "(max-width: 1024px)"
-                    ).matches;
-                    if (isSmallScreen) {
-                      const toolbar = document.querySelector(
-                        ".tox-toolbar__primary"
-                      );
-                      if (toolbar) {
-                        toolbar.style.flexWrap = "wrap";
-                      }
-                    }
-
-                    // Add padding to bottom of editor content for better scrolling
-                    const editorBody = editor.getBody();
-                    if (editorBody) {
-                      editorBody.style.paddingBottom = "100px";
-                    }
-                  });
-
-                  // Handle window resize
-                  window.addEventListener("resize", function () {
-                    const toolbar = document.querySelector(
-                      ".tox-toolbar__primary"
-                    );
-                    if (toolbar) {
-                      const isSmallScreen = window.matchMedia(
-                        "(max-width: 1024px)"
-                      ).matches;
-                      toolbar.style.flexWrap = isSmallScreen ? "wrap" : "";
-                    }
-                  });
-
-                  // Ensure scrolling works to the bottom
-                  editor.on("NodeChange", function () {
-                    const editorBody = editor.getBody();
-                    const editorContainer = editor.getContainer();
-
-                    // Make sure there's enough space at the bottom
-                    if (editorBody && editorContainer) {
-                      const lastElement = editorBody.lastChild;
-                      if (lastElement) {
-                        const paddingBottom = Math.max(
-                          100,
-                          window.innerHeight / 4
-                        );
-                        editorBody.style.paddingBottom = paddingBottom + "px";
-                      }
-                    }
-                  });
-                },
-                images_upload_handler: async function (blobInfo, progress) {
+                images_upload_handler: async (blobInfo) => {
                   return new Promise((resolve, reject) => {
                     const formData = new FormData();
                     formData.append("file", blobInfo.blob());
                     formData.append("upload_preset", uploadPreset);
 
-                    axios
-                      .post(
-                        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-                        formData
-                      )
-                      .then((response) => {
-                        console.log("Cloudinary response:", response.data);
-                        // Return just the URL string directly
-                        resolve(response.data.secure_url);
-                      })
+                    axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, formData)
+                      .then((response) => resolve(response.data.secure_url))
                       .catch((error) => {
                         console.error("Upload error:", error);
-                        reject("Image upload failed: " + error.message);
+                        reject("Image upload failed");
                       });
                   });
-                },
-                // Allow direct image URLs to work without modification
-                urlconverter_callback: function (url, node, on_save, name) {
-                  return url;
                 },
               }}
               value={editorContent}
@@ -527,8 +425,19 @@ const TemplateEditor = () => {
           </div>
         </div>
       </main>
-      <div className="send-email-btn">
-        <button onClick={handleSendClick}>Send Emails</button>
+      <div className="send-email-actions">
+        <button className="btn-schedule" onClick={handleScheduleClick}>
+          <svg className="schedule-icon" viewBox="0 0 24 24" width="16" height="16">
+            <path fill="currentColor" d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+          </svg>
+          Schedule Emails
+        </button>
+        <button className="btn-send" onClick={handleSendClick}>
+          <svg className="send-icon" viewBox="0 0 24 24" width="16" height="16">
+            <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+          </svg>
+          Send Emails Now
+        </button>
       </div>
     </div>
   );

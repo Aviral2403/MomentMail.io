@@ -17,6 +17,59 @@
   --disabled-overlay: rgba(255, 255, 255, 0.05);
 }
 
+/* Schedule steps styles */
+.schedule-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.schedule-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.schedule-step-circle {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-weight: 600;
+  border: 2px solid var(--border);
+}
+
+.schedule-step-circle-done {
+  background-color: var(--accent-primary) !important;
+  color: white;
+  border-color: var(--accent-primary);
+}
+
+.schedule-step-active .schedule-step-circle {
+  background-color: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+}
+
+.schedule-step-text {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.schedule-step-connector {
+  flex-grow: 1;
+  height: 2px;
+  background-color: var(--border);
+  max-width: 100px;
+}
+
 /* Column selection styles */
 .column-list {
   display: grid;
@@ -171,8 +224,8 @@
 }
 
 .btn-send:hover {
-  background-color: #2249c9; /* Lighter shade of #2555eb */
-  transform: scale(1.05); /* Slight zoom effect */
+  background-color: #2249c9;
+  transform: scale(1.05);
 }
 
 .btn-send:disabled {
@@ -224,7 +277,6 @@
   
   .step-content {
     padding: 1rem;
-
   }
   
   .drive-connect-section {
@@ -493,7 +545,6 @@
   z-index: 20;
   pointer-events: none;
   filter: none;
-  /* opacity: 1; */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   font-weight: 500;
 }
@@ -631,8 +682,6 @@
   border: black;
 }
 
-
-
 .back-icon {
   display: inline-block;
 }
@@ -718,14 +767,11 @@
   height: 20px;
 }
 
-
-
 /* Selection method tabs */
 .selection-method-tabs {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border);
   padding-bottom: 0.5rem;
 }
 
@@ -820,4 +866,9 @@
 .file-types {
   font-size: 0.8rem;
   color: var(--text-disabled);
+}
+
+
+.stepper{
+  margin-top: 4rem;
 }

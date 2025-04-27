@@ -1,23 +1,28 @@
 const express = require("express");
+const router = express.Router();
 const {
+    connectGoogleDrive,
     listSpreadsheets,
     getSpreadsheetColumns,
     getColumnData,
-    sendBulkEmails
+    sendBulkEmails,
+    getScheduledEmails,
+    getEmailHistory,
+    cancelScheduledEmail
 } = require("../controllers/driveControllers");
 
-const router = express.Router(); 
+// Google Drive connection
+router.get('/connect-drive', connectGoogleDrive);
 
-// List all spreadsheets
+// Spreadsheet operations
 router.get('/spreadsheets', listSpreadsheets);
-
-// Get columns for a specific spreadsheet
 router.get('/spreadsheets/:spreadsheetId/columns', getSpreadsheetColumns);
-
-// Get data from a specific column
 router.get('/spreadsheets/:spreadsheetId/columns/:column/data', getColumnData);
 
-// Send bulk emails
+// Email operations
 router.post('/send-emails', sendBulkEmails);
+router.get('/scheduled-emails', getScheduledEmails);
+router.get('/email-history', getEmailHistory);
+router.delete('/scheduled-emails/:scheduledEmailId', cancelScheduledEmail);
 
 module.exports = router;

@@ -1,105 +1,212 @@
 import axios from 'axios';
 
 // Base URL for the backend API
-const API_BASE_URL = 'https://momentmail-io-backend.onrender.com';
+const API_BASE_URL = 'http://localhost:8080';
 
-// Helper function to get the auth token from localStorage
-const getDriveToken = () => {
-  try {
-    const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-    return userInfo.driveToken;
-  } catch (error) {
-    console.error("Error getting drive token:", error);
-    return null;
-  }
-};
+// // Helper function to get the auth token from localStorage
+// const getDriveToken = () => {
+//   try {
+//     const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+//     return userInfo.driveToken;
+//   } catch (error) {
+//     console.error("Error getting drive token:", error);
+//     return null;
+//   }
+// };
 
 // Google Auth
 export const googleAuth = (code) => {
   return axios.get(`${API_BASE_URL}/auth/google?code=${code}`);
 };
 
-// Connect Google Drive
-export const connectGoogleDrive = (code) => {
-  return axios.get(`${API_BASE_URL}/auth/connect-drive`, {
-    params: { code },
-  });
+
+// Unified email sending function
+export const sendEmails = async (templateContent, recipients, templateName, options = {}) => {
+    try {
+        const { isScheduled = false, scheduledAt = null } = options;
+        const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+        
+        if (!userInfo.token) {
+            console.error("No authentication token found");
+            throw new Error("Authentication required");
+        }
+
+        console.log("Sending emails with options:", {
+            templateName,
+            recipientCount: recipients.length,
+            isScheduled,
+            scheduledAt: scheduledAt || 'immediate'
+        });
+
+        const response = await axios.post(`${API_BASE_URL}/drive/send-emails`, {
+            templateContent,
+            recipients,
+            templateName,
+            isScheduled,
+            scheduledAt
+        }, {
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        });
+
+        console.log("Email API response:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Email API error:", {
+            message: error.response?.data?.message || error.message,
+            status: error.response?.status,
+            data: error.response?.data
+        });
+        throw error;
+    }
 };
 
-// Fetch spreadsheets
-export const fetchSpreadsheets = () => {
-  const token = getDriveToken();
-  if (!token) {
-    return Promise.reject(new Error("No drive token found"));
-  }
+// Get scheduled emails
+export const getScheduledEmails = async () => {
+    try {
+        const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+        
+        if (!userInfo.token) {
+            console.error("No authentication token found");
+            throw new Error("Authentication required");
+        }
 
-  return axios.get(`${API_BASE_URL}/drive/spreadsheets`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+        const response = await axios.get(`${API_BASE_URL}/drive/scheduled-emails`, {
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        });
+
+        console.log("Scheduled emails:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error getting scheduled emails:", error);
+        throw error;
+    }
 };
 
-// Fetch spreadsheet columns
-export const fetchSpreadsheetColumns = (spreadsheetId) => {
-  const token = getDriveToken();
-  if (!token) {
-    return Promise.reject(new Error("No drive token found"));
-  }
+// Get email history
+export const getEmailHistory = async () => {
+    try {
+        const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+        
+        if (!userInfo.token) {
+            console.error("No authentication token found");
+            throw new Error("Authentication required");
+        }
 
-  return axios.get(`${API_BASE_URL}/drive/spreadsheets/${spreadsheetId}/columns`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+        const response = await axios.get(`${API_BASE_URL}/drive/email-history`, {
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        });
+
+        console.log("Email history:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error getting email history:", error);
+        throw error;
+    }
 };
 
-// Fetch column data
-export const fetchColumnData = (spreadsheetId, column) => {
-  const token = getDriveToken();
-  if (!token) {
-    return Promise.reject(new Error("No drive token found"));
-  }
+// Cancel scheduled email
+export const cancelScheduledEmail = async (scheduledEmailId) => {
+    try {
+        const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+        
+        if (!userInfo.token) {
+            console.error("No authentication token found");
+            throw new Error("Authentication required");
+        }
 
-  return axios.get(`${API_BASE_URL}/drive/spreadsheets/${spreadsheetId}/columns/${column}/data`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+        const response = await axios.delete(`${API_BASE_URL}/drive/scheduled-emails/${scheduledEmailId}`, {
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        });
+
+        console.log("Cancelled scheduled email:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error cancelling scheduled email:", error);
+        throw error;
+    }
 };
 
+// Google Drive functions
+export const fetchSpreadsheets = async () => {
+    try {
+        const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+        
+        if (!userInfo.driveToken) {
+            console.error("No drive token found");
+            throw new Error("Google Drive connection required");
+        }
 
-// Updated sendEmails function in api.js
-export const sendEmails = async (templateContent, recipients, templateName) => {
-  try {
-      // Get user info from localStorage
-      const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-      
-      if (!userInfo.token) {
-          console.error("No authentication token found");
-          return Promise.reject(new Error("Authentication required"));
-      }
+        const response = await axios.get(`${API_BASE_URL}/drive/spreadsheets`, {
+            headers: {
+                Authorization: `Bearer ${userInfo.driveToken}`,
+            },
+        });
 
-      console.log("Sending emails with subject:", templateName);
-      
-      const response = await axios.post(`${API_BASE_URL}/drive/send-emails`, {
-          templateContent,
-          recipients,
-          templateName
-      }, {
-          headers: {
-              Authorization: `Bearer ${userInfo.token}`,
-          },
-      });
-      
-      console.log("Email sending response:", response.data);
-      return response.data;
-  } catch (error) {
-      console.error("Error sending emails:", error.response?.data?.error || error.message);
-      if (error.response) {
-          console.error("Response status:", error.response.status);
-          console.error("Response data:", error.response.data);
-      }
-      throw error;
-  }
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching spreadsheets:", error);
+        throw error;
+    }
+};
+
+export const fetchSpreadsheetColumns = async (spreadsheetId) => {
+    try {
+        const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+        
+        if (!userInfo.driveToken) {
+            throw new Error("Google Drive connection required");
+        }
+
+        const response = await axios.get(`${API_BASE_URL}/drive/spreadsheets/${spreadsheetId}/columns`, {
+            headers: {
+                Authorization: `Bearer ${userInfo.driveToken}`,
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching spreadsheet columns:", error);
+        throw error;
+    }
+};
+
+export const fetchColumnData = async (spreadsheetId, column) => {
+    try {
+        const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+        
+        if (!userInfo.driveToken) {
+            throw new Error("Google Drive connection required");
+        }
+
+        const response = await axios.get(`${API_BASE_URL}/drive/spreadsheets/${spreadsheetId}/columns/${column}/data`, {
+            headers: {
+                Authorization: `Bearer ${userInfo.driveToken}`,
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching column data:", error);
+        throw error;
+    }
+};
+
+export const connectGoogleDrive = async (code) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/drive/connect-drive`, {
+            params: { code },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error connecting Google Drive:", error);
+        throw error;
+    }
 };
