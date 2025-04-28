@@ -59,49 +59,68 @@ const EmailPreview = () => {
 
     if (!isScheduled && recipients && recipients.length > 0) {
       console.log("Starting immediate email sending process");
-      const sendEmailsSequentially = async () => {
-        for (let i = 0; i < recipients.length; i++) {
-          try {
-            await sendEmails(templateContent, [recipients[i]], emailSubject);
-
-            setSendingStatus((prev) =>
-              prev.map((item) =>
-                item.email === recipients[i]
-                  ? { ...item, status: "sent" }
-                  : item
-              )
+      
+      // Send all emails at once instead of sequentially to avoid duplicate API calls
+      const sendAllEmails = async () => {
+        try {
+          const response = await sendEmails(templateContent, recipients, emailSubject);
+          
+          // Update all statuses based on response
+          if (response && response.results) {
+            const { totalSent, totalFailed, failedRecipients = [] } = response.results;
+            
+            // Create a set of failed email addresses for quick lookup
+            const failedEmailSet = new Set(failedRecipients.map(item => item.email));
+            
+            // Update status for each recipient
+            setSendingStatus(prev => 
+              prev.map(item => ({
+                ...item,
+                status: failedEmailSet.has(item.email) ? "failed" : "sent"
+              }))
             );
-
-            setStats((prev) => ({ ...prev, sent: prev.sent + 1 }));
-          } catch (err) {
-            console.error(`Error sending to ${recipients[i]}:`, err);
-
-            setSendingStatus((prev) =>
-              prev.map((item) =>
-                item.email === recipients[i]
-                  ? { ...item, status: "failed" }
-                  : item
-              )
-            );
-
-            setStats((prev) => ({ ...prev, failed: prev.failed + 1 }));
-            setError("Failed to send some emails. Please try again.");
+            
+            // Update overall stats correctly
+            setStats({
+              sent: totalSent,
+              failed: totalFailed,
+              total: recipients.length
+            });
+            
+            if (totalFailed > 0) {
+              setError(`${totalFailed} of ${recipients.length} emails failed to send.`);
+            }
           }
-
-          // Rate limiting
-          if (i < recipients.length - 1) {
-            await new Promise((resolve) => setTimeout(resolve, 500));
-          }
+          
+          setAllProcessed(true);
+        } catch (err) {
+          console.error("Error sending emails:", err);
+          
+          // Mark all as failed if entire request fails
+          setSendingStatus(prev => 
+            prev.map(item => ({
+              ...item,
+              status: "failed"
+            }))
+          );
+          
+          setStats({
+            sent: 0,
+            failed: recipients.length,
+            total: recipients.length
+          });
+          
+          setError("Failed to send emails. Please try again.");
+          setAllProcessed(true);
         }
-        setAllProcessed(true);
       };
 
-      sendEmailsSequentially();
+      sendAllEmails();
     } else if (isScheduled) {
       console.log("Displaying scheduled email preview");
       setAllProcessed(true);
 
-      // Call API to schedule the emails
+      // Call API to schedule the emails (only once)
       const scheduleEmails = async () => {
         try {
           console.log("Scheduling emails for:", scheduledAt);
@@ -186,6 +205,11 @@ const EmailPreview = () => {
                   <div className="mail-value">{emailSubject}</div>
                 </div>
 
+                <div className="mail-row">
+                  <div className="mail-label">Recipients</div>
+                  <div className="mail-value">{recipients ? recipients.length : 0} recipients</div>
+                </div>
+
                 {isScheduled && scheduledAt && (
                   <div className="mail-row">
                     <div className="mail-label">Time</div>
@@ -244,7 +268,7 @@ const EmailPreview = () => {
         </div>
 
         {!allProcessed ? (
-          <p className="status-footer">Starting to send emails...</p>
+          <p className="status-footer">Processing emails...</p>
         ) : isScheduled ? (
           <div className="status-footer-container">
             <p className="status-footer scheduled">
@@ -265,7 +289,7 @@ const EmailPreview = () => {
               }`}
             >
               {stats.failed > 0
-                ? `${stats.failed} emails failed to send.`
+                ? `${stats.failed} of ${stats.total} emails failed to send.`
                 : "All emails sent successfully!"}
             </p>
             <button

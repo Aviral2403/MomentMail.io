@@ -259,7 +259,38 @@ exports.sendBulkEmails = async (req, res) => {
             });
         }
 
-        // Handle immediate sending
+        // Generate a unique request ID to prevent duplicate processing
+        const requestId = req.headers['x-request-id'] || 
+                         `${decoded.email}-${templateName}-${Date.now()}`;
+
+        // Check if this exact request was recently processed (within last 10 seconds)
+        const recentRequests = await EmailHistory.find({
+            userId: decoded.email,
+            templateName: templateName,
+            sentAt: {
+                $gte: new Date(Date.now() - 10000) // Last 10 seconds
+            }
+        }).sort({ sentAt: -1 }).limit(1);
+
+        if (recentRequests.length > 0) {
+            const recent = recentRequests[0];
+            
+            // If we have a recent request with same number of recipients, likely a duplicate
+            if (recent.recipients.length === recipients.length) {
+                console.log("Potential duplicate request detected, returning previous response");
+                return res.status(200).json({
+                    message: 'Emails already processed',
+                    results: {
+                        totalSent: recent.successCount,
+                        totalFailed: recent.failureCount,
+                        failedRecipients: recent.failureCount > 0 ? 
+                            recipients.slice(0, recent.failureCount).map(email => ({ email, error: "Failed to send" })) : []
+                    }
+                });
+            }
+        }
+
+        // Handle immediate sending - BULK APPROACH
         const oauth2Client = new google.auth.OAuth2(
             process.env.GOOGLE_CLIENT_ID,
             process.env.GOOGLE_CLIENT_SECRET,
@@ -273,6 +304,9 @@ exports.sendBulkEmails = async (req, res) => {
 
         const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
         const results = { success: [], failed: [] };
+        
+        // Process emails in a single batch operation if possible
+        // If there are > 50 recipients, consider using batch API instead
         
         for (const recipient of recipients) {
             try {
@@ -304,35 +338,18 @@ exports.sendBulkEmails = async (req, res) => {
                 results.success.push(recipient);
             } catch (err) {
                 console.error(`Error sending to ${recipient}:`, err.message);
-                results.failed.push({ email: recipient, error: err.message });
+                
+                // Fix the error for Mongoose maps with dots in keys
+                const safeEmail = recipient.replace(/\./g, '_DOT_');
+                results.failed.push({ email: recipient, safeKey: safeEmail, error: err.message });
             }
             
             // Rate limiting
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 200));
         }
         
-        // Check for existing email history with same parameters to prevent duplicates
+        // Create a SINGLE history record for this batch
         const sentTime = new Date();
-        const existingEmailHistory = await EmailHistory.findOne({
-            userId: decoded.email,
-            templateName: templateName,
-            sentAt: {
-                $gte: new Date(sentTime.getTime() - 5000), // Within 5 seconds
-                $lte: new Date(sentTime.getTime() + 5000)
-            }
-        });
-
-        if (existingEmailHistory) {
-            return res.status(200).json({
-                message: 'Emails already sent',
-                results: {
-                    totalSent: existingEmailHistory.successCount,
-                    totalFailed: existingEmailHistory.failureCount,
-                }
-            });
-        }
-        
-        // Save history
         const emailHistory = new EmailHistory({
             userId: decoded.email,
             templateContent,
@@ -348,13 +365,14 @@ exports.sendBulkEmails = async (req, res) => {
         });
 
         await emailHistory.save();
+        console.log(`Email history created: ${results.success.length} successful, ${results.failed.length} failed`);
 
         return res.status(200).json({
-            message: 'Emails sent successfully',
+            message: 'Emails processed',
             results: {
                 totalSent: results.success.length,
                 totalFailed: results.failed.length,
-                failedRecipients: results.failed
+                failedRecipients: results.failed.map(f => ({ email: f.email, error: f.error }))
             }
         });
     } catch (err) {
@@ -377,7 +395,6 @@ exports.sendBulkEmails = async (req, res) => {
         });
     }
 };
-
 
 
 // Get scheduled emails
