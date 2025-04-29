@@ -3,17 +3,6 @@ import axios from 'axios';
 // Base URL for the backend API
 const API_BASE_URL = 'https://momentmail-io-backend.onrender.com';
 
-// // Helper function to get the auth token from localStorage
-// const getDriveToken = () => {
-//   try {
-//     const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-//     return userInfo.driveToken;
-//   } catch (error) {
-//     console.error("Error getting drive token:", error);
-//     return null;
-//   }
-// };
-
 
 // Debounce function to prevent duplicate API calls
 const debounce = (fn, delay) => {
@@ -258,5 +247,47 @@ export const connectGoogleDrive = async (code) => {
   } catch (error) {
       console.error("Error connecting Google Drive:", error);
       throw error;
+  }
+};
+
+
+
+
+export const getEmailStatus = async (recipients, emailSubject) => {
+  try {
+    const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+    
+    if (!userInfo.token) {
+      console.error("No authentication token found");
+      throw new Error("Authentication required");
+    }
+    
+    console.log("Making email status request to:", `${API_BASE_URL}/drive/email-status`);
+    console.log("Request payload:", { recipients, emailSubject });
+    
+    const response = await axios.post(`${API_BASE_URL}/drive/email-status`, {
+      recipients,
+      emailSubject,
+    }, {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    });
+
+    console.log("Email status response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error checking email status:", error);
+    
+    // Add more detailed error logging
+    if (error.response) {
+      console.error("Response status:", error.response.status);
+      console.error("Response data:", error.response.data);
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    }
+    
+    // Instead of throwing, return a default status to prevent breaking UI
+    return { status: 'unknown', error: error.message };
   }
 };

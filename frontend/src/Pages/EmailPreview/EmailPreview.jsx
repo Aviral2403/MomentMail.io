@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { sendEmails } from "../../api";
+import { sendEmails, getEmailStatus } from "../../api"; // Added getEmailStatus API function
 // import Navbar from "./Navbar/Navbar";
 import "./EmailPreview.css";
 import { IoMdArrowRoundBack } from "react-icons/io";
@@ -21,31 +21,52 @@ const EmailPreview = () => {
     scheduledAt,
   } = location.state || {};
 
-  const [sendingStatus, setSendingStatus] = useState(
-    recipients
-      ? recipients.map((email) => ({
-          email,
-          status: isScheduled ? "scheduled" : "pending",
-        }))
-      : []
+  // Track visible emails (those still in the process queue)
+  const [visibleEmails, setVisibleEmails] = useState(
+    recipients ? recipients.slice(0, 10).map(email => ({
+      email,
+      status: isScheduled ? "scheduled" : "pending"
+    })) : []
+  );
+  
+  // Track all email statuses for stats
+  const [allEmailStatuses, setAllEmailStatuses] = useState(
+    recipients ? recipients.map(email => ({
+      email,
+      status: isScheduled ? "scheduled" : "pending"
+    })) : []
   );
 
+  // For tracking which emails to process next
+  const emailQueueRef = useRef(recipients ? [...recipients] : []);
+  const processedCount = useRef(0);
+  const batchSize = 10;
+  
   const [stats, setStats] = useState({
     sent: 0,
     failed: 0,
     total: recipients ? recipients.length : 0,
+    processing: 0
   });
 
   const [allProcessed, setAllProcessed] = useState(false);
   const [error, setError] = useState(null);
-  const [currentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [userEmail, setUserEmail] = useState("");
+  const [apiCallMade, setApiCallMade] = useState(false);
+  const [failedEmails, setFailedEmails] = useState([]);
+  
+  // New state variables for scheduled emails
+  const [scheduledEmailsStarted, setScheduledEmailsStarted] = useState(false);
+  const [scheduledEmailsChecking, setScheduledEmailsChecking] = useState(false);
+  const [scheduledStatusTimer, setScheduledStatusTimer] = useState(null);
 
   const formattedTime = currentTime.toLocaleTimeString([], {
     hour: "numeric",
     minute: "2-digit",
   });
 
+  // Initial setup for the component
   useEffect(() => {
     try {
       const userInfo = localStorage.getItem("user-info");
@@ -57,86 +78,435 @@ const EmailPreview = () => {
       console.error("Error retrieving user info:", error);
     }
 
-    if (!isScheduled && recipients && recipients.length > 0) {
-      console.log("Starting immediate email sending process");
+    // Update the current time every minute
+    const timeInterval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+
+    if (isScheduled) {
+      console.log("Displaying scheduled email preview");
       
-      // Send all emails at once instead of sequentially to avoid duplicate API calls
-      const sendAllEmails = async () => {
-        try {
-          const response = await sendEmails(templateContent, recipients, emailSubject);
-          
-          // Update all statuses based on response
-          if (response && response.results) {
-            const { totalSent, totalFailed, failedRecipients = [] } = response.results;
-            
-            // Create a set of failed email addresses for quick lookup
-            const failedEmailSet = new Set(failedRecipients.map(item => item.email));
-            
-            // Update status for each recipient
-            setSendingStatus(prev => 
-              prev.map(item => ({
-                ...item,
-                status: failedEmailSet.has(item.email) ? "failed" : "sent"
-              }))
-            );
-            
-            // Update overall stats correctly
-            setStats({
-              sent: totalSent,
-              failed: totalFailed,
-              total: recipients.length
+      if (!apiCallMade) {
+        // Call API to schedule the emails (only once)
+        const scheduleEmails = async () => {
+          try {
+            console.log("Scheduling emails for:", scheduledAt);
+            await sendEmails(templateContent, recipients, emailSubject, {
+              isScheduled: true,
+              scheduledAt,
             });
+            setApiCallMade(true);
             
-            if (totalFailed > 0) {
-              setError(`${totalFailed} of ${recipients.length} emails failed to send.`);
+            // Set up timer to check scheduled email status
+            setupScheduledStatusCheck(scheduledAt);
+          } catch (err) {
+            console.error("Error scheduling emails:", err);
+            setError("Failed to schedule emails. Please try again.");
+          }
+        };
+        scheduleEmails();
+      } else if (!scheduledStatusTimer && !scheduledEmailsStarted) {
+        // If API call was already made but timer not set up yet
+        setupScheduledStatusCheck(scheduledAt);
+      }
+    }
+
+    return () => {
+      clearInterval(timeInterval);
+      if (scheduledStatusTimer) {
+        clearTimeout(scheduledStatusTimer);
+      }
+    };
+  }, [templateContent, recipients, emailSubject, isScheduled, scheduledAt, apiCallMade]);
+
+  // Setup timer to check scheduled email status
+  const setupScheduledStatusCheck = (scheduledTimeStr) => {
+    if (!scheduledTimeStr) return;
+    
+    const scheduledTime = new Date(scheduledTimeStr);
+    const currentTime = new Date();
+    
+    // Calculate time until scheduled time is reached
+    let timeUntilScheduled = scheduledTime - currentTime;
+    
+    // If scheduled time is in the past, check status immediately
+    if (timeUntilScheduled <= 0) {
+      checkScheduledEmailStatus();
+      return;
+    }
+    
+    console.log(`Setting up timer to check email status in ${Math.floor(timeUntilScheduled / 1000)} seconds`);
+    
+    // Set timer to start checking status when scheduled time is reached
+    const timer = setTimeout(() => {
+      checkScheduledEmailStatus();
+    }, timeUntilScheduled);
+    
+    setScheduledStatusTimer(timer);
+  };
+
+  // Function to check status of scheduled emails
+  const checkScheduledEmailStatus = async () => {
+    if (scheduledEmailsChecking || scheduledEmailsStarted) return;
+    
+    setScheduledEmailsChecking(true);
+    
+    try {
+      console.log("Checking scheduled email status for:", emailSubject);
+      // Make API call to get status of scheduled emails
+      const response = await getEmailStatus(recipients, emailSubject);
+      
+      if (!response) {
+        console.warn("No response from email status check");
+        setTimeout(checkScheduledEmailStatus, 10000);
+        return;
+      }
+      
+      if (response && response.status === "sending") {
+        // Emails are now being sent, transition to sending view
+        setScheduledEmailsStarted(true);
+        
+        // Start visual processing simulation
+        simulateScheduledEmailProcessing(response.failedRecipients || []);
+      } else if (response && response.status === "completed") {
+        // Emails have already been sent - TERMINAL STATE
+        setScheduledEmailsStarted(true);
+        setAllProcessed(true);
+        
+        // Clear any existing timers to stop polling
+        if (scheduledStatusTimer) {
+          clearTimeout(scheduledStatusTimer);
+          setScheduledStatusTimer(null);
+        }
+        
+        setStats({
+          total: recipients.length,
+          sent: response.totalSent || recipients.length - (response.failedRecipients?.length || 0),
+          failed: response.failedRecipients?.length || 0,
+          processing: 0
+        });
+        
+        // Update status displays
+        updateEmailStatusesAfterCompletion(response.failedRecipients || []);
+      } else if (response && (response.status === "failed" || response.status === "partially_failed")) {
+        // Failed emails - TERMINAL STATE
+        setScheduledEmailsStarted(true);
+        setAllProcessed(true);
+        
+        // Clear any existing timers to stop polling
+        if (scheduledStatusTimer) {
+          clearTimeout(scheduledStatusTimer);
+          setScheduledStatusTimer(null);
+        }
+        
+        setStats({
+          total: recipients.length,
+          sent: response.totalSent || 0,
+          failed: response.failedRecipients?.length || recipients.length,
+          processing: 0
+        });
+        
+        // Update status displays
+        updateEmailStatusesAfterCompletion(response.failedRecipients || []);
+        
+        // Show error message
+        setError(`${response.failedRecipients?.length || recipients.length} of ${recipients.length} emails failed to send.`);
+      } else if (response && response.error) {
+        console.error("Error in email status response:", response.error);
+        setTimeout(checkScheduledEmailStatus, 10000);
+      } else {
+        // Still scheduled, check again in 10 seconds
+        setTimeout(checkScheduledEmailStatus, 10000);
+      }
+    } catch (err) {
+      console.error("Error checking scheduled email status:", err);
+      // Retry after 10 seconds
+      setTimeout(checkScheduledEmailStatus, 10000);
+    } finally {
+      setScheduledEmailsChecking(false);
+    }
+  };
+  // Update all email statuses after completion
+  const updateEmailStatusesAfterCompletion = (failedRecipients) => {
+    const failedEmailAddresses = new Set(failedRecipients.map(item => item.email));
+    
+    // Update allEmailStatuses
+    setAllEmailStatuses(prev => 
+      prev.map(item => ({
+        ...item,
+        status: failedEmailAddresses.has(item.email) ? "failed" : "sent"
+      }))
+    );
+    
+    // Update visible emails to show only failed ones
+    setVisibleEmails(prev => 
+      prev.map(item => ({
+        ...item,
+        status: failedEmailAddresses.has(item.email) ? "failed" : "sent"
+      })).filter(item => item.status === "failed")
+    );
+    
+    // Store failed emails for reference
+    setFailedEmails(failedRecipients);
+  };
+
+  // Function to simulate the visual processing of scheduled emails
+  const simulateScheduledEmailProcessing = (failedRecipients) => {
+    const failedEmailAddresses = new Set(failedRecipients.map(item => item.email));
+    
+    // Mark all scheduled emails as processing now
+    setVisibleEmails(prev => {
+      const updated = [...prev];
+      if (updated.length > 0) {
+        updated[0] = { ...updated[0], status: "processing" };
+      }
+      return updated;
+    });
+    
+    // Now simulate sequential processing
+    let currentIndex = 0;
+    const totalEmails = recipients.length;
+    
+    const processNextEmail = () => {
+      if (currentIndex >= totalEmails) {
+        // All emails processed
+        setTimeout(() => {
+          setVisibleEmails(prev => prev.filter(item => item.status === "failed"));
+          setAllProcessed(true);
+          
+          const failedCount = failedEmailAddresses.size;
+          setStats(prev => ({
+            ...prev,
+            sent: totalEmails - failedCount,
+            failed: failedCount
+          }));
+          
+          if (failedCount > 0) {
+            setError(`${failedCount} of ${recipients.length} emails failed to send.`);
+          }
+        }, 1000);
+        return;
+      }
+
+      const currentEmail = emailQueueRef.current[currentIndex];
+      const isFailed = failedEmailAddresses.has(currentEmail);
+      const newStatus = isFailed ? "failed" : "sent";
+      
+      // Update the status in allEmailStatuses
+      setAllEmailStatuses(prev => {
+        const updated = [...prev];
+        const index = updated.findIndex(item => item.email === currentEmail);
+        if (index !== -1) {
+          updated[index] = { ...updated[index], status: newStatus };
+        }
+        return updated;
+      });
+
+      // Update the visibleEmails list to show the processed email status
+      setVisibleEmails(prev => {
+        const updated = [...prev];
+        if (updated[0]) {
+          updated[0] = { ...updated[0], status: newStatus };
+        }
+        return updated;
+      });
+
+      // Wait a bit longer to show the status before removing/updating
+      setTimeout(() => {
+        setVisibleEmails(prev => {
+          let updated = [...prev];
+          
+          // Remove the first email if it was sent successfully
+          if (newStatus === "sent") {
+            updated.shift();
+          } else {
+            // If failed, keep it but update status 
+            updated[0] = { ...updated[0], status: "failed" };
+          }
+          
+          // Add next email from queue if available
+          const nextEmailIndex = currentIndex + batchSize;
+          if (nextEmailIndex < totalEmails) {
+            const nextEmail = emailQueueRef.current[nextEmailIndex];
+            if (nextEmail && updated.length < batchSize) {
+              updated.push({ email: nextEmail, status: "pending" });
             }
           }
           
-          setAllProcessed(true);
-        } catch (err) {
-          console.error("Error sending emails:", err);
-          
-          // Mark all as failed if entire request fails
-          setSendingStatus(prev => 
-            prev.map(item => ({
-              ...item,
-              status: "failed"
-            }))
-          );
-          
-          setStats({
-            sent: 0,
-            failed: recipients.length,
-            total: recipients.length
-          });
-          
-          setError("Failed to send emails. Please try again.");
-          setAllProcessed(true);
-        }
-      };
+          return updated;
+        });
 
-      sendAllEmails();
-    } else if (isScheduled) {
-      console.log("Displaying scheduled email preview");
-      setAllProcessed(true);
+        // Update processed count for display
+        processedCount.current = currentIndex + 1;
+        
+        // Process next email
+        currentIndex++;
+        
+        // Schedule the next email processing with a delay
+        setTimeout(processNextEmail, 800); // Process every 800ms
+      }, 1200); // Show status for 1.2 seconds before removing/updating
+    };
 
-      // Call API to schedule the emails (only once)
-      const scheduleEmails = async () => {
-        try {
-          console.log("Scheduling emails for:", scheduledAt);
-          await sendEmails(templateContent, recipients, emailSubject, {
-            isScheduled: true,
-            scheduledAt,
-          });
-        } catch (err) {
-          console.error("Error scheduling emails:", err);
-          setError("Failed to schedule emails. Please try again.");
-        }
-      };
+    // Start the sequential processing
+    processNextEmail();
+  };
 
-      scheduleEmails();
+  // Function to simulate sequential processing for immediate sending
+  const processEmailsSequentially = async () => {
+    if (isScheduled || apiCallMade) return;
+    
+    // Make the API call right away but only once
+    if (!apiCallMade && recipients && recipients.length > 0) {
+      try {
+        console.log("Making API call to send all emails at once");
+        const response = await sendEmails(templateContent, recipients, emailSubject);
+        setApiCallMade(true);
+        
+        // Store the API response for later reference
+        const failedRecipients = response?.results?.failedRecipients || [];
+        const failedEmailAddresses = new Set(failedRecipients.map(item => item.email));
+        
+        // Update stats with the real results
+        setStats(prev => ({
+          ...prev,
+          sent: response?.results?.totalSent || 0,
+          failed: response?.results?.totalFailed || 0
+        }));
+        
+        // Store failed emails for later display
+        setFailedEmails(failedRecipients);
+        
+        // Now we'll simulate sequential processing for visual feedback
+        simulateSequentialProcessing(failedEmailAddresses);
+      } catch (err) {
+        console.error("Error sending emails:", err);
+        setError("Failed to send emails. Please try again.");
+        setAllProcessed(true);
+        
+        // Mark all as failed in the UI
+        setVisibleEmails(prev => 
+          prev.map(item => ({
+            ...item,
+            status: "failed"
+          }))
+        );
+        
+        setAllEmailStatuses(prev => 
+          prev.map(item => ({
+            ...item,
+            status: "failed"
+          }))
+        );
+        
+        setStats(prev => ({
+          ...prev,
+          sent: 0,
+          failed: prev.total
+        }));
+      }
     }
-  }, [templateContent, recipients, emailSubject, isScheduled, scheduledAt]);
+  };
+  
+  // Function to simulate the visual sequential processing with improved animations
+  const simulateSequentialProcessing = (failedEmailAddresses) => {
+    // Set an interval to process emails visually in sequence
+    let currentIndex = 0;
+    const totalEmails = recipients.length;
+    
+    // Process first email with status "processing"
+    if (visibleEmails.length > 0) {
+      setVisibleEmails(prev => {
+        const updated = [...prev];
+        if (updated[0]) {
+          updated[0] = { ...updated[0], status: "processing" };
+        }
+        return updated;
+      });
+    }
+
+    const processNextEmail = () => {
+      if (currentIndex >= totalEmails) {
+        // All emails processed
+        setTimeout(() => {
+          setVisibleEmails(prev => prev.filter(item => item.status === "failed"));
+          setAllProcessed(true);
+          
+          if (stats.failed > 0) {
+            setError(`${stats.failed} of ${recipients.length} emails failed to send.`);
+          }
+        }, 1000);
+        return;
+      }
+
+      const currentEmail = emailQueueRef.current[currentIndex];
+      const isFailed = failedEmailAddresses.has(currentEmail);
+      const newStatus = isFailed ? "failed" : "sent";
+      
+      // Update the status in allEmailStatuses
+      setAllEmailStatuses(prev => {
+        const updated = [...prev];
+        const index = updated.findIndex(item => item.email === currentEmail);
+        if (index !== -1) {
+          updated[index] = { ...updated[index], status: newStatus };
+        }
+        return updated;
+      });
+
+      // Update the visibleEmails list to show the processed email status
+      setVisibleEmails(prev => {
+        const updated = [...prev];
+        if (updated[0]) {
+          updated[0] = { ...updated[0], status: newStatus };
+        }
+        return updated;
+      });
+
+      // Wait a bit longer to show the status before removing/updating
+      setTimeout(() => {
+        setVisibleEmails(prev => {
+          let updated = [...prev];
+          
+          // Remove the first email if it was sent successfully
+          if (newStatus === "sent") {
+            updated.shift();
+          } else {
+            // If failed, keep it but update status 
+            updated[0] = { ...updated[0], status: "failed" };
+          }
+          
+          // Add next email from queue if available
+          const nextEmailIndex = currentIndex + batchSize;
+          if (nextEmailIndex < totalEmails) {
+            const nextEmail = emailQueueRef.current[nextEmailIndex];
+            if (nextEmail && updated.length < batchSize) {
+              updated.push({ email: nextEmail, status: "pending" });
+            }
+          }
+          
+          return updated;
+        });
+
+        // Update processed count for display
+        processedCount.current = currentIndex + 1;
+        
+        // Process next email
+        currentIndex++;
+        
+        // Schedule the next email processing with a delay
+        setTimeout(processNextEmail, 800); // Process every 800ms
+      }, 1200); // Show status for 1.2 seconds before removing/updating
+    };
+
+    // Start the sequential processing
+    processNextEmail();
+  };
+
+  // Trigger the processing when component mounts
+  useEffect(() => {
+    if (!isScheduled && recipients && recipients.length > 0 && !apiCallMade) {
+      processEmailsSequentially();
+    }
+  }, [recipients, isScheduled, apiCallMade]);
 
   const handleBackToTemplates = () => {
     navigate("/templates");
@@ -215,6 +585,7 @@ const EmailPreview = () => {
                     <div className="mail-label">Time</div>
                     <div className="mail-value">
                       {new Date(scheduledAt).toLocaleString()}
+                      
                     </div>
                   </div>
                 )}
@@ -234,12 +605,22 @@ const EmailPreview = () => {
 
         <div className="status-section">
           <div className="status-container">
-            <h2 className="status-title">Emails Status:</h2>
+            <h2 className="status-title">
+              Emails Status: 
+              {isScheduled && !scheduledEmailsStarted && !allProcessed && (
+                <span className="scheduled-status">
+                  {new Date(scheduledAt) > new Date() 
+                    ? ` Scheduled for ${new Date(scheduledAt).toLocaleString()}`
+                    : " Processing scheduled emails"
+                  }
+                </span>
+              )}
+            </h2>
 
             <div className="email-list">
-              {sendingStatus.map((item, index) => (
+              {visibleEmails.map((item, index) => (
                 <div
-                  key={index}
+                  key={`${item.email}-${index}`}
                   className={`email-recipients-list ${item.status}`}
                 >
                   <div
@@ -257,8 +638,12 @@ const EmailPreview = () => {
                       "Failed"
                     ) : item.status === "scheduled" ? (
                       "Scheduled"
+                    ) : item.status === "processing" ? (
+                      <>
+                        Processing <div className="loading-spinner-inline"></div>
+                      </>
                     ) : (
-                      "Pending..."
+                      "Pending"
                     )}
                   </div>
                 </div>
@@ -268,8 +653,14 @@ const EmailPreview = () => {
         </div>
 
         {!allProcessed ? (
-          <p className="status-footer">Processing emails...</p>
-        ) : isScheduled ? (
+          <p className="status-footer">
+            {isScheduled && !scheduledEmailsStarted ? 
+              new Date(scheduledAt) > new Date() 
+                ? `Emails will be sent at ${new Date(scheduledAt).toLocaleString()}` 
+                : "Processing scheduled emails..." 
+              : "Processing emails..."}
+          </p>
+        ) : isScheduled && !scheduledEmailsStarted ? (
           <div className="status-footer-container">
             <p className="status-footer scheduled">
               Emails scheduled for {new Date(scheduledAt).toLocaleString()}

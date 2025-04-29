@@ -8,7 +8,8 @@ const {
     sendBulkEmails,
     getScheduledEmails,
     getEmailHistory,
-    cancelScheduledEmail
+    cancelScheduledEmail,
+    checkEmailStatus
 } = require("../controllers/driveControllers");
 
 // Google Drive connection
@@ -24,5 +25,6 @@ router.post('/send-emails', sendBulkEmails);
 router.get('/scheduled-emails', getScheduledEmails);
 router.get('/email-history', getEmailHistory);
 router.delete('/scheduled-emails/:scheduledEmailId', cancelScheduledEmail);
+router.post('/email-status', checkEmailStatus);
 
 module.exports = router;

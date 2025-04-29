@@ -510,3 +510,66 @@ exports.cancelScheduledEmail = async (req, res) => {
         });
     }
 };
+
+
+// In your driveControllers.js
+exports.checkEmailStatus = async (req, res) => {
+    try {
+      const { recipients, emailSubject } = req.body;
+      const tokenHeader = req.headers.authorization;
+      
+      if (!tokenHeader?.startsWith('Bearer ')) {
+        return res.status(401).json({ message: "Authorization token required" });
+      }
+      
+      const token = tokenHeader.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      // Query your EmailHistory collection to check status
+      const emailHistory = await EmailHistory.findOne({
+        userId: decoded.email,
+        templateName: emailSubject,
+        recipients: { $all: recipients }
+      }).sort({ sentAt: -1 });
+  
+      if (emailHistory) {
+        return res.status(200).json({
+          status: emailHistory.status,
+          totalSent: emailHistory.successCount,
+          failedRecipients: emailHistory.failureCount > 0 ? 
+            recipients.slice(0, emailHistory.failureCount).map(email => ({ email, error: "Failed to send" })) : []
+        });
+      }
+      
+      // Check if it's still scheduled
+      const scheduledEmail = await ScheduledEmail.findOne({
+        userId: decoded.email,
+        templateName: emailSubject,
+        recipients: { $all: recipients },
+        status: 'scheduled'
+      });
+      
+      if (scheduledEmail) {
+        return res.status(200).json({
+          status: 'scheduled',
+          scheduledAt: scheduledEmail.scheduledAt
+        });
+      }
+      
+      // If we get here, emails are likely being processed
+      return res.status(200).json({
+        status: 'sending'
+      });
+    } catch (err) {
+      console.error('Error checking email status:', err);
+      
+      if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+        return res.status(401).json({ message: "Invalid or expired token" });
+      }
+      
+      res.status(500).json({
+        message: "Failed to check email status",
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined,
+      });
+    }
+  };

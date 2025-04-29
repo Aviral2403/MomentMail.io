@@ -246,16 +246,15 @@ body {
 
 .status-footer {
   margin-top: 20px;
-  color: whitesmoke;
   font-size: 16px;
 }
 
 .status-complete {
-  color: #40a042;
+  color: #40a042!important;
 }
 
 .status-error {
-  color: #e53e3e;
+  color: #e53e3e!important;
 }
 
 /* Add styles for the new back to templates button */
@@ -524,5 +523,306 @@ body {
     z-index: 1;
     background: white;
     box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  }
+}
+
+
+
+
+/* Add these styles to your EmailPreview.css file */
+
+.email-recipients-list {
+  transition: all 0.5s ease;
+  animation: slideIn 0.3s forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+.email-recipients-list.sent {
+  animation: slideOut 0.8s forwards;
+}
+
+.status-badge {
+  transition: all 0.3s ease;
+}
+
+
+.status-badge.processing {
+  color: #2563eb;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.processed-count {
+  font-size: 14px;
+  color: #6b7280;
+  margin-left: 10px;
+  font-weight: normal;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 60px;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+    max-height: 0;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Make sure the email list has a fixed height with scrolling for many emails */
+.email-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* Style for successful completion */
+.status-complete {
+  color: #10b981;
+}
+
+
+
+
+
+
+
+/* Add these styles to your EmailPreview.css file */
+
+/* Improved animations and visual cues */
+.email-recipients-list {
+  transition: all 0.8s ease;
+  animation: slideIn 0.5s forwards;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+
+
+.email-recipients-list.sent {
+  /* border-left-color: #4CAF50; */
+  /* background: rgba(76, 175, 80, 0.08); */
+  animation: slideOut 1.2s forwards;
+}
+
+
+
+/* Status badges with better visual differentiation */
+.status-badge {
+  transition: all 0.5s ease;
+  padding: 8px 14px;
+  border-radius: 50px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  min-width: 110px;
+  justify-content: center;
+  font-weight: 500;
+}
+
+
+.status-badge.failed {
+  color: #e53e3e;
+}
+
+
+
+.status-badge.processing {
+  color: #3a57e8;
+  animation: pulse 1.5s infinite;
+}
+
+.status-badge.scheduled {
+  color: #FFA000;
+}
+
+/* Inline loading spinner next to processing text */
+.loading-spinner-inline {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 60px;
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+    max-height: 0;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(58, 87, 232, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(58, 87, 232, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(58, 87, 232, 0);
+  }
+}
+
+/* Make sure the email list has a fixed height with scrolling for many emails */
+.email-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px;
+  padding-left: 2px;
+  margin-right: -10px;
+}
+
+/* Improve the processed count display */
+.processed-count {
+  font-size: 15px;
+  color: #c5c8cc;
+  margin-left: 10px;
+  font-weight: normal;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+/* Add a subtle progress indicator */
+.status-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 20px;
+  color: whitesmoke;
+  font-size: 16px;
+  position: relative;
+}
+
+.status-footer:not(.scheduled):not(.status-complete):not(.status-error):after {
+  content: "";
+  height: 4px;
+  background: linear-gradient(90deg, #3a57e8 0%, #4CAF50 100%);
+  position: absolute;
+  top: -12px;
+  left: 0;
+  width: calc((100% * var(--progress, 0)));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Make the status footer container display elements better */
+.status-footer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+
+
+/* Add these styles to your existing EmailPreview.css file */
+
+/* Style for scheduled status text with time indicator */
+.scheduled-status {
+  font-size: 15px;
+  font-weight: normal;
+  color: #FFA000;
+  margin-left: 8px;
+}
+
+/* Pulsing animation for when scheduled time has passed but processing hasn't started */
+@keyframes softPulse {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+.status-badge.processing {
+  animation: softPulse 1.5s infinite, pulse 1.5s infinite;
+}
+
+/* Modify status footer for scheduled emails that are processing */
+.status-footer:not(.scheduled):not(.status-complete):not(.status-error) {
+  position: relative;
+  padding-left: 24px;
+}
+
+
+/* Status transition animations */
+.email-recipients-list.scheduled.processing {
+  animation: statusTransition 0.5s forwards;
+}
+
+@keyframes statusTransition {
+  0% {
+    background-color: rgba(255, 193, 7, 0.05);
+  }
+  100% {
+    background-color: rgba(58, 87, 232, 0.05);
   }
 }
