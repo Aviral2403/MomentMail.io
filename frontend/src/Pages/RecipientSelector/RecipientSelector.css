@@ -662,7 +662,7 @@
   color: white;
 }
 
-.btn-back {
+.recipient-btn-back {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -871,4 +871,28 @@
 
 .stepper{
   margin-top: 4rem;
+}
+
+@media(max-width:767px){
+  .recipient-btn-back{
+    display: flex
+;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: transparent;
+    border: 1px solid whitesmoke;
+    color: var(--text-primary);
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    justify-content: left!important;
+
+  }
+  .recipient-button-back{
+    display: flex;
+    align-items: center;
+    justify-content: start;
+  }
 }

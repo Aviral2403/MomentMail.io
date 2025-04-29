@@ -259,15 +259,23 @@ body {
 
 /* Add styles for the new back to templates button */
 .btn-back {
-  color: white;
-  border: none;
-  border-radius: 50px;
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  
+    color: rgb(255, 255, 255);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    background: none;
+    border-width: initial;
+    border-style: none;
+    border-color: initial;
+    border-image: initial;
+    padding: 6px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+    justify-content: start;
 }
+
 
 .btn-back:hover {
   background-color: #2a46d2;
@@ -753,7 +761,7 @@ body {
   align-items: center;
   justify-content: flex-start;
   margin-top: 20px;
-  color: whitesmoke;
+  color: #2555eb;
   font-size: 16px;
   position: relative;
 }
