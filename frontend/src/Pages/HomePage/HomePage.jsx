@@ -7,6 +7,7 @@ import "./HomePage.css";
 import HeroSection from "../../Components/HeroSection/HeroSection";
 import TemplatesHero from "../../Components/TemplatesHero/TemplatesHero";
 import EmailMarketingAI from "../../Components/EmailMarketingAI/EmailMarketingAI";
+import ScheduleEmail from "../../Components/ScheduleEmail/ScheduleEmail";
 
 const HomePage = () => {
   const rotatingTextRef = useRef();
@@ -60,6 +61,8 @@ const HomePage = () => {
         <TemplatesHero/>
 
         <EmailMarketingAI/>
+
+        <ScheduleEmail/>
 
         <div className="features-grid">
           {[

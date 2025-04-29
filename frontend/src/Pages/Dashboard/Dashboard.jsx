@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../Components/Navbar/Navbar";
 import {
   getScheduledEmails,
@@ -9,14 +9,32 @@ import {
 import "./Dashboard.css";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("scheduled");
   const [scheduledEmails, setScheduledEmails] = useState([]);
   const [emailHistory, setEmailHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [cancellingId, setCancellingId] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    const checkAuth = () => {
+      const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+      if (!userInfo || !userInfo.token) {
+        setIsAuthenticated(false);
+        setError("Please login to access the dashboard");
+      } else {
+        setIsAuthenticated(true);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -38,7 +56,7 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, [activeTab]);
+  }, [activeTab, isAuthenticated]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -113,6 +131,55 @@ const Dashboard = () => {
       setCancellingId(null);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="dashboard-page-container">
+        <Navbar />
+        <main className="dashboard-main-content">
+          <div className="dashboard-inner-container">
+            <h1 className="dashboard-page-title">Email Dashboard</h1>
+            <div className="dashboard-auth-required">
+              <div className="dashboard-auth-message">
+                <svg
+                  className="dashboard-auth-icon"
+                  viewBox="0 0 24 24"
+                  width="48"
+                  height="48"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11V11.99z"
+                  />
+                </svg>
+                <h2>Authentication Required</h2>
+                <p>Please login to access your email dashboard</p>
+                <Link to="/login" className="dashboard-login-button">
+                  Go to Login
+                </Link>
+              </div>
+              {error && (
+                <div className="dashboard-error-message">
+                  <svg
+                    className="dashboard-error-icon"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+                    />
+                  </svg>
+                  {error}
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-page-container">
@@ -192,7 +259,7 @@ const Dashboard = () => {
                             </td>
                             <td>{getStatusBadge(email.status)}</td>
                             <td>
-                              {email.status === "scheduled" && (
+                              {email.status === "scheduled" ? (
                                 <button
                                   className="dashboard-action-button dashboard-cancel-button"
                                   onClick={() => handleCancelEmail(email._id)}
@@ -202,6 +269,14 @@ const Dashboard = () => {
                                     ? "Cancelling..."
                                     : "Cancel"}
                                 </button>
+                              ) : (
+                                <span className="dashboard-no-actions">
+                                  {email.status === "cancelled"
+                                    ? "Cancel Succesful"
+                                    : email.status === "sent"
+                                    ? "Sent"
+                                    : "Delivered"}
+                                </span>
                               )}
                             </td>
                           </tr>
@@ -261,7 +336,7 @@ const Dashboard = () => {
                         </div>
                       </div>
                       <div className="dashboard-card-actions">
-                        {email.status === "scheduled" && (
+                        {email.status === "scheduled" ? (
                           <button
                             className="dashboard-action-button dashboard-cancel-button"
                             onClick={() => handleCancelEmail(email._id)}
@@ -271,6 +346,14 @@ const Dashboard = () => {
                               ? "Cancelling..."
                               : "Cancel"}
                           </button>
+                        ) : (
+                          <span className="dashboard-no-actions">
+                            {email.status === "cancelled"
+                              ? "Cancel Succesful"
+                              : email.status === "sent"
+                              ? "Sent"
+                              : "Delivered"}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -314,7 +397,7 @@ const Dashboard = () => {
                             </div>
                           </div>
                           <div className="dashboard-card-row">
-                            <span className="dashboard-card-label">Time:</span>
+                            <span className="dashboard-card-label">Time(24h):</span>
                             <div className="dashboard-date-time">
                               <div>{formattedDate.time}</div>
                             </div>
