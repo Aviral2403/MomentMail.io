@@ -9,6 +9,8 @@ import {
   WEBINAR_TEMPLATE,
   FEEDBACK_TEMPLATE,
   SOCIAL_MEDIA_TEMPLATE,
+  WELCOME_TEMPLATE,
+  ABANDONED_CART_TEMPLATE
 } from "../../EmailTemplates";
 // import Navbar from "./Navbar/Navbar";
 import "./TemplateEditor.css";
@@ -32,6 +34,8 @@ const TemplateEditor = () => {
     invitation: WEBINAR_TEMPLATE,
     feedback: FEEDBACK_TEMPLATE,
     "social-media": SOCIAL_MEDIA_TEMPLATE,
+    "welcome-user" : WELCOME_TEMPLATE,
+    "abandoned-cart" : ABANDONED_CART_TEMPLATE,
     "custom-template": "",
   };
 
@@ -112,6 +116,9 @@ const TemplateEditor = () => {
       invitation: "Webinar Invitation Template",
       feedback: "Feedback & Survey Template",
       "social-media": "Social Media Connection Template",
+      "welcome-user" : "Welcome To community Template",
+      "abandoned-cart" : "Your Cart Items Feels Lonely , Order Them?"
+
     };
     return names[slug] || "Email Template";
   };

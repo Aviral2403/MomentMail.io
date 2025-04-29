@@ -1199,3 +1199,515 @@ export const SOCIAL_MEDIA_TEMPLATE = `
 // </body>
 // </html>
 // `;
+
+
+
+export const WELCOME_TEMPLATE = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to Our Community!</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Arial, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="min-width: 100%;">
+    <tr>
+      <td align="center" style="padding: 20px 0;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+          <!-- Header with brand color -->
+          <tr>
+            <td align="center" bgcolor="#6366f1" style="padding: 40px 20px; text-align: center;">
+              <img src="https://res.cloudinary.com/dmeszvzou/image/upload/v1745915544/logo_ynwxcg.jpg" alt="Brand Logo" width="120" height="120" style="display: block; margin: 0 auto 20px; border-radius: 60px; background-color: #ffffff; padding: 10px;" />
+              <h1 style="margin: 0 0 15px 0; font-size: 28px; line-height: 36px; color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                Welcome to the Family!
+              </h1>
+              <p style="margin: 0; font-size: 18px; line-height: 24px; color: rgba(255,255,255,0.9);">
+                We're thrilled to have you on board
+              </p>
+            </td>
+          </tr>
+          
+          <!-- Welcome Message -->
+          <tr>
+            <td style="padding: 40px 30px 20px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td>
+                    <h2 style="margin: 0 0 20px 0; font-size: 22px; line-height: 28px; color: #1f2937;">
+                      Hi [Customer Name],
+                    </h2>
+                    <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #4b5563;">
+                      Thank you for joining our community! We're excited to have you as part of our growing family. Your journey with us begins now, and we're committed to providing you with the best experience possible.
+                    </p>
+                    <p style="margin: 0 0 25px 0; font-size: 16px; line-height: 24px; color: #4b5563;">
+                      Here's what you can expect from us:
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Benefits Section -->
+          <tr>
+            <td style="padding: 0 30px 30px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td>
+                    <!-- Benefit 1 -->
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
+                      <tr>
+                        <td width="60" valign="top">
+                          <div style="width: 50px; height: 50px; background-color: #e0e7ff; border-radius: 25px; text-align: center; line-height: 50px;">
+                            <img src="https://w7.pngwing.com/pngs/722/258/png-transparent-encapsulated-postscript-exclusive-miscellaneous-text-label-thumbnail.png" alt="Exclusive Content" width="24" height="24" style="vertical-align: middle;" />
+                          </div>
+                        </td>
+                        <td>
+                          <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #1f2937;">
+                            Exclusive Content
+                          </h3>
+                          <p style="margin: 0; font-size: 15px; line-height: 22px; color: #6b7280;">
+                            Get access to member-only articles, videos, and resources designed to help you succeed.
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <!-- Benefit 2 -->
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
+                      <tr>
+                        <td width="60" valign="top">
+                          <div style="width: 50px; height: 50px; background-color: #e0e7ff; border-radius: 25px; text-align: center; line-height: 50px;">
+                            <img src="https://t3.ftcdn.net/jpg/11/93/11/82/360_F_1193118296_GJ5y8Ax5T7rhskamG6Cygb0TtCi5EQ8a.jpg" alt="Early Access" width="24" height="24" style="vertical-align: middle;" />
+                          </div>
+                        </td>
+                        <td>
+                          <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #1f2937;">
+                            Early Access
+                          </h3>
+                          <p style="margin: 0; font-size: 15px; line-height: 22px; color: #6b7280;">
+                            Be the first to know about new products, features, and special promotions.
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <!-- Benefit 3 -->
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="60" valign="top">
+                          <div style="width: 50px; height: 50px; background-color: #e0e7ff; border-radius: 25px; text-align: center; line-height: 50px;">
+                            <img src="https://media.istockphoto.com/id/1401544361/vector/vintage-icon-with-red-early-access-vector-icon-isolated-template.jpg?s=612x612&w=0&k=20&c=hZOgsmJJMsw1-TJXI25CJ-XUs9SvO7lUPfFZlUn_qdQ=" alt="Community" width="24" height="24" style="vertical-align: middle;" />
+                          </div>
+                        </td>
+                        <td>
+                          <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #1f2937;">
+                            Community Support
+                          </h3>
+                          <p style="margin: 0; font-size: 15px; line-height: 22px; color: #6b7280;">
+                            Join our community of like-minded individuals and learn from their experiences.
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Get Started Section -->
+          <tr>
+            <td style="padding: 0 30px 30px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 25px;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 20px; color: #1f2937; text-align: center;">
+                      Get Started Today
+                    </h3>
+                    <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 22px; color: #4b5563; text-align: center;">
+                      Complete your profile and start exploring everything we have to offer!
+                    </p>
+                    <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                      <tr>
+                        <td align="center" bgcolor="#6366f1" style="border-radius: 6px;">
+                          <a href="https://example.com/get-started" target="_blank" style="display: inline-block; padding: 14px 30px; font-size: 16px; color: #ffffff; text-decoration: none; font-weight: bold;">
+                            Complete Your Profile
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Welcome Gift -->
+          <tr>
+            <td style="padding: 0 30px 40px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border: 2px dashed #6366f1; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 20px; text-align: center;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 20px; color: #6366f1;">
+                      YOUR WELCOME GIFT
+                    </h3>
+                    <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 22px; color: #4b5563;">
+                      Enjoy <strong>20% OFF</strong> your first purchase!
+                    </p>
+                    <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                      <tr>
+                        <td style="background-color: #e0e7ff; border: 1px dashed #6366f1; padding: 10px 20px; border-radius: 4px;">
+                          <span style="font-size: 18px; font-weight: bold; color: #4338ca; letter-spacing: 1px;">
+                            WELCOME20
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                    <p style="margin: 15px 0 0 0; font-size: 14px; color: #6b7280;">
+                      Valid for 30 days. Terms and conditions apply.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Follow Us -->
+          <tr>
+            <td style="padding: 0 30px 30px;">
+              <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #1f2937; text-align: center;">
+                Follow Us
+              </h3>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center">
+                    <table role="presentation" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <!-- Social Icons -->
+                        <td style="padding: 0 10px;">
+                          <a href="https://facebook.com/" target="_blank" style="display: inline-block;">
+                            <img src="https://res.cloudinary.com/dmeszvzou/image/upload/v1742987530/syvfmjjhs7yvu4gajghv.webp" alt="Facebook" width="32" height="32" style="display: block;" />
+                          </a>
+                        </td>
+                        <td style="padding: 0 10px;">
+                        </td>
+                        <td style="padding: 0 10px;">
+                          <a href="" target="_blank" style="display: inline-block;">
+                            <img src="https://res.cloudinary.com/dmeszvzou/image/upload/v1742987584/k7kxgcpzotghxewdqnrn.png" alt="Twitter" width="32" height="32" style="display: block;" />
+                          </a>
+                        </td>
+                        <td style="padding: 0 10px;">
+                          <a href="" target="_blank" style="display: inline-block;">
+                            <img src="https://res.cloudinary.com/dmeszvzou/image/upload/v1742987604/wcgxzbhsjwc66fhwjs5y.webp" alt="LinkedIn" width="32" height="32" style="display: block;" />
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td bgcolor="#f3f4f6" style="padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 15px 0; font-size: 14px; color: #6b7280;">
+                If you have any questions, feel free to <a href="mailto:support@example.com" style="color: #6366f1; text-decoration: none;">contact our support team</a>
+              </p>
+              <p style="margin: 0 0 10px 0; font-size: 12px; color: #9ca3af;">
+                © 2025 Your Brand. All rights reserved.
+              </p>
+              <p style="margin: 0; font-size: 12px; color: #9ca3af;">
+                <a href="#" style="color: #6b7280; text-decoration: none;">Privacy Policy</a> | 
+                <a href="#" style="color: #6b7280; text-decoration: none;">Unsubscribe</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;
+
+
+
+
+
+export const ABANDONED_CART_TEMPLATE = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Don't Miss Out On Your Items!</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f9fafb; font-family: Arial, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="min-width: 100%;">
+    <tr>
+      <td align="center" style="padding: 20px 0;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+          <!-- Header -->
+          <tr>
+            <td align="center" bgcolor="#10b981" style="padding: 40px 20px; text-align: center;">
+              <img src="/api/placeholder/80/80" alt="Shopping Cart" width="80" height="80" style="display: block; margin: 0 auto 15px;" />
+              <h1 style="margin: 0 0 15px 0; font-size: 28px; line-height: 36px; color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                Your Cart Misses You!
+              </h1>
+              <p style="margin: 0; font-size: 18px; line-height: 24px; color: rgba(255,255,255,0.9);">
+                The items in your cart are waiting for you
+              </p>
+            </td>
+          </tr>
+          
+          <!-- Main Message -->
+          <tr>
+            <td style="padding: 40px 30px 20px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td>
+                    <h2 style="margin: 0 0 20px 0; font-size: 22px; line-height: 28px; color: #1f2937;">
+                      Hi [Customer Name],
+                    </h2>
+                    <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #4b5563;">
+                      We noticed you left some items in your shopping cart. Don't worry, we've saved them for you! Your carefully selected items are still available and ready for checkout.
+                    </p>
+                    <p style="margin: 0 0 30px 0; font-size: 16px; line-height: 24px; color: #4b5563;">
+                      Complete your purchase now before these popular items sell out!
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Cart Items -->
+          <tr>
+            <td style="padding: 0 30px 30px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e5e7eb; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 15px; background-color: #f9fafb; border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom: 1px solid #e5e7eb;">
+                    <h3 style="margin: 0; font-size: 18px; color: #1f2937;">
+                      Your Cart Items
+                    </h3>
+                  </td>
+                </tr>
+                
+                <!-- Item 1 -->
+                <tr>
+                  <td style="padding: 15px; border-bottom: 1px solid #e5e7eb;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="80">
+                          <img src="/api/placeholder/80/80" alt="Product 1" width="80" height="80" style="display: block; border-radius: 4px;" />
+                        </td>
+                        <td style="padding-left: 15px;">
+                          <p style="margin: 0 0 5px 0; font-size: 16px; font-weight: bold; color: #1f2937;">
+                            [Product Name]
+                          </p>
+                          <p style="margin: 0 0 5px 0; font-size: 14px; color: #6b7280;">
+                            Qty: 1
+                          </p>
+                          <p style="margin: 0; font-size: 16px; font-weight: bold; color: #10b981;">
+                            $XX.XX
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                
+                <!-- Item 2 -->
+                <tr>
+                  <td style="padding: 15px; border-bottom: 1px solid #e5e7eb;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="80">
+                          <img src="/api/placeholder/80/80" alt="Product 2" width="80" height="80" style="display: block; border-radius: 4px;" />
+                        </td>
+                        <td style="padding-left: 15px;">
+                          <p style="margin: 0 0 5px 0; font-size: 16px; font-weight: bold; color: #1f2937;">
+                            [Product Name]
+                          </p>
+                          <p style="margin: 0 0 5px 0; font-size: 14px; color: #6b7280;">
+                            Qty: 1
+                          </p>
+                          <p style="margin: 0; font-size: 16px; font-weight: bold; color: #10b981;">
+                            $XX.XX
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                
+                <!-- Cart Total -->
+                <tr>
+                  <td style="padding: 15px; background-color: #f9fafb; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="text-align: right; padding-right: 10px;">
+                          <p style="margin: 0; font-size: 16px; font-weight: bold; color: #1f2937;">
+                            Total: $XX.XX
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Call to Action -->
+          <tr>
+            <td style="padding: 0 30px 40px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center">
+                    <table role="presentation" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td align="center" bgcolor="#10b981" style="border-radius: 8px;">
+                          <a href="https://example.com/cart" target="_blank" style="display: inline-block; padding: 16px 36px; font-size: 18px; color: #ffffff; text-decoration: none; font-weight: bold;">
+                            Complete Your Purchase
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Special Offer -->
+          <tr>
+            <td style="padding: 0 30px 40px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ecfdf5; border: 2px dashed #10b981; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 25px; text-align: center;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 20px; color: #065f46;">
+                      EXCLUSIVE OFFER
+                    </h3>
+                    <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 24px; color: #047857;">
+                      Complete your purchase within the next <strong>24 hours</strong> and get
+                    </p>
+                    <p style="margin: 0 0 15px 0; font-size: 24px; font-weight: bold; color: #10b981;">
+                      FREE SHIPPING
+                    </p>
+                    <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                      <tr>
+                        <td style="background-color: #d1fae5; border: 1px dashed #10b981; padding: 10px 20px; border-radius: 4px;">
+                          <span style="font-size: 18px; font-weight: bold; color: #047857; letter-spacing: 1px;">
+                            FREESHIP
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                    <p style="margin: 15px 0 0 0; font-size: 14px; color: #047857;">
+                      Use this code at checkout
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Recommended Products -->
+          <tr>
+            <td style="padding: 0 30px 30px;">
+              <h3 style="margin: 0 0 20px 0; font-size: 20px; color: #1f2937; text-align: center;">
+                You Might Also Like
+              </h3>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <!-- Product 1 -->
+                  <td width="50%" style="padding-right: 10px; padding-bottom: 10px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e5e7eb; border-radius: 8px;">
+                      <tr>
+                        <td style="padding: 10px;">
+                          <img src="/api/placeholder/240/160" alt="Recommended Product 1" width="100%" style="display: block; max-width: 100%; height: auto; border-radius: 4px;" />
+                          <p style="margin: 10px 0 5px 0; font-size: 14px; font-weight: bold; color: #1f2937;">
+                            [Product Name]
+                          </p>
+                          <p style="margin: 0; font-size: 14px; font-weight: bold; color: #10b981;">
+                            $XX.XX
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <!-- Product 2 -->
+                  <td width="50%" style="padding-left: 10px; padding-bottom: 10px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e5e7eb; border-radius: 8px;">
+                      <tr>
+                        <td style="padding: 10px;">
+                          <img src="/api/placeholder/240/160" alt="Recommended Product 2" width="100%" style="display: block; max-width: 100%; height: auto; border-radius: 4px;" />
+                          <p style="margin: 10px 0 5px 0; font-size: 14px; font-weight: bold; color: #1f2937;">
+                            [Product Name]
+                          </p>
+                          <p style="margin: 0; font-size: 14px; font-weight: bold; color: #10b981;">
+                            $XX.XX
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Customer Support -->
+          <tr>
+            <td style="padding: 0 30px 40px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 20px; text-align: center;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #1f2937;">
+                      Need Assistance?
+                    </h3>
+                    <p style="margin: 0 0 15px 0; font-size: 15px; line-height: 22px; color: #4b5563;">
+                      Our customer support team is here to help you with any questions you may have.
+                    </p>
+                    <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                      <tr>
+                        <td align="center" bgcolor="#f3f4f6" style="border: 1px solid #e5e7eb; border-radius: 6px;">
+                          <a href="mailto:support@example.com" style="display: inline-block; padding: 10px 20px; font-size: 14px; color: #4b5563; text-decoration: none; font-weight: bold;">
+                            Contact Support
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td bgcolor="#f3f4f6" style="padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 15px 0; font-size: 14px; color: #6b7280;">
+                This email was sent to [customer.email@example.com]
+              </p>
+              <p style="margin: 0 0 10px 0; font-size: 12px; color: #9ca3af;">
+                © 2025 Your Brand. All rights reserved.
+              </p>
+              <p style="margin: 0; font-size: 12px; color: #9ca3af;">
+                <a href="#" style="color: #6b7280; text-decoration: none;">Privacy Policy</a> | 
+                <a href="#" style="color: #6b7280; text-decoration: none;">Unsubscribe</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;

@@ -10,6 +10,8 @@ import {
   SOCIAL_MEDIA_TEMPLATE,
   // JOB_APPLICATION_TEMPLATE,
   // HEALTH_SUBSCRIPTION_TEMPLATE
+  WELCOME_TEMPLATE,
+  ABANDONED_CART_TEMPLATE
 } from "../../EmailTemplates";
 import { IoMdArrowRoundBack } from "react-icons/io";
 
@@ -140,6 +142,21 @@ const TemplatePreview = () => {
       //     sender: userSender,
       //     avatar: userAvatar,
       //   };
+      case "welcome-user":
+        return {
+          content: WELCOME_TEMPLATE,
+          subject: "Welcome To The Community! Explore & Enjoy!",
+          sender: userSender,
+          avatar: userAvatar,
+        };
+
+        case "abandoned-cart":
+        return {
+          content: ABANDONED_CART_TEMPLATE,
+          subject: "Items In Your Cart Feels Lonely,Order Them?",
+          sender: userSender,
+          avatar: userAvatar,
+        };
       default:
         return null;
     }

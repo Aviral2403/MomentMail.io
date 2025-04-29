@@ -8,6 +8,9 @@ import {
   SOCIAL_MEDIA_TEMPLATE,
   // JOB_APPLICATION_TEMPLATE,
   // HEALTH_SUBSCRIPTION_TEMPLATE
+  WELCOME_TEMPLATE,
+  ABANDONED_CART_TEMPLATE 
+  
 } from "../../EmailTemplates";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -90,6 +93,24 @@ const SingleTemplate = () => {
     //   category: "Subscription",
     //   slug: "health-subscription",
     // },
+    {
+      id: 7,
+      name: "Welcome To The Community!",
+      content: WELCOME_TEMPLATE,
+      description:
+        "A warm, visually engaging welcome email designed to greet new users, highlight key benefits, and drive immediate engagement. Includes a special offer, social links, and a clear call to action to complete their profile.",
+      category: "Welcome",
+      slug: "welcome-user",
+    },
+    {
+      id: 8,
+      name: "Items In Your Cart Feels Lonely?",
+      content: ABANDONED_CART_TEMPLATE,
+      description:
+        "A persuasive, visually appealing email that reminds users of items left in their cart, encouraging them to complete their purchase. Includes product details, a time-sensitive offer, and personalized recommendations to drive conversions.",
+      category: "Shopping",
+      slug: "abandoned-cart",
+    },
   ];
 
   const handlePreview = (slug) => {
