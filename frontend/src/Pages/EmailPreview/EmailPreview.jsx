@@ -1,13 +1,33 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { sendEmails, getEmailStatus } from "../../api"; // Added getEmailStatus API function
-// import Navbar from "./Navbar/Navbar";
+import { sendEmails, getEmailStatus } from "../../api"; // Make sure this points to your updated API
 import "./EmailPreview.css";
 import { IoMdArrowRoundBack } from "react-icons/io";
 
-const truncateEmail = (email) => {
+// Helper function to extract username from email for preview purposes only
+const extractUsername = (email) => {
+  if (!email || typeof email !== 'string') return "User";
   const atIndex = email.indexOf("@");
-  return atIndex !== -1 ? `${email.substring(0, atIndex)}@` : email;
+  return atIndex !== -1 ? email.substring(0, atIndex) : email;
+};
+
+const createPreviewTemplate = (templateContent, recipientSample) => {
+  if (!templateContent) return "";
+  if (!recipientSample) return templateContent;
+  
+  const username = extractUsername(recipientSample);
+  
+  // Replace common placeholders - for PREVIEW only
+  return templateContent
+    .replace(/\[Customer Name\]/gi, username)
+    .replace(/\[customer\.name\]/gi, username)
+    .replace(/\[customer\.email\]/gi, recipientSample)
+    .replace(/\[User\]/gi, username)
+    .replace(/\[user\]/gi, username)
+    .replace(/\[First Name\]/gi, username)
+    .replace(/\[firstname\]/gi, username)
+    .replace(/\[username\]/gi, username)
+    .replace(/\[email\]/gi, recipientSample);
 };
 
 const EmailPreview = () => {
@@ -42,6 +62,9 @@ const EmailPreview = () => {
   const processedCount = useRef(0);
   const batchSize = 10;
   
+  // Create a preview version of the template for display in the UI
+  const [previewTemplateContent, setPreviewTemplateContent] = useState("");
+
   const [stats, setStats] = useState({
     sent: 0,
     failed: 0,
@@ -65,6 +88,17 @@ const EmailPreview = () => {
     hour: "numeric",
     minute: "2-digit",
   });
+
+  // Create preview template with sample data from first recipient
+  useEffect(() => {
+    if (templateContent && recipients && recipients.length > 0) {
+      // Use first recipient as an example for the preview
+      const previewContent = createPreviewTemplate(templateContent, recipients[0]);
+      setPreviewTemplateContent(previewContent);
+    } else {
+      setPreviewTemplateContent(templateContent || "");
+    }
+  }, [templateContent, recipients]);
 
   // Initial setup for the component
   useEffect(() => {
@@ -226,6 +260,7 @@ const EmailPreview = () => {
       setScheduledEmailsChecking(false);
     }
   };
+
   // Update all email statuses after completion
   const updateEmailStatusesAfterCompletion = (failedRecipients) => {
     const failedEmailAddresses = new Set(failedRecipients.map(item => item.email));
@@ -585,7 +620,6 @@ const EmailPreview = () => {
                     <div className="mail-label">Time</div>
                     <div className="mail-value">
                       {new Date(scheduledAt).toLocaleString()}
-                      
                     </div>
                   </div>
                 )}
@@ -593,6 +627,7 @@ const EmailPreview = () => {
                 <div className="mail-row message-row">
                   <div className="mail-label">Message</div>
                   <div className="mail-value message-content">
+                    {/* Show the original template content with placeholders in preview */}
                     <div
                       dangerouslySetInnerHTML={{ __html: templateContent }}
                     />

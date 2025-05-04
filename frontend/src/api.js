@@ -62,44 +62,46 @@ export const googleAuth = (code) => {
 // Unified email sending function with debounce to prevent duplicates
 export const sendEmails = debounce(async (templateContent, recipients, templateName, options = {}) => {
   try {
-      const { isScheduled = false, scheduledAt = null } = options;
-      const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-      
-      if (!userInfo.token) {
-          console.error("No authentication token found");
-          throw new Error("Authentication required");
-      }
+    const { isScheduled = false, scheduledAt = null } = options;
+    const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+    
+    if (!userInfo.token) {
+      console.error("No authentication token found");
+      throw new Error("Authentication required");
+    }
 
-      console.log("Sending emails with options:", {
-          templateName,
-          recipientCount: recipients.length,
-          isScheduled,
-          scheduledAt: scheduledAt || 'immediate'
-      });
+    console.log("Sending emails with options:", {
+      templateName,
+      recipientCount: recipients.length,
+      isScheduled,
+      scheduledAt: scheduledAt || 'immediate'
+    });
 
-      const response = await axios.post(`${API_BASE_URL}/drive/send-emails`, {
-          templateContent,
-          recipients,
-          templateName,
-          isScheduled,
-          scheduledAt
-      }, {
-          headers: {
-              Authorization: `Bearer ${userInfo.token}`,
-          },
-      });
+    // Send all data to backend - the template content will be personalized on the server
+    const response = await axios.post(`${API_BASE_URL}/drive/send-emails`, {
+      templateContent,
+      recipients,
+      templateName,
+      isScheduled,
+      scheduledAt
+    }, {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+        'X-Request-ID': `${userInfo.email}-${templateName}-${Date.now()}`  // Add a unique request ID
+      },
+    });
 
-      console.log("Email API response:", response.data);
-      return response.data;
+    console.log("Email API response:", response.data);
+    return response.data;
   } catch (error) {
-      console.error("Email API error:", {
-          message: error.response?.data?.message || error.message,
-          status: error.response?.status,
-          data: error.response?.data
-      });
-      throw error;
+    console.error("Email API error:", {
+      message: error.response?.data?.message || error.message,
+      status: error.response?.status,
+      data: error.response?.data
+    });
+    throw error;
   }
-}, 300); // 300ms debounce
+}, 300);
 
 // Get scheduled emails
 export const getScheduledEmails = async () => {
