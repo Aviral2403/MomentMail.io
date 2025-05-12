@@ -46,7 +46,7 @@ const Login = () => {
   return (
     <div className="login-page">
       <div className="welcome">
-        <div className="title">Welcome to MomentMail.io</div>
+        <div className="title">Welcome to <span className="title-app">MomentMail.io</span></div>
         <div className="subtitle">Designed for efficiency</div>
         <div className="welcome-content">
           Forget manual email sending. Our platform lets you automate and
@@ -62,6 +62,7 @@ const Login = () => {
         </div>
         {error && <div className="error-message">{error}</div>}
       </div>
+      
     </div>
   );
 };
