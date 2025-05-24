@@ -1,0 +1,72 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background gradient -->
+    <!-- <radialGradient id="backgroundGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#ffffff" />
+    </radialGradient> -->
+    
+    <!-- Original gradients -->
+    <linearGradient id="leftGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2555eb" />
+      <stop offset="100%" stop-color="#FFFFFF" />
+    </linearGradient>
+    
+    <linearGradient id="leftDiagonalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#de0a26" />
+      <stop offset="100%" stop-color="#FBBC05" />
+    </linearGradient>
+    
+    <linearGradient id="middleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBBC05" />
+      <stop offset="100%" stop-color="#34A853" />
+    </linearGradient>
+    
+    <linearGradient id="rightDiagonalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6cc173" />
+      <stop offset="100%" stop-color="#4caf50" />
+    </linearGradient>
+    
+    <linearGradient id="rightGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#000000" />
+      <stop offset="100%" stop-color="#FFFFFF" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background rectangle -->
+  <rect width="200" height="200" fill="url(#backgroundGradient)" rx="20" />
+  
+  <!-- Your original paths with slightly increased stroke width for better visibility -->
+  <g>
+    <path d="M40,40 L40,160 M40,40 L100,120 L160,40 M160,40 L160,160" 
+          stroke-width="28" 
+          stroke-linecap="round" 
+          fill="none" 
+          stroke="url(#leftGradient)" 
+          stroke-linejoin="round" />
+          
+    <path d="M40,40 L40,160" 
+          stroke-width="28" 
+          stroke-linecap="round" 
+          fill="none" 
+          stroke="url(#leftGradient)" />
+          
+    <path d="M40,40 L100,120" 
+          stroke-width="28" 
+          stroke-linecap="round" 
+          fill="none" 
+          stroke="url(#leftDiagonalGradient)" />
+          
+    <path d="M100,120 L160,40" 
+          stroke-width="28" 
+          stroke-linecap="round" 
+          fill="none" 
+          stroke="url(#rightDiagonalGradient)" />
+          
+    <path d="M160,40 L160,160" 
+          stroke-width="28" 
+          stroke-linecap="round" 
+          fill="none" 
+          stroke="url(#rightGradient)" />
+  </g>
+</svg>
