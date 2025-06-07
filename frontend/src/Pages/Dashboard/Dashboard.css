@@ -1051,78 +1051,7 @@
     }
 }
 
-/* @media (max-width: 576px) {
-    .day-column {
-        min-width: 80px;
-    }
-    
-    .time-column {
-        width: 45px;
-    }
-    
-    .time-slot, .time-header {
-        height: 50px;
-        font-size: 0.7rem;
-    }
-    
-    .time-slot-cell {
-        height: 50px;
-    }
-    
-    .calendar-event {
-        font-size: 0.6rem;
-        padding: 0.15rem;
-    }
-    
-    .calendar-event-time {
-        font-size: 0.55rem;
-    }
-    
-    .calendar-event-title {
-        font-size: 0.6rem;
-    }
-} */
 
-/* @media (max-width: 480px) {
-    .day-column {
-        min-width: 70px;
-    }
-    
-    .time-column {
-        width: 45px;
-    }
-    
-    .calendar-weekday {
-        font-size: 0.6rem;
-    }
-    
-    .calendar-day-number {
-        font-size: 0.9rem;
-    }
-    
-    .time-slot, .time-header {
-        height: 50px;    
-    }
-    
-    .time-slot-cell {
-        height: 45px;
-    }
-    
-    .calendar-month-title {
-        font-size: 1.2rem;
-        min-width: 150px;
-    }
-    
-    .calendar-week-indicator {
-        font-size: 0.8rem;
-        min-width: 100px;
-    }
-    
-    .calendar-nav-button {
-        width: 2rem;
-        height: 2rem;
-    }
-} */
 
 /* Landscape mode on mobile */
 @media (max-height: 500px) and (orientation: landscape) {

@@ -55,9 +55,14 @@ const Dashboard = () => {
         if (activeTab === "scheduled") {
           const response = await getScheduledEmails();
           setScheduledEmails(response.scheduledEmails || []);
-        } else {
+        } else if (activeTab === "history") {
           const response = await getEmailHistory();
           setEmailHistory(response.emailHistory || []);
+        } else if (activeTab === "calendar") {
+          const scheduledResponse = await getScheduledEmails();
+          const historyResponse = await getEmailHistory();
+          setScheduledEmails(scheduledResponse.scheduledEmails || []);
+          setEmailHistory(historyResponse.emailHistory || []);
         }
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -177,12 +182,12 @@ const Dashboard = () => {
     const firstDayOfMonth = new Date(year, month, 1).getDay();
     const startDate = weekIndex * 7 - firstDayOfMonth + 1;
     const dates = [];
-    
+
     for (let i = 0; i < 7; i++) {
       const date = new Date(year, month, startDate + i);
       dates.push(date);
     }
-    
+
     return dates;
   };
 
@@ -190,7 +195,7 @@ const Dashboard = () => {
     const weeksInMonth = getWeeksInMonth(currentMonth, currentYear);
     const adjustedWeek = currentWeek >= weeksInMonth ? weeksInMonth - 1 : currentWeek;
     const weekDates = getWeekDates(adjustedWeek, currentMonth, currentYear);
-    
+
     const timeSlots = [
       { label: "12AM", hour: 0 },
       { label: "3AM", hour: 3 },
@@ -213,17 +218,17 @@ const Dashboard = () => {
               </div>
             ))}
           </div>
-          
+
           {weekDates.map((date, dayIndex) => {
             const day = date.getDate();
             const isCurrentMonth = date.getMonth() === currentMonth;
-            const isToday = 
-              date.getDate() === new Date().getDate() && 
-              date.getMonth() === new Date().getMonth() && 
+            const isToday =
+              date.getDate() === new Date().getDate() &&
+              date.getMonth() === new Date().getMonth() &&
               date.getFullYear() === new Date().getFullYear();
-            
+
             return (
-              <div 
+              <div
                 key={`day-${dayIndex}`}
                 className={`day-column ${isToday ? 'calendar-today' : ''} ${!isCurrentMonth ? 'calendar-other-month' : ''}`}
               >
@@ -236,16 +241,29 @@ const Dashboard = () => {
                     </div>
                   )}
                 </div>
-                
+
                 {timeSlots.map((slot, timeIndex) => {
-                  const slotEmails = [...scheduledEmails, ...emailHistory].filter(email => {
-                    const emailDate = new Date(email.scheduledAt || email.sentAt);
+                  const slotScheduledEmails = scheduledEmails.filter(email => {
+                    const emailDate = new Date(email.scheduledAt);
                     const emailHour = emailDate.getHours();
                     return (
                       emailDate.getDate() === day &&
                       emailDate.getMonth() === date.getMonth() &&
                       emailDate.getFullYear() === date.getFullYear() &&
-                      emailHour >= slot.hour && 
+                      emailHour >= slot.hour &&
+                      emailHour < slot.hour + 3
+                    );
+                  });
+
+                  const slotHistoryEmails = emailHistory.filter(email => {
+                    if (email.scheduledAt) return false; // Exclude scheduled emails from history
+                    const emailDate = new Date(email.sentAt);
+                    const emailHour = emailDate.getHours();
+                    return (
+                      emailDate.getDate() === day &&
+                      emailDate.getMonth() === date.getMonth() &&
+                      emailDate.getFullYear() === date.getFullYear() &&
+                      emailHour >= slot.hour &&
                       emailHour < slot.hour + 3
                     );
                   });
@@ -253,30 +271,61 @@ const Dashboard = () => {
                   return (
                     <div key={`slot-${dayIndex}-${timeIndex}`} className="time-slot-cell">
                       <div className="time-slot-content">
-                        {slotEmails.map((email, emailIndex) => {
+                        {slotScheduledEmails.map((email, emailIndex) => {
                           const emailTag = tags[email._id];
-                          const isScheduled = email.scheduledAt && !email.sentAt;
-                          const formattedTime = formatDate(email.scheduledAt || email.sentAt).time;
-                          
+                          const formattedTime = formatDate(email.scheduledAt).time;
+
                           return (
-                            <div 
-                              key={`email-${dayIndex}-${timeIndex}-${emailIndex}`}
-                              className={`calendar-event ${isScheduled ? 'scheduled-event' : ''}`}
-                              style={{ 
-                                backgroundColor: emailTag ? `${emailTag.color}20` : isScheduled ? 'rgba(245, 158, 11, 0.1)' : 'rgba(59, 130, 246, 0.1)',
-                                borderLeft: `3px solid ${emailTag?.color || (isScheduled ? '#f59e0b' : '#3b82f6')}`
+                            <div
+                              key={`email-scheduled-${dayIndex}-${timeIndex}-${emailIndex}`}
+                              className="calendar-event scheduled-event"
+                              style={{
+                                backgroundColor: emailTag ? `${emailTag.color}20` : 'rgba(245, 158, 11, 0.1)',
+                                borderLeft: `3px solid ${emailTag?.color || '#f59e0b'}`
                               }}
                               onClick={() => handleEmailClick(email)}
                             >
                               <div className="calendar-event-time">{formattedTime}</div>
                               <div className="calendar-event-title">
-                                {email.templateName.length > 15 
-                                  ? `${email.templateName.substring(0, 15)}...` 
+                                {email.templateName.length > 15
+                                  ? `${email.templateName.substring(0, 15)}...`
                                   : email.templateName}
                               </div>
                               {emailTag && (
-                                <div 
-                                  className="calendar-event-tag" 
+                                <div
+                                  className="calendar-event-tag"
+                                  style={{ backgroundColor: emailTag.color }}
+                                >
+                                  {emailTag.name}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+
+                        {slotHistoryEmails.map((email, emailIndex) => {
+                          const emailTag = tags[email._id];
+                          const formattedTime = formatDate(email.sentAt).time;
+
+                          return (
+                            <div
+                              key={`email-history-${dayIndex}-${timeIndex}-${emailIndex}`}
+                              className="calendar-event"
+                              style={{
+                                backgroundColor: emailTag ? `${emailTag.color}20` : 'rgba(59, 130, 246, 0.1)',
+                                borderLeft: `3px solid ${emailTag?.color || '#3b82f6'}`
+                              }}
+                              onClick={() => handleEmailClick(email)}
+                            >
+                              <div className="calendar-event-time">{formattedTime}</div>
+                              <div className="calendar-event-title">
+                                {email.templateName.length > 15
+                                  ? `${email.templateName.substring(0, 15)}...`
+                                  : email.templateName}
+                              </div>
+                              {emailTag && (
+                                <div
+                                  className="calendar-event-tag"
                                   style={{ backgroundColor: emailTag.color }}
                                 >
                                   {emailTag.name}
@@ -308,7 +357,7 @@ const Dashboard = () => {
   const handleMonthChange = (increment) => {
     let newMonth = currentMonth + increment;
     let newYear = currentYear;
-    
+
     if (newMonth < 0) {
       newMonth = 11;
       newYear--;
@@ -316,7 +365,7 @@ const Dashboard = () => {
       newMonth = 0;
       newYear++;
     }
-    
+
     setCurrentMonth(newMonth);
     setCurrentYear(newYear);
     setCurrentWeek(0);
@@ -325,7 +374,7 @@ const Dashboard = () => {
   const handleWeekChange = (increment) => {
     const weeksInMonth = getWeeksInMonth(currentMonth, currentYear);
     let newWeek = currentWeek + increment;
-    
+
     if (newWeek < 0) {
       handleMonthChange(-1);
       setCurrentWeek(getWeeksInMonth(currentMonth - 1 < 0 ? 11 : currentMonth - 1, currentYear) - 1);
@@ -344,7 +393,7 @@ const Dashboard = () => {
 
   const saveTag = () => {
     if (!tagName.trim() || !currentEmailId) return;
-    
+
     const newTags = {
       ...tags,
       [currentEmailId]: {
@@ -352,7 +401,7 @@ const Dashboard = () => {
         color: tagColor
       }
     };
-    
+
     setTags(newTags);
     localStorage.setItem("email-tags", JSON.stringify(newTags));
     setShowTagModal(false);
@@ -384,7 +433,7 @@ const Dashboard = () => {
                 >
                   <path
                     fill="currentColor"
-                    d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11V11.99z"
+                    d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h-2v-2h2v2zm0-4h-2V7h2v6z"
                   />
                 </svg>
                 <h2>Authentication Required</h2>
@@ -433,7 +482,7 @@ const Dashboard = () => {
                 setCalendarView(false);
               }}
             >
-              Scheduled 
+              Scheduled
             </button>
             <button
               className={`dashboard-tab-button ${
@@ -451,6 +500,7 @@ const Dashboard = () => {
                 calendarView ? "dashboard-tab-active" : ""
               }`}
               onClick={() => {
+                setActiveTab("calendar");
                 setCalendarView(true);
               }}
             >
@@ -484,28 +534,28 @@ const Dashboard = () => {
             <div className="dashboard-calendar-view">
               <div className="calendar-header">
                 <div className="calendar-nav-group">
-                  <button 
+                  <button
                     className="calendar-nav-button"
                     onClick={() => handleMonthChange(-1)}
                   >
                     &lt;
                   </button>
                   <h2 className="calendar-month-title">
-                    {new Date(currentYear, currentMonth).toLocaleDateString('default', { 
-                      month: 'long', 
-                      year: 'numeric' 
+                    {new Date(currentYear, currentMonth).toLocaleDateString('default', {
+                      month: 'long',
+                      year: 'numeric'
                     })}
                   </h2>
-                  <button 
+                  <button
                     className="calendar-nav-button"
                     onClick={() => handleMonthChange(1)}
                   >
                     &gt;
                   </button>
                 </div>
-                
+
                 <div className="calendar-week-nav">
-                  <button 
+                  <button
                     className="calendar-nav-button"
                     onClick={() => handleWeekChange(-1)}
                   >
@@ -514,7 +564,7 @@ const Dashboard = () => {
                   <span className="calendar-week-indicator">
                     Week {currentWeek + 1} of {getWeeksInMonth(currentMonth, currentYear)}
                   </span>
-                  <button 
+                  <button
                     className="calendar-nav-button"
                     onClick={() => handleWeekChange(1)}
                   >
@@ -522,15 +572,15 @@ const Dashboard = () => {
                   </button>
                 </div>
               </div>
-              
+
               {renderWeeklyCalendar()}
-              
+
               {emailDetails && (
                 <div className="calendar-email-details-wrapper" onClick={closeEmailDetails}>
                   <div className="calendar-email-details" onClick={(e) => e.stopPropagation()}>
                     <button className="calendar-details-close" onClick={closeEmailDetails}>×</button>
                     <h3>{emailDetails.templateName}</h3>
-                    
+
                     <div className="calendar-details-content">
                       <div className="calendar-details-row">
                         <span className="calendar-details-label">Status:</span>
@@ -555,17 +605,17 @@ const Dashboard = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="calendar-details-actions">
                       {tags[emailDetails._id] ? (
-                        <button 
+                        <button
                           className="calendar-tag-button calendar-remove-tag"
                           onClick={() => removeTag(emailDetails._id)}
                         >
                           Remove Tag
                         </button>
                       ) : (
-                        <button 
+                        <button
                           className="calendar-tag-button calendar-add-tag"
                           onClick={() => handleAddTag(emailDetails._id)}
                         >
@@ -576,7 +626,7 @@ const Dashboard = () => {
                   </div>
                 </div>
               )}
-              
+
               {showTagModal && (
                 <div className="calendar-tag-modal">
                   <div className="calendar-tag-modal-content">
@@ -599,13 +649,13 @@ const Dashboard = () => {
                       />
                     </div>
                     <div className="tag-modal-actions">
-                      <button 
+                      <button
                         className="tag-modal-cancel"
                         onClick={() => setShowTagModal(false)}
                       >
                         Cancel
                       </button>
-                      <button 
+                      <button
                         className="tag-modal-save"
                         onClick={saveTag}
                       >
@@ -658,7 +708,7 @@ const Dashboard = () => {
                               ) : (
                                 <span className="dashboard-no-actions">
                                   {email.status === "cancelled"
-                                    ? "Cancel Succesful"
+                                    ? "Cancel Successful"
                                     : email.status === "sent"
                                     ? "Sent"
                                     : "Delivered"}
@@ -734,7 +784,7 @@ const Dashboard = () => {
                         ) : (
                           <span className="dashboard-no-actions">
                             {email.status === "cancelled"
-                              ? "Cancel Succesful"
+                              ? "Cancel Successful"
                               : email.status === "sent"
                               ? "Sent"
                               : "Delivered"}
