@@ -36,7 +36,9 @@ const Dashboard = () => {
         setError("Please login to access the dashboard");
       } else {
         setIsAuthenticated(true);
-        const savedTags = JSON.parse(localStorage.getItem("email-tags") || "{}");
+        const savedTags = JSON.parse(
+          localStorage.getItem("email-tags") || "{}"
+        );
         setTags(savedTags);
       }
     };
@@ -193,7 +195,8 @@ const Dashboard = () => {
 
   const renderWeeklyCalendar = () => {
     const weeksInMonth = getWeeksInMonth(currentMonth, currentYear);
-    const adjustedWeek = currentWeek >= weeksInMonth ? weeksInMonth - 1 : currentWeek;
+    const adjustedWeek =
+      currentWeek >= weeksInMonth ? weeksInMonth - 1 : currentWeek;
     const weekDates = getWeekDates(adjustedWeek, currentMonth, currentYear);
 
     const timeSlots = [
@@ -204,7 +207,7 @@ const Dashboard = () => {
       { label: "12PM", hour: 12 },
       { label: "3PM", hour: 15 },
       { label: "6PM", hour: 18 },
-      { label: "9PM", hour: 21 }
+      { label: "9PM", hour: 21 },
     ];
 
     return (
@@ -230,32 +233,42 @@ const Dashboard = () => {
             return (
               <div
                 key={`day-${dayIndex}`}
-                className={`day-column ${isToday ? 'calendar-today' : ''} ${!isCurrentMonth ? 'calendar-other-month' : ''}`}
+                className={`day-column ${isToday ? "calendar-today" : ""} ${
+                  !isCurrentMonth ? "calendar-other-month" : ""
+                }`}
               >
                 <div className="day-header">
-                  <div className="calendar-weekday">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dayIndex]}</div>
+                  <div className="calendar-weekday">
+                    {
+                      ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
+                        dayIndex
+                      ]
+                    }
+                  </div>
                   <div className="calendar-day-number">{day}</div>
                   {!isCurrentMonth && (
                     <div className="calendar-month-indicator">
-                      {date.toLocaleDateString('default', { month: 'short' })}
+                      {date.toLocaleDateString("default", { month: "short" })}
                     </div>
                   )}
                 </div>
 
                 {timeSlots.map((slot, timeIndex) => {
-                  const slotScheduledEmails = scheduledEmails.filter(email => {
-                    const emailDate = new Date(email.scheduledAt);
-                    const emailHour = emailDate.getHours();
-                    return (
-                      emailDate.getDate() === day &&
-                      emailDate.getMonth() === date.getMonth() &&
-                      emailDate.getFullYear() === date.getFullYear() &&
-                      emailHour >= slot.hour &&
-                      emailHour < slot.hour + 3
-                    );
-                  });
+                  const slotScheduledEmails = scheduledEmails.filter(
+                    (email) => {
+                      const emailDate = new Date(email.scheduledAt);
+                      const emailHour = emailDate.getHours();
+                      return (
+                        emailDate.getDate() === day &&
+                        emailDate.getMonth() === date.getMonth() &&
+                        emailDate.getFullYear() === date.getFullYear() &&
+                        emailHour >= slot.hour &&
+                        emailHour < slot.hour + 3
+                      );
+                    }
+                  );
 
-                  const slotHistoryEmails = emailHistory.filter(email => {
+                  const slotHistoryEmails = emailHistory.filter((email) => {
                     if (email.scheduledAt) return false; // Exclude scheduled emails from history
                     const emailDate = new Date(email.sentAt);
                     const emailHour = emailDate.getHours();
@@ -269,23 +282,34 @@ const Dashboard = () => {
                   });
 
                   return (
-                    <div key={`slot-${dayIndex}-${timeIndex}`} className="time-slot-cell">
+                    <div
+                      key={`slot-${dayIndex}-${timeIndex}`}
+                      className="time-slot-cell"
+                    >
                       <div className="time-slot-content">
                         {slotScheduledEmails.map((email, emailIndex) => {
                           const emailTag = tags[email._id];
-                          const formattedTime = formatDate(email.scheduledAt).time;
+                          const formattedTime = formatDate(
+                            email.scheduledAt
+                          ).time;
 
                           return (
                             <div
                               key={`email-scheduled-${dayIndex}-${timeIndex}-${emailIndex}`}
                               className="calendar-event scheduled-event"
                               style={{
-                                backgroundColor: emailTag ? `${emailTag.color}20` : 'rgba(245, 158, 11, 0.1)',
-                                borderLeft: `3px solid ${emailTag?.color || '#f59e0b'}`
+                                backgroundColor: emailTag
+                                  ? `${emailTag.color}20`
+                                  : "rgba(245, 158, 11, 0.1)",
+                                borderLeft: `3px solid ${
+                                  emailTag?.color || "#f59e0b"
+                                }`,
                               }}
                               onClick={() => handleEmailClick(email)}
                             >
-                              <div className="calendar-event-time">{formattedTime}</div>
+                              <div className="calendar-event-time">
+                                {formattedTime}
+                              </div>
                               <div className="calendar-event-title">
                                 {email.templateName.length > 15
                                   ? `${email.templateName.substring(0, 15)}...`
@@ -312,12 +336,18 @@ const Dashboard = () => {
                               key={`email-history-${dayIndex}-${timeIndex}-${emailIndex}`}
                               className="calendar-event"
                               style={{
-                                backgroundColor: emailTag ? `${emailTag.color}20` : 'rgba(59, 130, 246, 0.1)',
-                                borderLeft: `3px solid ${emailTag?.color || '#3b82f6'}`
+                                backgroundColor: emailTag
+                                  ? `${emailTag.color}20`
+                                  : "rgba(59, 130, 246, 0.1)",
+                                borderLeft: `3px solid ${
+                                  emailTag?.color || "#3b82f6"
+                                }`,
                               }}
                               onClick={() => handleEmailClick(email)}
                             >
-                              <div className="calendar-event-time">{formattedTime}</div>
+                              <div className="calendar-event-time">
+                                {formattedTime}
+                              </div>
                               <div className="calendar-event-title">
                                 {email.templateName.length > 15
                                   ? `${email.templateName.substring(0, 15)}...`
@@ -377,7 +407,12 @@ const Dashboard = () => {
 
     if (newWeek < 0) {
       handleMonthChange(-1);
-      setCurrentWeek(getWeeksInMonth(currentMonth - 1 < 0 ? 11 : currentMonth - 1, currentYear) - 1);
+      setCurrentWeek(
+        getWeeksInMonth(
+          currentMonth - 1 < 0 ? 11 : currentMonth - 1,
+          currentYear
+        ) - 1
+      );
     } else if (newWeek >= weeksInMonth) {
       handleMonthChange(1);
       setCurrentWeek(0);
@@ -398,8 +433,8 @@ const Dashboard = () => {
       ...tags,
       [currentEmailId]: {
         name: tagName.trim(),
-        color: tagColor
-      }
+        color: tagColor,
+      },
     };
 
     setTags(newTags);
@@ -475,7 +510,9 @@ const Dashboard = () => {
           <div className="dashboard-tabs-container">
             <button
               className={`dashboard-tab-button ${
-                activeTab === "scheduled" && !calendarView ? "dashboard-tab-active" : ""
+                activeTab === "scheduled" && !calendarView
+                  ? "dashboard-tab-active"
+                  : ""
               }`}
               onClick={() => {
                 setActiveTab("scheduled");
@@ -486,7 +523,9 @@ const Dashboard = () => {
             </button>
             <button
               className={`dashboard-tab-button ${
-                activeTab === "history" && !calendarView ? "dashboard-tab-active" : ""
+                activeTab === "history" && !calendarView
+                  ? "dashboard-tab-active"
+                  : ""
               }`}
               onClick={() => {
                 setActiveTab("history");
@@ -541,10 +580,13 @@ const Dashboard = () => {
                     &lt;
                   </button>
                   <h2 className="calendar-month-title">
-                    {new Date(currentYear, currentMonth).toLocaleDateString('default', {
-                      month: 'long',
-                      year: 'numeric'
-                    })}
+                    {new Date(currentYear, currentMonth).toLocaleDateString(
+                      "default",
+                      {
+                        month: "long",
+                        year: "numeric",
+                      }
+                    )}
                   </h2>
                   <button
                     className="calendar-nav-button"
@@ -562,7 +604,8 @@ const Dashboard = () => {
                     &lt;
                   </button>
                   <span className="calendar-week-indicator">
-                    Week {currentWeek + 1} of {getWeeksInMonth(currentMonth, currentYear)}
+                    Week {currentWeek + 1} of{" "}
+                    {getWeeksInMonth(currentMonth, currentYear)}
                   </span>
                   <button
                     className="calendar-nav-button"
@@ -576,32 +619,63 @@ const Dashboard = () => {
               {renderWeeklyCalendar()}
 
               {emailDetails && (
-                <div className="calendar-email-details-wrapper" onClick={closeEmailDetails}>
-                  <div className="calendar-email-details" onClick={(e) => e.stopPropagation()}>
-                    <button className="calendar-details-close" onClick={closeEmailDetails}>×</button>
+                <div
+                  className="calendar-email-details-wrapper"
+                  onClick={closeEmailDetails}
+                >
+                  <div
+                    className="calendar-email-details"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      className="calendar-details-close"
+                      onClick={closeEmailDetails}
+                    >
+                      ×
+                    </button>
                     <h3>{emailDetails.templateName}</h3>
 
                     <div className="calendar-details-content">
                       <div className="calendar-details-row">
                         <span className="calendar-details-label">Status:</span>
-                        <span className="calendar-details-value">{getStatusBadge(emailDetails.status)}</span>
+                        <span className="calendar-details-value">
+                          {getStatusBadge(emailDetails.status)}
+                        </span>
                       </div>
                       <div className="calendar-details-row">
-                        <span className="calendar-details-label">Recipients:</span>
-                        <span className="calendar-details-value">{emailDetails.recipients.length}</span>
+                        <span className="calendar-details-label">
+                          Recipients:
+                        </span>
+                        <span className="calendar-details-value">
+                          {emailDetails.recipients.length}
+                        </span>
                       </div>
                       <div className="calendar-details-row">
                         <span className="calendar-details-label">Time:</span>
-                        <span className="calendar-details-value">{formatDate(emailDetails.scheduledAt || emailDetails.sentAt).time}</span>
+                        <span className="calendar-details-value">
+                          {
+                            formatDate(
+                              emailDetails.scheduledAt || emailDetails.sentAt
+                            ).time
+                          }
+                        </span>
                       </div>
                       <div className="calendar-details-row">
                         <span className="calendar-details-label">Date:</span>
-                        <span className="calendar-details-value">{formatDate(emailDetails.scheduledAt || emailDetails.sentAt).date}</span>
+                        <span className="calendar-details-value">
+                          {
+                            formatDate(
+                              emailDetails.scheduledAt || emailDetails.sentAt
+                            ).date
+                          }
+                        </span>
                       </div>
                       {emailDetails.isScheduled !== undefined && (
                         <div className="calendar-details-row">
                           <span className="calendar-details-label">Type:</span>
-                          <span className="calendar-details-value">{emailDetails.isScheduled ? "Scheduled" : "Instant"}</span>
+                          <span className="calendar-details-value">
+                            {emailDetails.isScheduled ? "Scheduled" : "Instant"}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -655,10 +729,7 @@ const Dashboard = () => {
                       >
                         Cancel
                       </button>
-                      <button
-                        className="tag-modal-save"
-                        onClick={saveTag}
-                      >
+                      <button className="tag-modal-save" onClick={saveTag}>
                         Save Tag
                       </button>
                     </div>
@@ -668,133 +739,134 @@ const Dashboard = () => {
             </div>
           ) : activeTab === "scheduled" ? (
             <div className="dashboard-data-section">
-              <div className="dashboard-table-wrapper">
-                {scheduledEmails.length > 0 ? (
-                  <table className="dashboard-emails-table">
-                    <thead>
-                      <tr>
-                        <th>Subject</th>
-                        <th>Recipients</th>
-                        <th>Scheduled Time</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {scheduledEmails.map((email) => {
-                        const formattedDate = formatDate(email.scheduledAt);
-                        return (
-                          <tr key={email._id}>
-                            <td>{email.templateName}</td>
-                            <td>{email.recipients.length}</td>
-                            <td>
+              {/* Empty State - shown when no emails exist */}
+              {scheduledEmails.length === 0 ? (
+                <div className="dashboard-empty-state">
+                  <img
+                    src="/empty.svg"
+                    className="dashboard-empty-icon"
+                    width="256"
+                    height="256"
+                    alt="No scheduled emails"
+                  />
+                  <p>No scheduled emails found</p>
+                </div>
+              ) : (
+                <>
+                  {/* Table View - shown on desktop */}
+                  <div className="dashboard-table-wrapper">
+                    <table className="dashboard-emails-table">
+                      <thead>
+                        <tr>
+                          <th>Subject</th>
+                          <th>Recipients</th>
+                          <th>Scheduled Time</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {scheduledEmails.map((email) => {
+                          const formattedDate = formatDate(email.scheduledAt);
+                          return (
+                            <tr key={email._id}>
+                              <td>{email.templateName}</td>
+                              <td>{email.recipients.length}</td>
+                              <td>
+                                <div className="dashboard-date-time">
+                                  <div>{formattedDate.date}</div>
+                                  <div>{formattedDate.time}</div>
+                                </div>
+                              </td>
+                              <td>{getStatusBadge(email.status)}</td>
+                              <td>
+                                {email.status === "scheduled" ? (
+                                  <button
+                                    className="dashboard-action-button dashboard-cancel-button"
+                                    onClick={() => handleCancelEmail(email._id)}
+                                    disabled={cancellingId === email._id}
+                                  >
+                                    {cancellingId === email._id
+                                      ? "Cancelling..."
+                                      : "Cancel"}
+                                  </button>
+                                ) : (
+                                  <span className="dashboard-no-actions">
+                                    {email.status === "cancelled"
+                                      ? "Cancel Successful"
+                                      : email.status === "sent"
+                                      ? "Sent"
+                                      : "Delivered"}
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Card View - shown on mobile */}
+                  <div className="dashboard-cards-grid dashboard-scheduled-cards">
+                    {scheduledEmails.map((email) => {
+                      const formattedDate = formatDate(email.scheduledAt);
+                      return (
+                        <div key={email._id} className="dashboard-email-card">
+                          <div className="dashboard-card-header">
+                            <h3 className="dashboard-card-title">
+                              {email.templateName}
+                            </h3>
+                            <div className="dashboard-card-status">
+                              {getStatusBadge(email.status)}
+                            </div>
+                          </div>
+                          <div className="dashboard-card-content">
+                            <div className="dashboard-card-row">
+                              <span className="dashboard-card-label">
+                                Recipients:
+                              </span>
+                              <span className="dashboard-card-value">
+                                {email.recipients.length}
+                              </span>
+                            </div>
+                            <div className="dashboard-card-row">
+                              <span className="dashboard-card-label">
+                                Scheduled:
+                              </span>
                               <div className="dashboard-date-time">
                                 <div>{formattedDate.date}</div>
                                 <div>{formattedDate.time}</div>
                               </div>
-                            </td>
-                            <td>{getStatusBadge(email.status)}</td>
-                            <td>
-                              {email.status === "scheduled" ? (
-                                <button
-                                  className="dashboard-action-button dashboard-cancel-button"
-                                  onClick={() => handleCancelEmail(email._id)}
-                                  disabled={cancellingId === email._id}
-                                >
-                                  {cancellingId === email._id
-                                    ? "Cancelling..."
-                                    : "Cancel"}
-                                </button>
-                              ) : (
-                                <span className="dashboard-no-actions">
-                                  {email.status === "cancelled"
-                                    ? "Cancel Successful"
-                                    : email.status === "sent"
-                                    ? "Sent"
-                                    : "Delivered"}
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                ) : (
-                  <div className="dashboard-empty-state">
-                    <svg
-                      className="dashboard-empty-icon"
-                      viewBox="0 0 24 24"
-                      width="48"
-                      height="48"
-                    >
-                      <path
-                        fill="currentColor"
-                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"
-                      />
-                    </svg>
-                    <p>No scheduled emails found</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="dashboard-cards-grid dashboard-scheduled-cards">
-                {scheduledEmails.map((email) => {
-                  const formattedDate = formatDate(email.scheduledAt);
-                  return (
-                    <div key={email._id} className="dashboard-email-card">
-                      <div className="dashboard-card-header">
-                        <h3 className="dashboard-card-title">
-                          {email.templateName}
-                        </h3>
-                        <div className="dashboard-card-status">
-                          {getStatusBadge(email.status)}
-                        </div>
-                      </div>
-                      <div className="dashboard-card-content">
-                        <div className="dashboard-card-row">
-                          <span className="dashboard-card-label">
-                            Recipients:
-                          </span>
-                          <span className="dashboard-card-value">
-                            {email.recipients.length}
-                          </span>
-                        </div>
-                        <div className="dashboard-card-row">
-                          <span className="dashboard-card-label">
-                            Scheduled:
-                          </span>
-                          <div className="dashboard-date-time">
-                            <div>{formattedDate.date}</div>
-                            <div>{formattedDate.time}</div>
+                            </div>
+                          </div>
+                          <div className="dashboard-card-actions">
+                            {email.status === "scheduled" ? (
+                              <button
+                                className="dashboard-action-button dashboard-cancel-button"
+                                onClick={() => handleCancelEmail(email._id)}
+                                disabled={cancellingId === email._id}
+                              >
+                                {cancellingId === email._id
+                                  ? "Cancelling..."
+                                  : "Cancel"}
+                              </button>
+                            ) : (
+                              <span className="dashboard-no-actions">
+                                {email.status === "cancelled"
+                                  ? "Cancel Successful"
+                                  : email.status === "sent"
+                                  ? "Sent"
+                                  : "Delivered"}
+                              </span>
+                            )}
                           </div>
                         </div>
-                      </div>
-                      <div className="dashboard-card-actions">
-                        {email.status === "scheduled" ? (
-                          <button
-                            className="dashboard-action-button dashboard-cancel-button"
-                            onClick={() => handleCancelEmail(email._id)}
-                            disabled={cancellingId === email._id}
-                          >
-                            {cancellingId === email._id
-                              ? "Cancelling..."
-                              : "Cancel"}
-                          </button>
-                        ) : (
-                          <span className="dashboard-no-actions">
-                            {email.status === "cancelled"
-                              ? "Cancel Successful"
-                              : email.status === "sent"
-                              ? "Sent"
-                              : "Delivered"}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
           ) : (
             <div className="dashboard-data-section">
@@ -831,7 +903,9 @@ const Dashboard = () => {
                             </div>
                           </div>
                           <div className="dashboard-card-row">
-                            <span className="dashboard-card-label">Time(24h):</span>
+                            <span className="dashboard-card-label">
+                              Time(24h):
+                            </span>
                             <div className="dashboard-date-time">
                               <div>{formattedDate.time}</div>
                             </div>
@@ -864,17 +938,13 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="dashboard-empty-state">
-                  <svg
-                    className="dashboard-empty-icon"
-                    viewBox="0 0 24 24"
-                    width="48"
-                    height="48"
-                  >
-                    <path
-                      fill="currentColor"
-                      d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"
-                    />
-                  </svg>
+                  <img
+                    src="/empty.svg" // Path from public folder
+                    className="scheduled-dashboard-empty-icon"
+                    width="256"
+                    height="256"
+                    alt="Empty state icon"
+                  />
                   <p>No email history found</p>
                 </div>
               )}
