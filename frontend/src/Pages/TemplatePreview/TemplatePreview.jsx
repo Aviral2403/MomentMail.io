@@ -14,8 +14,28 @@ import {
   ABANDONED_CART_TEMPLATE
 } from "../../EmailTemplates";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import { useEffect, useState } from "react";
+import LoadingSkeleton from "../../Components/LoadingSkeleton/LoadingSkeleton";
 
 const TemplatePreview = () => {
+
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading data
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <LoadingSkeleton type="template-preview" />;
+  }
+
+
   const { templateSlug } = useParams();
   const currentDate = new Date().toLocaleString("en-US", {
     weekday: "short",

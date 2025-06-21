@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import RotatingText from "../../Components/RotatingText/RotatingText";
 import DualScroll from "../../Components/DualScroll/DualScroll";
@@ -8,9 +8,24 @@ import HeroSection from "../../Components/HeroSection/HeroSection";
 import TemplatesHero from "../../Components/TemplatesHero/TemplatesHero";
 import EmailMarketingAI from "../../Components/EmailMarketingAI/EmailMarketingAI";
 import ScheduleEmail from "../../Components/ScheduleEmail/ScheduleEmail";
+import LoadingSkeleton from "../../Components/LoadingSkeleton/LoadingSkeleton";
 
 const HomePage = () => {
   const rotatingTextRef = useRef();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading data
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <LoadingSkeleton type="homepage" />;
+  }
 
   return (
     <div className="home-container">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../Components/Navbar/Navbar";
 import {
@@ -7,13 +7,14 @@ import {
   cancelScheduledEmail,
 } from "../../api";
 import "./Dashboard.css";
+import LoadingSkeleton from "../../Components/LoadingSkeleton/LoadingSkeleton";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("scheduled");
   const [scheduledEmails, setScheduledEmails] = useState([]);
   const [emailHistory, setEmailHistory] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [cancellingId, setCancellingId] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -29,6 +30,14 @@ const Dashboard = () => {
   const [currentWeek, setCurrentWeek] = useState(0);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     const checkAuth = () => {
       const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
       if (!userInfo || !userInfo.token) {
@@ -36,9 +45,7 @@ const Dashboard = () => {
         setError("Please login to access the dashboard");
       } else {
         setIsAuthenticated(true);
-        const savedTags = JSON.parse(
-          localStorage.getItem("email-tags") || "{}"
-        );
+        const savedTags = JSON.parse(localStorage.getItem("email-tags") || "{}");
         setTags(savedTags);
       }
     };
@@ -195,8 +202,7 @@ const Dashboard = () => {
 
   const renderWeeklyCalendar = () => {
     const weeksInMonth = getWeeksInMonth(currentMonth, currentYear);
-    const adjustedWeek =
-      currentWeek >= weeksInMonth ? weeksInMonth - 1 : currentWeek;
+    const adjustedWeek = currentWeek >= weeksInMonth ? weeksInMonth - 1 : currentWeek;
     const weekDates = getWeekDates(adjustedWeek, currentMonth, currentYear);
 
     const timeSlots = [
@@ -239,11 +245,7 @@ const Dashboard = () => {
               >
                 <div className="day-header">
                   <div className="calendar-weekday">
-                    {
-                      ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
-                        dayIndex
-                      ]
-                    }
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dayIndex]}
                   </div>
                   <div className="calendar-day-number">{day}</div>
                   {!isCurrentMonth && (
@@ -269,7 +271,7 @@ const Dashboard = () => {
                   );
 
                   const slotHistoryEmails = emailHistory.filter((email) => {
-                    if (email.scheduledAt) return false; // Exclude scheduled emails from history
+                    if (email.scheduledAt) return false;
                     const emailDate = new Date(email.sentAt);
                     const emailHour = emailDate.getHours();
                     return (
@@ -282,16 +284,11 @@ const Dashboard = () => {
                   });
 
                   return (
-                    <div
-                      key={`slot-${dayIndex}-${timeIndex}`}
-                      className="time-slot-cell"
-                    >
+                    <div key={`slot-${dayIndex}-${timeIndex}`} className="time-slot-cell">
                       <div className="time-slot-content">
                         {slotScheduledEmails.map((email, emailIndex) => {
                           const emailTag = tags[email._id];
-                          const formattedTime = formatDate(
-                            email.scheduledAt
-                          ).time;
+                          const formattedTime = formatDate(email.scheduledAt).time;
 
                           return (
                             <div
@@ -451,6 +448,10 @@ const Dashboard = () => {
     localStorage.setItem("email-tags", JSON.stringify(newTags));
   };
 
+  if (loading) {
+    return <LoadingSkeleton type="dashboard" activeTab={activeTab} />;
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="dashboard-page-container">
@@ -564,12 +565,7 @@ const Dashboard = () => {
             </div>
           )}
 
-          {loading ? (
-            <div className="dashboard-loading-state">
-              <div className="dashboard-loading-spinner"></div>
-              <p>Loading your emails...</p>
-            </div>
-          ) : calendarView ? (
+          {calendarView ? (
             <div className="dashboard-calendar-view">
               <div className="calendar-header">
                 <div className="calendar-nav-group">
@@ -653,21 +649,17 @@ const Dashboard = () => {
                       <div className="calendar-details-row">
                         <span className="calendar-details-label">Time:</span>
                         <span className="calendar-details-value">
-                          {
-                            formatDate(
-                              emailDetails.scheduledAt || emailDetails.sentAt
-                            ).time
-                          }
+                          {formatDate(
+                            emailDetails.scheduledAt || emailDetails.sentAt
+                          ).time}
                         </span>
                       </div>
                       <div className="calendar-details-row">
                         <span className="calendar-details-label">Date:</span>
                         <span className="calendar-details-value">
-                          {
-                            formatDate(
-                              emailDetails.scheduledAt || emailDetails.sentAt
-                            ).date
-                          }
+                          {formatDate(
+                            emailDetails.scheduledAt || emailDetails.sentAt
+                          ).date}
                         </span>
                       </div>
                       {emailDetails.isScheduled !== undefined && (
@@ -739,7 +731,6 @@ const Dashboard = () => {
             </div>
           ) : activeTab === "scheduled" ? (
             <div className="dashboard-data-section">
-              {/* Empty State - shown when no emails exist */}
               {scheduledEmails.length === 0 ? (
                 <div className="dashboard-empty-state">
                   <img
@@ -753,7 +744,6 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <>
-                  {/* Table View - shown on desktop */}
                   <div className="dashboard-table-wrapper">
                     <table className="dashboard-emails-table">
                       <thead>
@@ -807,7 +797,6 @@ const Dashboard = () => {
                     </table>
                   </div>
 
-                  {/* Card View - shown on mobile */}
                   <div className="dashboard-cards-grid dashboard-scheduled-cards">
                     {scheduledEmails.map((email) => {
                       const formattedDate = formatDate(email.scheduledAt);
@@ -874,9 +863,7 @@ const Dashboard = () => {
                 <div className="dashboard-cards-grid dashboard-history-cards">
                   {emailHistory.map((email) => {
                     const formattedDate = formatDate(email.sentAt);
-                    const sendType = email.isScheduled
-                      ? "Scheduled"
-                      : "Instant";
+                    const sendType = email.isScheduled ? "Scheduled" : "Instant";
                     return (
                       <div key={email._id} className="dashboard-history-card">
                         <div className="dashboard-card-header">
@@ -939,7 +926,7 @@ const Dashboard = () => {
               ) : (
                 <div className="dashboard-empty-state">
                   <img
-                    src="/empty.svg" // Path from public folder
+                    src="/empty.svg"
                     className="scheduled-dashboard-empty-icon"
                     width="256"
                     height="256"

@@ -1,27 +1,26 @@
 /* eslint-disable react/prop-types */
-import "./App.css";
-import HomePage from "./Pages/HomePage/HomePage";
-import Login from "./Pages/Login/Login";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Suspense, useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import Navbar from './Components/Navbar/Navbar';
+import Footer from './Components/Footer/Footer';
+import HomePage from './Pages/HomePage/HomePage';
+import Login from './Pages/Login/Login';
+import Templates from './Pages/Templates/Templates';
+import TemplatePreview from './Pages/TemplatePreview/TemplatePreview';
+import TemplateEditor from './Pages/TemplateEditor/TemplateEditor';
+import RecipientSelector from './Pages/RecipientSelector/RecipientSelector';
+import EmailPreview from './Pages/EmailPreview/EmailPreview';
+import Chatbot from './Pages/Chatbot/Chatbot';
+import PrivacyPolicy from './Pages/PrivacyPolicy/PrivacyPolicy';
+import Terms from './Pages/Terms/Terms';
+import ScheduleDateTime from './Pages/ScheduleDateTime/ScheduleDateTime';
+import Dashboard from './Pages/Dashboard/Dashboard';
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import Navbar from "./Components/Navbar/Navbar";
-import Templates from "./Pages/Templates/Templates";
-import TemplatePreview from "./Pages/TemplatePreview/TemplatePreview";
-import TemplateEditor from "./Pages/TemplateEditor/TemplateEditor";
-import RecipientSelector from "./Pages/RecipientSelector/RecipientSelector";
-import EmailPreview from "./Pages/EmailPreview/EmailPreview";
-import Chatbot from "./Pages/Chatbot/Chatbot";
-import { useEffect } from "react";
-import Footer from "./Components/Footer/Footer";
-import PrivacyPolicy from "./Pages/PrivacyPolicy/PrivacyPolicy";
-import Terms from "./Pages/Terms/Terms";
-import ScheduleDateTime from "./Pages/ScheduleDateTime/ScheduleDateTime";
-import Dashboard from "./Pages/Dashboard/Dashboard";
+import LoadingSkeleton from './Components/LoadingSkeleton/LoadingSkeleton';
 
 // Scroll to top component with smooth scrolling
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -29,7 +28,6 @@ const ScrollToTop = () => {
       behavior: "smooth",
     });
   }, [pathname]);
-  
   return null;
 };
 
@@ -47,28 +45,29 @@ const Layout = ({ children }) => {
   return (
     <>
       <Navbar />
-      {children}
+      <Suspense fallback={<LoadingSkeleton type="default" />}>
+        {children}
+      </Suspense>
       <Footer />
     </>
   );
 };
 
-function App() {
+const App = () => {
   return (
     <>
       <ScrollToTop />
       <Routes>
-        {/* Login route without Layout */}
         <Route
           path="/login"
           element={
-            <GoogleOAuthWrapper>
-              <Login />
-            </GoogleOAuthWrapper>
+            <Suspense fallback={<LoadingSkeleton type="default" />}>
+              <GoogleOAuthWrapper>
+                <Login />
+              </GoogleOAuthWrapper>
+            </Suspense>
           }
         />
-
-        {/* Routes with Layout */}
         <Route
           path="/"
           element={
@@ -172,6 +171,6 @@ function App() {
       </Routes>
     </>
   );
-}
+};
 
 export default App;

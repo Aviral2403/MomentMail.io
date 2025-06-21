@@ -2,15 +2,17 @@ import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
+import LoadingSkeleton from "../../Components/LoadingSkeleton/LoadingSkeleton";
 import './Chatbot.css';
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with true for initial loading
   const [userInfo, setUserInfo] = useState(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamedText, setStreamedText] = useState('');
+  const [apiLoading, setApiLoading] = useState(false); // Separate loading state for API calls
   const [suggestions] = useState([
     "How do I create an effective email template?",
     "What are the best practices for email subject lines?",
@@ -22,25 +24,41 @@ const Chatbot = () => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Get user info from localStorage
+  // Initialize component - load user info and chat history
   useEffect(() => {
-    const storedUserInfo = localStorage.getItem('user-info');
-    if (storedUserInfo) {
-      setUserInfo(JSON.parse(storedUserInfo));
-    }
-  }, []);
-
-  // Load chat history
-  useEffect(() => {
-    if (userInfo?.email) {
-      const savedMessages = localStorage.getItem(`chatHistory-${userInfo.email}`);
-      if (savedMessages) {
-        setMessages(JSON.parse(savedMessages));
-      } else {
+    const initializeChat = async () => {
+      try {
+        // Get user info from localStorage
+        const storedUserInfo = localStorage.getItem('user-info');
+        if (storedUserInfo) {
+          const parsedUserInfo = JSON.parse(storedUserInfo);
+          setUserInfo(parsedUserInfo);
+          
+          // Load chat history for this user
+          const savedMessages = localStorage.getItem(`chatHistory-${parsedUserInfo.email}`);
+          if (savedMessages) {
+            setMessages(JSON.parse(savedMessages));
+          } else {
+            setWelcomeMessage();
+          }
+        } else {
+          // No user info found, set welcome message
+          setWelcomeMessage();
+        }
+        
+        // Simulate loading time (you can remove this or adjust as needed)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+      } catch (error) {
+        console.error('Error initializing chat:', error);
         setWelcomeMessage();
+      } finally {
+        setLoading(false);
       }
-    }
-  }, [userInfo]);
+    };
+
+    initializeChat();
+  }, []);
 
   const setWelcomeMessage = () => {
     setMessages([{
@@ -49,7 +67,7 @@ const Chatbot = () => {
     }]);
   };
 
-  // Save messages
+  // Save messages whenever they change
   useEffect(() => {
     if (messages.length > 0 && userInfo?.email) {
       localStorage.setItem(`chatHistory-${userInfo.email}`, JSON.stringify(messages));
@@ -57,8 +75,17 @@ const Chatbot = () => {
   }, [messages, userInfo]);
 
   // Auto-scroll and focus
-  useEffect(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), [messages, streamedText]);
-  useEffect(() => inputRef.current?.focus(), []);
+  useEffect(() => {
+    if (!loading) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, streamedText, loading]);
+
+  useEffect(() => {
+    if (!loading) {
+      inputRef.current?.focus();
+    }
+  }, [loading]);
 
   const goBack = () => {
     window.history.back();
@@ -106,7 +133,7 @@ const Chatbot = () => {
     const userMessage = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
-    setLoading(true);
+    setApiLoading(true);
 
     try {
       const response = await fetch(
@@ -165,7 +192,7 @@ const Chatbot = () => {
         content: `## Error\n\nSorry, I encountered an error: ${error.message || 'Please try again later'}`
       }]);
     } finally {
-      setLoading(false);
+      setApiLoading(false);
     }
   };
 
@@ -184,6 +211,11 @@ const Chatbot = () => {
   const clearChat = () => {
     setWelcomeMessage();
   };
+
+  // Show loading skeleton during initial load
+  if (loading) {
+    return <LoadingSkeleton type="ask-ai" />;
+  }
 
   return (
     <div className="chatbot-container">
@@ -237,7 +269,7 @@ const Chatbot = () => {
             </div>
           </div>
         )}
-        {loading && !isStreaming && (
+        {apiLoading && !isStreaming && (
           <div className="message assistant-message">
             <div className="message-bubble">
               <div className="typing-indicator">
@@ -257,7 +289,7 @@ const Chatbot = () => {
             key={index}
             className="suggestion-button"
             onClick={() => handleSuggestionClick(suggestion)}
-            disabled={loading || isStreaming}
+            disabled={apiLoading || isStreaming}
           >
             {suggestion}
           </button>
@@ -273,11 +305,11 @@ const Chatbot = () => {
           placeholder="Ask about email marketing..."
           rows={1}
           className="chat-input"
-          disabled={loading || isStreaming}
+          disabled={apiLoading || isStreaming}
         />
         <button 
           onClick={sendMessage} 
-          disabled={loading || isStreaming || !input.trim()}
+          disabled={apiLoading || isStreaming || !input.trim()}
           className="send-button"
           aria-label="Send message"
         >

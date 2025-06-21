@@ -12,10 +12,10 @@ import {
   WELCOME_TEMPLATE,
   ABANDONED_CART_TEMPLATE
 } from "../../EmailTemplates";
-// import Navbar from "./Navbar/Navbar";
 import "./TemplateEditor.css";
 import axios from "axios";
 import { Toaster, toast } from "react-hot-toast";
+import LoadingSkeleton from "../../Components/LoadingSkeleton/LoadingSkeleton";
 
 const TemplateEditor = () => {
   const { slug } = useParams();
@@ -26,7 +26,8 @@ const TemplateEditor = () => {
   const [userEmail, setUserEmail] = useState("");
   const [emailSubject, setEmailSubject] = useState("");
   const [isDriveConnected, setIsDriveConnected] = useState(false);
-  
+  const [loading, setLoading] = useState(true);
+
   const templateMap = {
     "product-launch": FEATURE_UPDATE_TEMPLATE,
     "flash-sale": FLASH_SALE_TEMPLATE,
@@ -34,59 +35,15 @@ const TemplateEditor = () => {
     invitation: WEBINAR_TEMPLATE,
     feedback: FEEDBACK_TEMPLATE,
     "social-media": SOCIAL_MEDIA_TEMPLATE,
-    "welcome-user" : WELCOME_TEMPLATE,
-    "abandoned-cart" : ABANDONED_CART_TEMPLATE,
+    "welcome-user": WELCOME_TEMPLATE,
+    "abandoned-cart": ABANDONED_CART_TEMPLATE,
     "custom-template": "",
   };
 
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
-  useEffect(() => {
-    const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-    if (userInfo.driveAccess && userInfo.driveToken) {
-      try {
-        const tokenData = JSON.parse(atob(userInfo.driveToken.split(".")[1]));
-        const isTokenValid = tokenData.exp * 1000 > Date.now();
-        setIsDriveConnected(isTokenValid);
-        if (!isTokenValid) {
-          const updatedUserInfo = { ...userInfo };
-          delete updatedUserInfo.driveAccess;
-          delete updatedUserInfo.driveToken;
-          localStorage.setItem("user-info", JSON.stringify(updatedUserInfo));
-        }
-      } catch (error) {
-        console.error("Error checking drive token:", error);
-        setIsDriveConnected(false);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      const userInfoString = localStorage.getItem("user-info");
-      if (userInfoString) {
-        const userInfo = JSON.parse(userInfoString);
-        if (userInfo?.email) {
-          setUserEmail(userInfo.email);
-        }
-      }
-    } catch (error) {
-      console.error("Error getting user info:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!slug || (slug !== "custom-template" && !templateMap[slug])) {
-      navigate("/templates");
-      return;
-    }
-    setTemplateName(getTemplateName(slug));
-    if (userEmail) {
-      loadTemplate();
-    }
-  }, [slug, userEmail]);
-
+  // Helper functions defined first
   const getStorageKey = (templateSlug) => {
     if (userEmail) {
       const sanitizedEmail = userEmail.replace(/[^a-zA-Z0-9]/g, "_");
@@ -116,9 +73,8 @@ const TemplateEditor = () => {
       invitation: "Webinar Invitation Template",
       feedback: "Feedback & Survey Template",
       "social-media": "Social Media Connection Template",
-      "welcome-user" : "Welcome To community Template",
-      "abandoned-cart" : "Your Cart Items Feels Lonely , Order Them?"
-
+      "welcome-user": "Welcome To community Template",
+      "abandoned-cart": "Your Cart Items Feels Lonely , Order Them?"
     };
     return names[slug] || "Email Template";
   };
@@ -182,6 +138,61 @@ const TemplateEditor = () => {
     }
   };
 
+  // All useEffect hooks
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+    if (userInfo.driveAccess && userInfo.driveToken) {
+      try {
+        const tokenData = JSON.parse(atob(userInfo.driveToken.split(".")[1]));
+        const isTokenValid = tokenData.exp * 1000 > Date.now();
+        setIsDriveConnected(isTokenValid);
+        if (!isTokenValid) {
+          const updatedUserInfo = { ...userInfo };
+          delete updatedUserInfo.driveAccess;
+          delete updatedUserInfo.driveToken;
+          localStorage.setItem("user-info", JSON.stringify(updatedUserInfo));
+        }
+      } catch (error) {
+        console.error("Error checking drive token:", error);
+        setIsDriveConnected(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      const userInfoString = localStorage.getItem("user-info");
+      if (userInfoString) {
+        const userInfo = JSON.parse(userInfoString);
+        if (userInfo?.email) {
+          setUserEmail(userInfo.email);
+        }
+      }
+    } catch (error) {
+      console.error("Error getting user info:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!slug || (slug !== "custom-template" && !templateMap[slug])) {
+      navigate("/templates");
+      return;
+    }
+    setTemplateName(getTemplateName(slug));
+    if (userEmail) {
+      loadTemplate();
+    }
+  }, [slug, userEmail]);
+
+  // Event handlers
   const handleEditorChange = (content) => {
     setEditorContent(content);
     setSaveStatus("");
@@ -352,9 +363,13 @@ const TemplateEditor = () => {
     }
   };
 
+  // Conditional rendering
+  if (loading) {
+    return <LoadingSkeleton type="template-editor" />;
+  }
+
   return (
     <div className="template-editor-page">
-      {/* <Navbar /> */}
       <Toaster position="top-center" />
       <main className="template-editor-main">
         <div className="template-editor-container">
