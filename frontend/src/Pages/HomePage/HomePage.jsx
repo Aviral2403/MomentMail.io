@@ -13,9 +13,9 @@ import LoadingSkeleton from "../../Components/LoadingSkeleton/LoadingSkeleton";
 const HomePage = () => {
   const rotatingTextRef = useRef();
   const [loading, setLoading] = useState(true);
+  const containerRef = useRef(null);
 
   useEffect(() => {
-    // Simulate loading data
     const timer = setTimeout(() => {
       setLoading(false);
     }, 2000);
@@ -38,12 +38,7 @@ const HomePage = () => {
                 <span className="gradient-text">
                   <RotatingText
                     ref={rotatingTextRef}
-                    texts={[
-                      "Effortless!",
-                      "Effective!",
-                      "Efficient!",
-                      "Simple!",
-                    ]}
+                    texts={["Effortless!", "Effective!", "Efficient!", "Simple!"]}
                     mainClassName="rotating-text-highlight"
                     staggerFrom="last"
                     initial={{ y: "100%" }}
@@ -68,16 +63,23 @@ const HomePage = () => {
         </div>
 
         <DualScroll />
-        
+
         <HeroSection />
 
         <Workflow />
 
-        <TemplatesHero/>
-
-        <EmailMarketingAI/>
-
-        <ScheduleEmail/>
+        <div
+          ref={containerRef}
+          style={{
+            fontFamily: "Montserrat, sans-serif",
+            overflow: "hidden",
+          }}
+        >
+          
+            <TemplatesHero />
+            <EmailMarketingAI />
+            <ScheduleEmail />
+        </div>
 
         <div className="features-grid">
           {[

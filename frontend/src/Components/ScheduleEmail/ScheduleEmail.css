@@ -30,7 +30,6 @@ body {
   gap: 40px;
 }
 
-/* Content section containing text and interface */
 .schedule-email-content-section {
   flex: 1;
   display: flex;
@@ -42,17 +41,6 @@ body {
   padding: 20px 0;
 }
 
-.schedule-email-beta-tag {
-  background-color: #2655eb;
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 4px 14px;
-  border-radius: 20px;
-  display: inline-block;
-  margin-bottom: 1.5rem;
-}
-
 .schedule-email-heading {
   font-size: 2.8rem;
   font-weight: 500;
@@ -61,9 +49,8 @@ body {
   color: #fff;
 }
 
-.schedule-email-highlight {
+.schedule-plan {
   color: #2655eb;
-  display: inline-block;
 }
 
 .schedule-email-description {
@@ -73,154 +60,6 @@ body {
   margin-bottom: 2rem;
 }
 
-.schedule-email-features {
-  margin-bottom: 2.5rem;
-}
-
-.schedule-email-features p {
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-}
-
-.schedule-email-features-list {
-  list-style-type: none;
-  padding-left: 0.5rem;
-}
-
-.schedule-email-features-list li {
-  position: relative;
-  padding-left: 1.8rem;
-  margin-bottom: 0.75rem;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.schedule-email-features-list li::before {
-  content: "•";
-  color: #2655eb;
-  font-weight: bold;
-  font-size: 1.2rem;
-  position: absolute;
-  left: 0;
-}
-
-.schedule-email-generate-button {
-  display: flex;
-  align-items: center;
-  background-color: transparent;
-  border: 2px solid #2655eb;
-  color: #fff;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.schedule-email-generate-button:hover {
-  background-color: #2655eb;
-}
-
-.schedule-email-arrow {
-  margin-left: 0.75rem;
-  font-size: 1.2rem;
-}
-
-/* AI Interface styling */
-.schedule-email-ai-interface {
-  background-color: #1d1d25;
-  border-radius: 12px;
-  padding: 1.8rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.schedule-email-interface-title {
-  font-size: 1.3rem;
-  margin-bottom: 1.5rem;
-  font-weight: 500;
-  color: #fff;
-}
-
-.schedule-email-input-wrapper {
-  display: flex;
-  align-items: center;
-  background-color: #2a2a35;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  padding: 0.5rem;
-  border: 1px solid #3a3a4a;
-}
-
-.schedule-email-icon {
-  padding: 0 0.75rem;
-  color: #2655eb;
-  font-size: 1.2rem;
-}
-
-.schedule-email-prompt-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  color: #fff;
-  padding: 0.75rem 0.5rem;
-  font-size: 1rem;
-  outline: none;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.schedule-email-prompt-input::placeholder {
-  color: #6e6e7e;
-}
-
-.schedule-email-prompt-button {
-  background-color: #2655eb;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.25rem;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.schedule-email-prompt-button:hover {
-  background-color: #5590ff;
-}
-
-.schedule-email-suggestions {
-  background-color: #2a2a35;
-  border-radius: 8px;
-  padding: 1rem;
-}
-
-.schedule-email-suggestions-title {
-  font-size: 1rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.schedule-email-suggestions-list {
-  list-style-type: none;
-  padding: 0;
-}
-
-.schedule-email-suggestions-list li {
-  padding: 0.75rem;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.schedule-email-suggestions-list li:hover {
-  background-color: #353542;
-}
-
-/* Image container styling */
 .schedule-email-image-container {
   flex: 1;
   max-width: 500px;
@@ -235,67 +74,96 @@ body {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* Responsive styles */
-@media screen and (max-width: 950px) {
-  .schedule-email-heading {
-    font-size: 2.4rem;
+/* Responsive Styles */
+@media screen and (max-width: 768px) {
+  .th-content-wrapper {
+    flex-direction: column-reverse;
+    text-align: center;
   }
-  
-  .schedule-email-image-container {
-    max-width: 450px;
+
+  .th-image-container {
+    margin: 0 auto;
+  }
+
+  .th-text-container {
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .th-description {
+    text-align: center;
+    margin: 0 auto;
+  }
+
+  .th-heading {
+    font-size: 2.2rem;
+    text-align: center;
   }
 }
 
 @media screen and (max-width: 768px) {
-  .schedule-email-content-wrapper {
+  .email-content-wrapper {
     gap: 30px;
   }
-  
-  .schedule-email-heading {
+
+  .email-heading {
     font-size: 2rem;
   }
-  
-  .schedule-email-description {
+
+  .email-description {
     font-size: 1rem;
   }
 }
 
-/* Mobile layout - image on top, content below */
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 768px) {
+  .email-container {
+    padding: 15px;
+    margin-bottom: 4rem;
+  }
+
+  .email-content-wrapper {
+    flex-direction: column-reverse;
+  }
+
+  .email-image-container {
+    order: -1;
+    max-width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .email-heading {
+    font-size: 1.8rem;
+  }
+
   .schedule-email-container {
     padding: 15px;
     margin-bottom: 4rem;
   }
-  
+
   .schedule-email-content-wrapper {
     flex-direction: column-reverse;
+    padding: 1.5rem;
   }
-  
+
   .schedule-email-image-container {
-    order: -1; /* Moves image to the top */
+    order: -1;
     max-width: 100%;
     margin-bottom: 20px;
   }
-  
+
   .schedule-email-heading {
     font-size: 1.8rem;
   }
-  
-  .schedule-email-input-wrapper {
-    flex-wrap: wrap;
-  }
-  
-  .schedule-email-prompt-button {
-    margin-top: 0.75rem;
-    width: 100%;
-  }
 }
 
-.ask-ai-button a{
-    text-decoration: none;
-}
+@media screen and (max-width: 600px) {
+  .th-heading {
+    font-size: 1.8rem;
+  }
 
-
-.schedule-email-text-container .schedule-plan{
-    color: #2655eb;
+  .th-description {
+    font-size: 1rem;
+  }
 }
