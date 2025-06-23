@@ -1,0 +1,451 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  .bento-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .bento-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 20px;
+    width: 75%;
+    height: 75%;
+    max-width: 1200px;
+    max-height: 800px;
+  }
+  
+  .bento-item {
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease;
+  }
+  
+  .bento-item:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* Grid positioning to match reference image exactly */
+  .bento-travel {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  
+  .bento-statistics {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  
+  .bento-walking {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  
+  .bento-support {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  
+  .bento-potential {
+    grid-column: 2 / 4;
+    grid-row: 2 / 4;
+  }
+  
+  .bento-competitions {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  
+  .bento-practice {
+    grid-column: 2;
+    grid-row: 3;
+  }
+  
+  /* Image wrapper with fixed dimensions */
+  .bento-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  .bento-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Random direction sliding animations */
+  .bento-sliding-left .bento-image {
+    transform: translateX(-100%);
+  }
+  
+  .bento-sliding-right .bento-image {
+    transform: translateX(100%);
+  }
+  
+  .bento-sliding-top .bento-image {
+    transform: translateY(-100%);
+  }
+  
+  .bento-sliding-bottom .bento-image {
+    transform: translateY(100%);
+  }
+  
+  .bento-item:hover .bento-image {
+    transform: scale(1.05);
+  }
+  
+  /* Hover states with sliding animations */
+  .bento-sliding-left:hover .bento-image {
+    transform: translateX(-100%) scale(1.05);
+  }
+  
+  .bento-sliding-right:hover .bento-image {
+    transform: translateX(100%) scale(1.05);
+  }
+  
+  .bento-sliding-top:hover .bento-image {
+    transform: translateY(-100%) scale(1.05);
+  }
+  
+  .bento-sliding-bottom:hover .bento-image {
+    transform: translateY(100%) scale(1.05);
+  }
+  
+  /* Overlays */
+  .bento-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    color: white;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    z-index: 2;
+  }
+  
+  .bento-overlay.bento-yellow-bg {
+    color: #333;
+  }
+  
+  .bento-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+  }
+  
+  .bento-large-number {
+    font-size: 3.2rem !important;
+    font-weight: 900;
+  }
+  
+  .bento-subtitle {
+    font-size: 1rem;
+    line-height: 1.4;
+    opacity: 0.9;
+  }
+  
+  /* Text content boxes */
+  .bento-text-content {
+    width: 100%;
+    height: 100%;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .bento-text-content.bento-dark {
+    background: #9700ff;
+    color: black;
+  }
+  
+  .bento-text-content.bento-blue {
+    background: #ff3dda;
+    color: black;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: 500;
+  }
+  
+  .bento-description {
+    font-size: 0.75rem;
+    margin-top: 12px;
+    margin-bottom: 20px;
+    opacity: 0.8;
+  }
+  
+  /* Support content */
+  .bento-support-icon {
+    font-size: 2rem;
+    margin-bottom: 16px;
+  }
+  
+  .bento-support-text {
+    font-size: 1rem;
+    line-height: 1.4;
+    text-align: center;
+    font-weight: 700;
+  }
+  
+  /* Statistics grid */
+  .bento-stats-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  
+  .bento-stats-header h3{
+      color: black;
+  }
+  
+  .bento-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+  }
+  
+  .bento-stat-bar {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+  
+  .bento-stat-bar.bento-yellow {
+    background: #ffeb3b;
+  }
+  
+  .bento-stat-bar.bento-blue {
+    background: #2196f3;
+  }
+  
+  .bento-stat-bar.bento-white {
+    background: #ffffff;
+  }
+  
+  .bento-stat-label {
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+  }
+  
+  .bento-stat-percentage {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  
+  /* Feature list */
+  .bento-feature-list {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .bento-feature-item {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: background 0.3s ease;
+  }
+  
+  .bento-feature-item.bento-active {
+    background: #ffeb3b;
+    color: #333;
+  }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 600px) {
+    .bento-container {
+      padding: 0.5rem;
+      width: 98vw;
+      height: 100vh;
+      margin: auto;
+    }
+  
+    .bento-support-text {
+      font-size: .8rem;
+      line-height: 1.2;
+      text-align: center;
+      font-weight: 700;
+    }
+  
+    .bento-grid {
+      width: 100%;
+      height: 100%;
+      gap: 10px;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr 1fr;
+    }
+  
+    /* Mobile grid positioning - 2 cards in top row */
+    .bento-travel {
+      grid-column: 1;
+      grid-row: 1;
+    }
+  
+    .bento-statistics {
+      grid-column: 2;
+      grid-row: 1;
+    }
+  
+    .bento-walking {
+      display: none; /* Hide third card on mobile */
+    }
+  
+    .bento-support {
+      grid-column: 1;
+      grid-row: 2;
+    }
+  
+    .bento-potential {
+      grid-column: 2;
+      grid-row: 2 / 4;
+    }
+  
+    .bento-competitions {
+      grid-column: 1;
+      grid-row: 3;
+    }
+  
+    .bento-practice {
+      grid-column: 1;
+      grid-row: 4;
+    }
+  
+    .bento-overlay {
+      padding: 16px;
+    }
+  
+    .bento-title {
+      font-size: 1.2rem;
+    }
+  
+    .bento-large-number {
+      font-size: 2.5rem !important;
+    }
+  
+    .bento-subtitle {
+      font-size: 1.5rem;
+    }
+  
+    .bento-text-content {
+      padding: 16px;
+    }
+  
+    .bento-support-text {
+      font-size: 0.9rem;
+    }
+  
+    .bento-stats-grid {
+      gap: 8px;
+    }
+  
+    .bento-stat-bar {
+      width: 40px;
+      height: 40px;
+    }
+  
+    .bento-feature-item {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .bento-grid {
+      gap: 8px;
+    }
+  
+    .bento-overlay {
+      padding: 12px;
+    }
+  
+    .bento-title {
+      font-size: 1rem;
+    }
+  
+    .bento-large-number {
+      font-size: 2.8rem !important;
+    }
+  
+    .bento-subtitle {
+      font-size: 1.2rem;
+    }
+  
+    .bento-text-content {
+      padding: 12px;
+    }
+  
+    .bento-support-text {
+      font-size: 0.8rem;
+    }
+  
+    .bento-stat-bar {
+      width: 35px;
+      height: 35px;
+    }
+  
+    .bento-stat-percentage {
+      font-size: 1rem;
+    }
+  }
+  
+  /* Initial load animation */
+  @keyframes bento-slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .bento-item {
+    animation: bento-slideIn 0.6s ease forwards;
+  }
+  
+  .bento-travel {
+    animation-delay: 0.1s;
+  }
+  .bento-statistics {
+    animation-delay: 0.2s;
+  }
+  .bento-walking {
+    animation-delay: 0.3s;
+  }
+  .bento-support {
+    animation-delay: 0.4s;
+  }
+  .bento-potential {
+    animation-delay: 0.5s;
+  }
+  .bento-competitions {
+    animation-delay: 0.6s;
+  }
+  .bento-practice {
+    animation-delay: 0.7s;
+  }

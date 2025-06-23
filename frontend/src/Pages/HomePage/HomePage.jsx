@@ -9,6 +9,7 @@ import TemplatesHero from "../../Components/TemplatesHero/TemplatesHero";
 import EmailMarketingAI from "../../Components/EmailMarketingAI/EmailMarketingAI";
 import ScheduleEmail from "../../Components/ScheduleEmail/ScheduleEmail";
 import LoadingSkeleton from "../../Components/LoadingSkeleton/LoadingSkeleton";
+import BentoGrid from "../../Components/BentoGrid/BentoGrid";
 
 const HomePage = () => {
   const rotatingTextRef = useRef();
@@ -111,6 +112,8 @@ const HomePage = () => {
             </div>
           ))}
         </div>
+
+        <BentoGrid/>
 
         <div className="tagline">
           <p className="text-xl">

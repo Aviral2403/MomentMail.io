@@ -19,14 +19,14 @@
 
 .hero-section {
   text-align: center;
-  margin-bottom: 4rem;
-  margin-top: 8rem;
+  margin-bottom: 2rem;
+  margin-top: 4rem;
 }
 
 .hero-text-wrapper {
   display: flex;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .hero-title-container {
@@ -63,7 +63,7 @@
 .hero-subtitle {
   font-size: clamp(1.25rem, 2.5vw, 2rem);
   color: whitesmoke;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   max-width: 80%;
   margin: 0 auto;
   font-family: "Montserrat";
@@ -82,13 +82,11 @@
   position: relative;
   width: 100vw;
   height: 600px;
-  margin: 4rem 0;
+  margin: 2rem 0;
   overflow: hidden;
   margin-left: calc(-50vw + 50%);
   margin-right: calc(-50vw + 50%);
 }
-
-
 
 .templates-container {
   display: flex;
@@ -128,9 +126,9 @@
 .features-grid {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1rem;
   position: relative;
-  margin-bottom: 8rem;
+  margin-bottom: 4rem;
 }
 
 .feature-item {
@@ -151,9 +149,6 @@
 .feature-item:hover .feature-title {
   position: relative;
 }
-
-
-
 
 .feature-number {
   grid-area: number;
@@ -176,6 +171,24 @@
   font-family: "Cormorant Garamond", serif;
   font-weight: 600;
   font-style: italic;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.25rem;
+}
+
+.feature-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #2555eb;
+  transition: width 0.3s ease;
+}
+
+.feature-item:hover .feature-title::after {
+  width: 30%;
 }
 
 .feature-description {
@@ -188,14 +201,14 @@
 
 .cta-section {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .cta-button {
   background: linear-gradient(45deg, #2563eb, #7c3aed);
   color: white;
   padding: 1rem 2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   border-radius: 9999px;
   border: none;
   font-size: clamp(1rem, 1.5vw, 1.25rem);
@@ -208,12 +221,16 @@
 }
 
 .cta-subtitle {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
-.cta-section .cta-button a{
+.cta-section .cta-button a {
   text-decoration: none;
   color: inherit;
+}
+
+.tagline {
+  margin: 1.5rem;
 }
 
 @media (min-width: 1024px) {
@@ -225,15 +242,10 @@
     padding-left: 4rem;
   }
 
-
-
-
   .feature-item.reverse {
     grid-template-areas: "description title";
     padding-left: 4rem;
   }
-
-  
 }
 
 @media (max-width: 1440px) {
@@ -281,7 +293,6 @@
     top: 0;
     margin-bottom: 0.5rem;
   }
-
 }
 
 @media (max-width: 768px) {
@@ -311,7 +322,7 @@
   }
 }
 
-@media  (max-width: 564px) {
+@media (max-width: 564px) {
   .rotating-text-container {
     justify-content: center;
   }
@@ -350,99 +361,5 @@
 
   .feature-number {
     left: 0.5rem;
-  }
-}
-
-.tagline{
-  margin: 2.5rem;
-}
-
-/* @media (min-width: 480px) and (max-width: 496px) {
-  .rotating-text-container {
-    min-width: 220px;
-    justify-content: center;
-  }
-} */
-
-
-.feature-item {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-areas:
-    "number title"
-    "number description";
-  gap: 1rem 4rem;
-  position: relative;
-  padding: 1rem;
-  padding-left: 4rem;
-  border-radius: 1rem;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.feature-title {
-  grid-area: title;
-  font-size: clamp(2rem, 4vw, 4rem);
-  font-weight: bold;
-  color: whitesmoke;
-  line-height: 1.2;
-  transition: color 0.3s ease;
-  font-family: "Cormorant Garamond", serif;
-  font-weight: 600;
-  font-style: italic;
-  position: relative;
-  display: inline-block; 
-  padding-bottom: 0.25rem; 
-}
-
-.feature-title::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0; 
-  height: 2px; 
-  background-color: #2555eb; 
-  transition: width 0.3s ease; 
-}
-
-.feature-item:hover .feature-title::after {
-  width: 30%; 
-}
-
-@media (min-width: 1024px) {
-  .feature-item {
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas: "title description";
-    align-items: start;
-    gap: 4rem;
-    padding-left: 4rem;
-  }
-
-  .feature-item.reverse {
-    grid-template-areas: "description title";
-    padding-left: 4rem;
-  }
-}
-
-@media (max-width: 1023px) {
-  .feature-item {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "number"
-      "title"
-      "description";
-    gap: 1.5rem;
-    padding-left: 4rem;
-  }
-  
-  .feature-title {
-    display: inline-block;
-  }
-}
-
-@media (max-width: 480px) {
-  .feature-title {
-    font-size: clamp(1.5rem, 3vw, 2rem);
   }
 }
