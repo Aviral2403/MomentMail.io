@@ -1,7 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Montserrat';
   }
   
   .bento-container {
@@ -161,6 +164,7 @@
     font-size: 1rem;
     line-height: 1.4;
     opacity: 0.9;
+    font-family: 'Montserrat';
   }
   
   /* Text content boxes */
@@ -171,11 +175,13 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    font-family: 'Montserrat';
   }
   
   .bento-text-content.bento-dark {
     background: #9700ff;
     color: black;
+    font-family: 'Montserrat';
   }
   
   .bento-text-content.bento-blue {
@@ -185,6 +191,7 @@
     justify-content: center;
     text-align: center;
     font-weight: 500;
+    font-family: 'Montserrat';
   }
   
   .bento-description {
@@ -216,6 +223,7 @@
   
   .bento-stats-header h3{
       color: black;
+      font-family: 'Montserrat';
   }
   
   .bento-stat-item {

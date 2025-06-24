@@ -119,6 +119,10 @@
   opacity: 0.9;
 }
 
+.create-line{
+  cursor: pointer;
+}
+
 .line-wrapper {
   display: flex;
   align-items: center;
@@ -140,6 +144,32 @@
   position: relative;
   transition: color 0.3s ease;
   font-family: "Quintessential"
+}
+
+.template-text{
+  cursor: pointer;
+}
+
+.template-text {
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  transition: color 0.3s ease;
+}
+
+.template-text::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; /* Adjust distance from text */
+  left: -150px; /* Start 30px to the left of the word */
+  width: 0;
+  height: 2px; /* Adjust thickness of underline */
+  background-color: currentColor; /* Uses the text color */
+  transition: width 0.3s ease;
+}
+
+.template-text:hover::after {
+  width: calc(100% + 120px); /* Extend 30px on each side (60px total) */
 }
 
 
@@ -289,5 +319,37 @@
     
   .template-ai-description {
     font-size: 1rem;
+  }
+}
+
+/* Video Section Styles */
+.video-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.templates-video {
+  width: 90vw;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #000;
+  margin: auto;
+}
+
+/* Media query for screens larger than 625px */
+@media (min-width: 625px) {
+  .video-section {
+    padding: 40px;
+  }
+  
+  .templates-video {
+    width: 75vw;
+    object-fit: cover;
+    margin: auto;
   }
 }

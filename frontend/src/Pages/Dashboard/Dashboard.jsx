@@ -461,17 +461,15 @@ const Dashboard = () => {
             <h1 className="dashboard-page-title">Email Dashboard</h1>
             <div className="dashboard-auth-required">
               <div className="dashboard-auth-message">
-                <svg
+                <img
                   className="dashboard-auth-icon"
-                  viewBox="0 0 24 24"
-                  width="48"
-                  height="48"
+                  src="/auth.png"
+                  
+                  width="180"
+                  height="180"
                 >
-                  <path
-                    fill="currentColor"
-                    d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h-2v-2h2v2zm0-4h-2V7h2v6z"
-                  />
-                </svg>
+                  
+                </img>
                 <h2>Authentication Required</h2>
                 <p>Please login to access your email dashboard</p>
                 <Link to="/login" className="dashboard-login-button">

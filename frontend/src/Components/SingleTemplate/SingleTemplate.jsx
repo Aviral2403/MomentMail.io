@@ -173,7 +173,7 @@ const SingleTemplate = () => {
 
       {/* Create Your Own Template Section */}
       <div className="create-template-section">
-        <h2 className="create-template-heading">Create Your Own Template</h2>
+        <h2 className="create-template-heading " id="ownTemplate">Create Your Own Template</h2>
         <div className="create-template-wrapper">
           <CreateTemplate />
         </div>

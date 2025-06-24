@@ -34,7 +34,6 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 30px;
 }
 
 .schedule-email-text-container {
@@ -166,4 +165,8 @@ body {
   .th-description {
     font-size: 1rem;
   }
+}
+
+.mm-dark-try-button .schedule{
+  max-width: 5rem;
 }
