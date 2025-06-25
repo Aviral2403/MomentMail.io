@@ -17,6 +17,7 @@ import ScheduleDateTime from './Pages/ScheduleDateTime/ScheduleDateTime';
 import Dashboard from './Pages/Dashboard/Dashboard';
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import LoadingSkeleton from './Components/LoadingSkeleton/LoadingSkeleton';
+import useTokenRefresh from './Hooks/useTokenRefresh';
 
 // Scroll to top component with smooth scrolling
 const ScrollToTop = () => {
@@ -54,6 +55,8 @@ const Layout = ({ children }) => {
 };
 
 const App = () => {
+
+  useTokenRefresh()
   return (
     <>
       <ScrollToTop />

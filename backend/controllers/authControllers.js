@@ -71,3 +71,81 @@ exports.googleAuth = async (req, res) => {
     });
   }
 };
+
+
+
+exports.refreshToken = async (req, res) => {
+  try {
+    const { token } = req.body;
+    
+    if (!token) {
+      return res.status(400).json({ message: 'Token is required' });
+    }
+
+    let decoded;
+    try {
+      // Verify token (this will throw if expired, but we'll catch it)
+      decoded = jwt.verify(token, process.env.JWT_SECRET, { ignoreExpiration: true });
+    } catch (err) {
+      return res.status(401).json({ message: 'Invalid token format' });
+    }
+
+    // Check if token needs refresh (expired or expires soon)
+    const now = Math.floor(Date.now() / 1000);
+    const tokenExp = decoded.exp;
+    const timeUntilExpiry = tokenExp - now;
+    
+    // Refresh if expired or expires in less than 5 minutes
+    if (timeUntilExpiry <= 300) {
+      try {
+        // Set credentials for OAuth2 client
+        oauth2Client.setCredentials({
+          access_token: decoded.tokens?.access_token,
+          refresh_token: decoded.tokens?.refresh_token,
+        });
+
+        // Refresh the access token
+        const { credentials } = await oauth2Client.refreshAccessToken();
+        
+        // Create new JWT with refreshed Google tokens
+        const newTokenPayload = {
+          ...decoded,
+          tokens: {
+            access_token: credentials.access_token,
+            refresh_token: credentials.refresh_token || decoded.tokens.refresh_token,
+            ...(credentials.expiry_date && { expiry_date: credentials.expiry_date })
+          },
+          iat: now,
+          exp: now + (parseInt(process.env.JWT_TIMEOUT) || 3600)
+        };
+
+        const newToken = jwt.sign(newTokenPayload, process.env.JWT_SECRET);
+        
+        return res.status(200).json({ 
+          token: newToken,
+          refreshed: true 
+        });
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
+        return res.status(401).json({ 
+          message: 'Token refresh failed', 
+          error: refreshError.message,
+          requiresReauth: true 
+        });
+      }
+    }
+
+    // Token is still valid, return as is
+    return res.status(200).json({ 
+      token,
+      refreshed: false 
+    });
+
+  } catch (err) {
+    console.error('Token refresh error:', err);
+    return res.status(500).json({ 
+      message: 'Internal server error', 
+      error: err.message 
+    });
+  }
+};

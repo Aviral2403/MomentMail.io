@@ -1,10 +1,91 @@
+// api.js - Updated with token refresh logic
 import axios from 'axios';
 
-// Base URL for the backend API
 const API_BASE_URL = 'https://momentmail-io-backend.onrender.com';
 
+// Token refresh function
+export const refreshAuthToken = async (token) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, { token });
+    return response.data;
+  } catch (error) {
+    console.error('Error refreshing auth token:', error);
+    throw error;
+  }
+};
 
-// Debounce function to prevent duplicate API calls
+// Create axios instance with interceptors
+const createApiInstance = () => {
+  const apiInstance = axios.create({
+    baseURL: API_BASE_URL,
+  });
+
+  // Request interceptor to add auth header
+  apiInstance.interceptors.request.use(
+    (config) => {
+      const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+      if (userInfo.token) {
+        config.headers.Authorization = `Bearer ${userInfo.token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+  // Response interceptor to handle token refresh
+  apiInstance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest = error.config;
+
+      if (error.response?.status === 401 && 
+          (error.response?.data?.expired || error.response?.data?.requiresRefresh) && 
+          !originalRequest._retry) {
+        
+        originalRequest._retry = true;
+
+        try {
+          const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+          
+          if (!userInfo.token) {
+            throw new Error('No token available for refresh');
+          }
+
+          const refreshResult = await refreshAuthToken(userInfo.token);
+          
+          if (refreshResult.requiresReauth) {
+            // Clear local storage and redirect to login
+            localStorage.removeItem("user-info");
+            window.location.href = '/login';
+            return Promise.reject(error);
+          }
+
+          // Update token in localStorage
+          const updatedUserInfo = { ...userInfo, token: refreshResult.token };
+          localStorage.setItem("user-info", JSON.stringify(updatedUserInfo));
+
+          // Update the failed request with new token
+          originalRequest.headers.Authorization = `Bearer ${refreshResult.token}`;
+          
+          return apiInstance(originalRequest);
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          localStorage.removeItem("user-info");
+          window.location.href = '/login';
+          return Promise.reject(refreshError);
+        }
+      }
+
+      return Promise.reject(error);
+    }
+  );
+
+  return apiInstance;
+};
+
+const api = createApiInstance();
+
+// Debounce function (keep your existing implementation)
 const debounce = (fn, delay) => {
   let timeoutId;
   let lastArgs;
@@ -15,20 +96,17 @@ const debounce = (fn, delay) => {
   return function(...args) {
     const context = this;
 
-    // Return existing promise if a call is already in progress with the same args
     if (isRunning && 
         JSON.stringify(lastArgs) === JSON.stringify(args) && 
         lastThis === context) {
       return lastPromise;
     }
 
-    // Clear any existing timeout
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
 
     return new Promise((resolve, reject) => {
-      // Execute the function after delay
       timeoutId = setTimeout(() => {
         isRunning = true;
         lastArgs = args;
@@ -50,25 +128,15 @@ const debounce = (fn, delay) => {
   };
 };
 
-
-
-// Google Auth
+// Updated API functions using the interceptor-enabled instance
 export const googleAuth = (code) => {
   return axios.get(`${API_BASE_URL}/auth/google?code=${code}`);
 };
 
-
-
-// Unified email sending function with debounce to prevent duplicates
 export const sendEmails = debounce(async (templateContent, recipients, templateName, options = {}) => {
   try {
     const { isScheduled = false, scheduledAt = null } = options;
     const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-    
-    if (!userInfo.token) {
-      console.error("No authentication token found");
-      throw new Error("Authentication required");
-    }
 
     console.log("Sending emails with options:", {
       templateName,
@@ -77,8 +145,7 @@ export const sendEmails = debounce(async (templateContent, recipients, templateN
       scheduledAt: scheduledAt || 'immediate'
     });
 
-    // Send all data to backend - the template content will be personalized on the server
-    const response = await axios.post(`${API_BASE_URL}/drive/send-emails`, {
+    const response = await api.post('/drive/send-emails', {
       templateContent,
       recipients,
       templateName,
@@ -86,8 +153,7 @@ export const sendEmails = debounce(async (templateContent, recipients, templateN
       scheduledAt
     }, {
       headers: {
-        Authorization: `Bearer ${userInfo.token}`,
-        'X-Request-ID': `${userInfo.email}-${templateName}-${Date.now()}`  // Add a unique request ID
+        'X-Request-ID': `${userInfo.email}-${templateName}-${Date.now()}`
       },
     });
 
@@ -103,177 +169,89 @@ export const sendEmails = debounce(async (templateContent, recipients, templateN
   }
 }, 300);
 
-// Get scheduled emails
 export const getScheduledEmails = async () => {
   try {
-      const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-      
-      if (!userInfo.token) {
-          console.error("No authentication token found");
-          throw new Error("Authentication required");
-      }
-
-      const response = await axios.get(`${API_BASE_URL}/drive/scheduled-emails`, {
-          headers: {
-              Authorization: `Bearer ${userInfo.token}`,
-          },
-      });
-
-      console.log("Scheduled emails:", response.data);
-      return response.data;
+    const response = await api.get('/drive/scheduled-emails');
+    console.log("Scheduled emails:", response.data);
+    return response.data;
   } catch (error) {
-      console.error("Error getting scheduled emails:", error);
-      throw error;
+    console.error("Error getting scheduled emails:", error);
+    throw error;
   }
 };
 
-// Get email history
 export const getEmailHistory = async () => {
   try {
-      const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-      
-      if (!userInfo.token) {
-          console.error("No authentication token found");
-          throw new Error("Authentication required");
-      }
-
-      const response = await axios.get(`${API_BASE_URL}/drive/email-history`, {
-          headers: {
-              Authorization: `Bearer ${userInfo.token}`,
-          },
-      });
-
-      console.log("Email history:", response.data);
-      return response.data;
+    const response = await api.get('/drive/email-history');
+    console.log("Email history:", response.data);
+    return response.data;
   } catch (error) {
-      console.error("Error getting email history:", error);
-      throw error;
+    console.error("Error getting email history:", error);
+    throw error;
   }
 };
 
-// Cancel scheduled email
 export const cancelScheduledEmail = async (scheduledEmailId) => {
   try {
-      const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-      
-      if (!userInfo.token) {
-          console.error("No authentication token found");
-          throw new Error("Authentication required");
-      }
-
-      const response = await axios.delete(`${API_BASE_URL}/drive/scheduled-emails/${scheduledEmailId}`, {
-          headers: {
-              Authorization: `Bearer ${userInfo.token}`,
-          },
-      });
-
-      console.log("Cancelled scheduled email:", response.data);
-      return response.data;
+    const response = await api.delete(`/drive/scheduled-emails/${scheduledEmailId}`);
+    console.log("Cancelled scheduled email:", response.data);
+    return response.data;
   } catch (error) {
-      console.error("Error cancelling scheduled email:", error);
-      throw error;
+    console.error("Error cancelling scheduled email:", error);
+    throw error;
   }
 };
 
-// Google Drive functions
 export const fetchSpreadsheets = async () => {
   try {
-      const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-      
-      if (!userInfo.driveToken) {
-          console.error("No drive token found");
-          throw new Error("Google Drive connection required");
-      }
-
-      const response = await axios.get(`${API_BASE_URL}/drive/spreadsheets`, {
-          headers: {
-              Authorization: `Bearer ${userInfo.driveToken}`,
-          },
-      });
-
-      return response.data;
+    const response = await api.get('/drive/spreadsheets');
+    return response.data;
   } catch (error) {
-      console.error("Error fetching spreadsheets:", error);
-      throw error;
+    console.error("Error fetching spreadsheets:", error);
+    throw error;
   }
 };
 
 export const fetchSpreadsheetColumns = async (spreadsheetId) => {
   try {
-      const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-      
-      if (!userInfo.driveToken) {
-          throw new Error("Google Drive connection required");
-      }
-
-      const response = await axios.get(`${API_BASE_URL}/drive/spreadsheets/${spreadsheetId}/columns`, {
-          headers: {
-              Authorization: `Bearer ${userInfo.driveToken}`,
-          },
-      });
-
-      return response.data;
+    const response = await api.get(`/drive/spreadsheets/${spreadsheetId}/columns`);
+    return response.data;
   } catch (error) {
-      console.error("Error fetching spreadsheet columns:", error);
-      throw error;
+    console.error("Error fetching spreadsheet columns:", error);
+    throw error;
   }
 };
 
 export const fetchColumnData = async (spreadsheetId, column) => {
   try {
-      const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-      
-      if (!userInfo.driveToken) {
-          throw new Error("Google Drive connection required");
-      }
-
-      const response = await axios.get(`${API_BASE_URL}/drive/spreadsheets/${spreadsheetId}/columns/${column}/data`, {
-          headers: {
-              Authorization: `Bearer ${userInfo.driveToken}`,
-          },
-      });
-
-      return response.data;
+    const response = await api.get(`/drive/spreadsheets/${spreadsheetId}/columns/${column}/data`);
+    return response.data;
   } catch (error) {
-      console.error("Error fetching column data:", error);
-      throw error;
+    console.error("Error fetching column data:", error);
+    throw error;
   }
 };
 
 export const connectGoogleDrive = async (code) => {
   try {
-      const response = await axios.get(`${API_BASE_URL}/drive/connect-drive`, {
-          params: { code },
-      });
-      return response.data;
+    const response = await axios.get(`${API_BASE_URL}/drive/connect-drive`, {
+      params: { code },
+    });
+    return response.data;
   } catch (error) {
-      console.error("Error connecting Google Drive:", error);
-      throw error;
+    console.error("Error connecting Google Drive:", error);
+    throw error;
   }
 };
 
-
-
-
 export const getEmailStatus = async (recipients, emailSubject) => {
   try {
-    const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-    
-    if (!userInfo.token) {
-      console.error("No authentication token found");
-      throw new Error("Authentication required");
-    }
-    
     console.log("Making email status request to:", `${API_BASE_URL}/drive/email-status`);
     console.log("Request payload:", { recipients, emailSubject });
     
-    const response = await axios.post(`${API_BASE_URL}/drive/email-status`, {
+    const response = await api.post('/drive/email-status', {
       recipients,
       emailSubject,
-    }, {
-      headers: {
-        Authorization: `Bearer ${userInfo.token}`,
-      },
     });
 
     console.log("Email status response:", response.data);
@@ -281,7 +259,6 @@ export const getEmailStatus = async (recipients, emailSubject) => {
   } catch (error) {
     console.error("Error checking email status:", error);
     
-    // Add more detailed error logging
     if (error.response) {
       console.error("Response status:", error.response.status);
       console.error("Response data:", error.response.data);
@@ -289,7 +266,6 @@ export const getEmailStatus = async (recipients, emailSubject) => {
       console.error("No response received:", error.request);
     }
     
-    // Instead of throwing, return a default status to prevent breaking UI
     return { status: 'unknown', error: error.message };
   }
 };
