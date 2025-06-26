@@ -34,39 +34,74 @@ const personalizeContent = (content, recipientEmail) => {
 
 // Connect Google Drive
 exports.connectGoogleDrive = async (req, res) => {
-    const code = req.query.code;
-  
-    if (!code) {
-        return res.status(400).json({ message: "Authorization code is required" });
-    }
-  
-    try {
-        const { tokens } = await oauth2Client.getToken(code);
-        oauth2Client.setCredentials(tokens);
+  const code = req.query.code;
+  console.log('\n=== Drive Connection Request ===');
+  console.log('Authorization code:', code ? 'present' : 'missing');
+
+  if (!code) {
+    console.error("Authorization code is required");
+    return res.status(400).json({ 
+      message: "Authorization code is required",
+      debug: process.env.NODE_ENV === 'development' ? 'No code parameter received' : undefined
+    });
+  }
+
+  try {
+    console.log('Exchanging code for tokens...');
+    const { tokens } = await oauth2Client.getToken(code);
+    console.log('Tokens received:', {
+      access_token: tokens.access_token ? 'present' : 'missing',
+      refresh_token: tokens.refresh_token ? 'present' : 'missing',
+      expiry_date: tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : 'missing'
+    });
+
+    const decodedToken = jwt.decode(tokens.id_token || tokens.access_token);
+    console.log('Decoded Token:', {
+      email: decodedToken.email,
+      scopes: decodedToken.scope
+    });
+
+    oauth2Client.setCredentials(tokens);
+    console.log('OAuth2 client credentials set');
+
+    const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
+    const userInfo = await oauth2.userinfo.get();
+    console.log('User info retrieved:', {
+      email: userInfo.data.email,
+      name: userInfo.data.name
+    });
+
+    const drive = google.drive({ version: 'v3', auth: oauth2Client });
+    await drive.files.list({ pageSize: 1, fields: 'files(id, name)' });
+    console.log('Drive API access verified');
+
+    const driveToken = jwt.sign(
+      { tokens, email: userInfo.data.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    console.log('Drive connection successful');
+    res.status(200).json({
+      message: 'Google Drive connected successfully',
+      token: driveToken,
+    });
+  } catch (err) {
+    console.error('Google Drive Connection Error:', {
+      error: err.message,
+      stack: err.stack,
+      response: err.response?.data
+    });
     
-        const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
-        const userInfo = await oauth2.userinfo.get();
-    
-        const drive = google.drive({ version: 'v3', auth: oauth2Client });
-        await drive.files.list({ pageSize: 1, fields: 'files(id, name)' });
-    
-        const driveToken = jwt.sign(
-            { tokens, email: userInfo.data.email },
-            process.env.JWT_SECRET,
-            { expiresIn: '7d' }
-        );
-    
-        res.status(200).json({
-            message: 'Google Drive connected successfully',
-            token: driveToken,
-        });
-    } catch (err) {
-        console.error('Google Drive Connection Error:', err);
-        res.status(500).json({
-            message: "Failed to connect to Google Drive",
-            error: process.env.NODE_ENV === 'development' ? err.message : undefined,
-        });
-    }
+    res.status(500).json({
+      message: "Failed to connect to Google Drive",
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined,
+      debug: process.env.NODE_ENV === 'development' ? {
+        code: code ? 'present' : 'missing',
+        step: 'Failed during token exchange or API access'
+      } : undefined
+    });
+  }
 };
 
 // List spreadsheets
@@ -201,221 +236,191 @@ exports.getColumnData = async (req, res) => {
 
 // Unified email sending endpoint
 exports.sendBulkEmails = async (req, res) => {
-    const { templateContent, recipients, templateName, isScheduled, scheduledAt } = req.body;
-    
-    console.log("Email request received:", { 
-      action: isScheduled ? "Scheduling" : "Sending",
-      templateName, 
-      recipientCount: recipients.length,
-      scheduledAt: isScheduled ? scheduledAt : 'immediate'
+  const { templateContent, recipients, templateName, isScheduled, scheduledAt } = req.body;
+  
+  console.log('\n=== Email Request Received ===');
+  console.log('Action:', isScheduled ? "Scheduling" : "Sending");
+  console.log('Template:', templateName);
+  console.log('Recipient count:', recipients.length);
+  console.log('Scheduled at:', isScheduled ? scheduledAt : 'immediate');
+
+  try {
+    // Validation
+    if (!templateContent || !recipients || !templateName) {
+      throw new Error("Missing required fields: templateContent, recipients, or templateName");
+    }
+    if (!Array.isArray(recipients)) {
+      throw new Error("Recipients must be an array");
+    }
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      throw new Error("Authorization token required");
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Token decoded successfully:', {
+      email: decoded.email,
+      token_exp: new Date(decoded.exp * 1000).toISOString()
     });
-    
-    try {
-      // Validation
-      if (!templateContent || !recipients || !templateName) {
-        throw new Error("Missing required fields: templateContent, recipients, or templateName");
+
+    // Handle scheduled emails
+    if (isScheduled) {
+      if (!scheduledAt) {
+        throw new Error("Scheduled time is required");
       }
-    
-      if (!Array.isArray(recipients)) {
-        throw new Error("Recipients must be an array");
+
+      const scheduledTime = new Date(scheduledAt);
+      if (scheduledTime <= new Date()) {
+        throw new Error("Scheduled time must be in the future");
       }
-    
-      const authHeader = req.headers.authorization;
-      if (!authHeader?.startsWith('Bearer ')) {
-        throw new Error("Authorization token required");
-      }
-        
-      const token = authHeader.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  
-      console.log("Token decoded successfully:", decoded);
-  
-      // Handle scheduled emails
-      if (isScheduled) {
-        if (!scheduledAt) {
-          throw new Error("Scheduled time is required");
-        }
-    
-        const scheduledTime = new Date(scheduledAt);
-        if (scheduledTime <= new Date()) {
-          throw new Error("Scheduled time must be in the future");
-        }
-    
-        // Check for existing scheduled email
-        const existingScheduledEmail = await ScheduledEmail.findOne({
-          userId: decoded.email,
-          templateName: templateName,
-          scheduledAt: scheduledTime
-        });
-    
-        if (existingScheduledEmail) {
-          console.log("Email already scheduled:", existingScheduledEmail._id);
-          return res.status(200).json({
-            message: 'Email already scheduled',
-            scheduledEmailId: existingScheduledEmail._id,
-            scheduledAt: scheduledTime,
-            isScheduled: true
-          });
-        }
-    
-        const scheduledEmail = new ScheduledEmail({
-          userId: decoded.email,
-          templateContent,
-          recipients,
-          templateName,
-          scheduledAt: scheduledTime,
-          status: 'scheduled',
-          createdAt: new Date(),
-          userToken: token
-        });
-    
-        await scheduledEmail.save();
-        console.log('Email scheduled successfully:', scheduledEmail._id);
-    
+
+      // Check for existing scheduled email
+      const existingScheduledEmail = await ScheduledEmail.findOne({
+        userId: decoded.email,
+        templateName: templateName,
+        scheduledAt: scheduledTime
+      });
+
+      if (existingScheduledEmail) {
+        console.log("Email already scheduled:", existingScheduledEmail._id);
         return res.status(200).json({
-          message: 'Emails scheduled successfully',
-          scheduledEmailId: scheduledEmail._id,
+          message: 'Email already scheduled',
+          scheduledEmailId: existingScheduledEmail._id,
           scheduledAt: scheduledTime,
           isScheduled: true
         });
       }
-    
-      const requestId = req.headers['x-request-id'] || 
-                       `${decoded.email}-${templateName}-${Date.now()}`;
-    
-      // Check if this exact request was recently processed
-      const recentRequests = await EmailHistory.find({
+
+      const scheduledEmail = new ScheduledEmail({
         userId: decoded.email,
-        templateName: templateName,
-        sentAt: {
-          $gte: new Date(Date.now() - 10000) // Last 10 seconds
-        }
-      }).sort({ sentAt: -1 }).limit(1);
-    
-      if (recentRequests.length > 0) {
-        const recent = recentRequests[0];
-        
-        if (recent.recipients.length === recipients.length) {
-          console.log("Potential duplicate request detected, returning previous response");
-          return res.status(200).json({
-            message: 'Emails already processed',
-            results: {
-              totalSent: recent.successCount,
-              totalFailed: recent.failureCount,
-              failedRecipients: recent.failureCount > 0 ? 
-                recipients.slice(0, recent.failureCount).map(email => ({ email, error: "Failed to send" })) : []
-            }
-          });
-        }
-      }
-    
-      // Handle immediate sending
-      const oauth2Client = new google.auth.OAuth2(
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_REDIRECT_URI
-      );
-    
-      oauth2Client.setCredentials({
-        access_token: decoded.tokens.access_token,
-        refresh_token: decoded.tokens.refresh_token
-      });
-    
-      const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
-      const results = { success: [], failed: [] };
-      
-      for (const recipient of recipients) {
-        try {
-          if (!recipient || typeof recipient !== 'string' || !recipient.includes('@')) {
-            throw new Error('Invalid email format');
-          }
-    
-          // Personalize the content for each recipient
-          const personalizedContent = personalizeContent(templateContent, recipient);
-          console.log(`Personalized content for ${recipient}:`, personalizedContent);
-    
-          const emailContent = [
-            `From: ${decoded.email}`,
-            `To: ${recipient}`,
-            'Content-Type: text/html; charset=utf-8',
-            'MIME-Version: 1.0',
-            `Subject: ${templateName}`,
-            '',
-            personalizedContent
-          ].join('\n');
-    
-          const base64Email = Buffer.from(emailContent)
-            .toString('base64')
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/, '');
-            
-          console.log(`Sending email to ${recipient} with content:`, emailContent);
-          
-          await gmail.users.messages.send({
-            userId: 'me',
-            requestBody: { raw: base64Email },
-          });
-          
-          console.log(`Email sent successfully to ${recipient}`);
-          results.success.push(recipient);
-        } catch (err) {
-          console.error(`Error sending to ${recipient}:`, err.message);
-          
-          const safeEmail = recipient.replace(/\./g, '_DOT_');
-          results.failed.push({ email: recipient, safeKey: safeEmail, error: err.message });
-        }
-        
-        // Rate limiting
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
-      
-      // Create a SINGLE history record for this batch
-      const sentTime = new Date();
-      const emailHistory = new EmailHistory({
-        userId: decoded.email,
-        templateContent, // Store original template content
+        templateContent,
         recipients,
         templateName,
-        sentAt: sentTime,
-        status: results.failed.length > 0 ? 
-          (results.success.length > 0 ? 'partially_failed' : 'failed') : 'sent',
-        successCount: results.success.length,
-        failureCount: results.failed.length,
-        failureReasons: results.failed.map(f => f.error),
-        isScheduled: false
-      });
-    
-      await emailHistory.save();
-      console.log(`Email history created: ${results.success.length} successful, ${results.failed.length} failed`);
-    
-      return res.status(200).json({
-        message: 'Emails processed',
-        results: {
-          totalSent: results.success.length,
-          totalFailed: results.failed.length,
-          failedRecipients: results.failed.map(f => ({ email: f.email, error: f.error }))
+        scheduledAt: scheduledTime,
+        status: 'scheduled',
+        createdAt: new Date(),
+        googleTokens: {
+          access_token: decoded.tokens.access_token,
+          refresh_token: decoded.tokens.refresh_token,
+          expiry_date: decoded.tokens.expiry_date
         }
       });
-    } catch (err) {
-      console.error('Email processing error:', err);
-      
-      if (err.code === 11000) {
-        return res.status(409).json({
-          message: "This email operation was already processed",
-          error: "Duplicate record detected"
-        });
-      }
-      
-      const statusCode = err.name === 'JsonWebTokenError' ? 401 : 
-                     err.code === 403 ? 403 : 400;
-      
-      return res.status(statusCode).json({
-        message: err.message || "Email processing failed",
-        error: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+
+      await scheduledEmail.save();
+      console.log('Email scheduled successfully:', {
+        id: scheduledEmail._id,
+        scheduledAt: scheduledTime.toISOString()
+      });
+
+      return res.status(200).json({
+        message: 'Emails scheduled successfully',
+        scheduledEmailId: scheduledEmail._id,
+        scheduledAt: scheduledTime,
+        isScheduled: true
       });
     }
-  };
+
+    // Handle immediate sending
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI
+    );
+
+    oauth2Client.setCredentials({
+      access_token: decoded.tokens.access_token,
+      refresh_token: decoded.tokens.refresh_token
+    });
+
+    const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+    const results = { success: [], failed: [] };
+
+    console.log('Starting email sending process...');
+    for (const recipient of recipients) {
+      try {
+        if (!recipient || typeof recipient !== 'string' || !recipient.includes('@')) {
+          throw new Error('Invalid email format');
+        }
+
+        const personalizedContent = personalizeContent(templateContent, recipient);
+        const emailContent = [
+          `From: ${decoded.email}`,
+          `To: ${recipient}`,
+          'Content-Type: text/html; charset=utf-8',
+          'MIME-Version: 1.0',
+          `Subject: ${templateName}`,
+          '',
+          personalizedContent
+        ].join('\n');
+
+        const base64Email = Buffer.from(emailContent)
+          .toString('base64')
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=+$/, '');
+
+        console.log(`Sending email to ${recipient}`);
+        await gmail.users.messages.send({
+          userId: 'me',
+          requestBody: { raw: base64Email },
+        });
+
+        results.success.push(recipient);
+      } catch (err) {
+        console.error(`Error sending to ${recipient}:`, err.message);
+        results.failed.push({ email: recipient, error: err.message });
+      }
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+
+    // Create history record
+    const emailHistory = new EmailHistory({
+      userId: decoded.email,
+      templateContent,
+      recipients,
+      templateName,
+      sentAt: new Date(),
+      status: results.failed.length > 0 ? 
+        (results.success.length > 0 ? 'partially_failed' : 'failed') : 'sent',
+      successCount: results.success.length,
+      failureCount: results.failed.length,
+      failureReasons: results.failed.map(f => f.error),
+      isScheduled: false
+    });
+
+    await emailHistory.save();
+    console.log('Email history created:', {
+      success: results.success.length,
+      failed: results.failed.length
+    });
+
+    return res.status(200).json({
+      message: 'Emails processed',
+      results: {
+        totalSent: results.success.length,
+        totalFailed: results.failed.length,
+        failedRecipients: results.failed
+      }
+    });
+  } catch (err) {
+    console.error('Email processing error:', {
+      error: err.message,
+      stack: err.stack,
+      isScheduled,
+      scheduledAt
+    });
+
+    const statusCode = err.name === 'JsonWebTokenError' ? 401 : 
+                      err.code === 403 ? 403 : 400;
+
+    return res.status(statusCode).json({
+      message: err.message || "Email processing failed",
+      error: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    });
+  }
+};
 
 
   // Get scheduled emails

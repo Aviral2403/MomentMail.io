@@ -14,7 +14,7 @@ const {
 const verifyTokens = require("../middleware/verifyTokens");
 
 // Google Drive connection
-router.get('/connect-drive', verifyTokens ,  connectGoogleDrive);
+router.get('/connect-drive', connectGoogleDrive);
 
 // Spreadsheet operations
 router.get('/spreadsheets', verifyTokens , listSpreadsheets);

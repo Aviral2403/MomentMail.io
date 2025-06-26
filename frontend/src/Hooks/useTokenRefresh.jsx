@@ -1,4 +1,4 @@
-// hooks/useTokenRefresh.js
+// useTokenRefresh.js
 import { useEffect, useRef, useCallback } from 'react';
 import { refreshAuthToken } from '../api';
 
@@ -9,13 +9,14 @@ const useTokenRefresh = () => {
   const checkAndRefreshToken = useCallback(async () => {
     // Prevent multiple simultaneous refresh attempts
     if (isRefreshingRef.current) {
+      console.log('Token refresh already in progress');
       return;
     }
 
     try {
       const userInfo = JSON.parse(localStorage.getItem('user-info') || '{}');
-      
       if (!userInfo.token) {
+        console.log('No token found in user info');
         return;
       }
 
@@ -36,7 +37,6 @@ const useTokenRefresh = () => {
         isRefreshingRef.current = true;
 
         const refreshResult = await refreshAuthToken(userInfo.token);
-        
         if (refreshResult.requiresReauth) {
           console.log('Refresh failed, clearing user data and redirecting to login');
           localStorage.removeItem('user-info');
@@ -52,7 +52,6 @@ const useTokenRefresh = () => {
       }
     } catch (error) {
       console.error('Error in token refresh check:', error);
-      
       // If refresh fails with auth error, clear storage and redirect
       if (error.response?.status === 401 || error.response?.data?.requiresReauth) {
         localStorage.removeItem('user-info');

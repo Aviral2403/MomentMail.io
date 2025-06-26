@@ -172,7 +172,7 @@ const RecipientSelector = () => {
       setIsConnecting(false);
     },
     flow: "auth-code",
-    scope: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets.readonly",
+    scope: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email openid",
   });
 
   const handleSpreadsheetSelect = async (spreadsheet) => {
