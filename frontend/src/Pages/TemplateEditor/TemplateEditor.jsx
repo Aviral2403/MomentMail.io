@@ -499,6 +499,9 @@ const TemplateEditor = () => {
 
                 // FIX 5: URL validation
                 link_title: false, // Disable automatic title fetching which can cause issues
+
+                
+
                 images_upload_handler: async (blobInfo) => {
                   return new Promise((resolve, reject) => {
                     const formData = new FormData();
