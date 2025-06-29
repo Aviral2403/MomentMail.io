@@ -75,7 +75,7 @@ const Dashboard = () => {
         }
       } catch (err) {
         console.error("Error fetching data:", err);
-        setError("Failed to load data. Please try again.");
+        setError("Failed to load data. Please try again. Re-load Or Login Again!");
       } finally {
         setLoading(false);
       }

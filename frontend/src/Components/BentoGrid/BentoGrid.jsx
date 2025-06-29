@@ -10,36 +10,49 @@ const BentoGrid = () => {
       "bento-6.png",
       "bento-10.webp",
       "bento-999.webp",
+      "bento-222.png",
+      "bento-444.jpg"
     ],
     walking: [
       "bento-6.png",
       "bento-5.jpg",
+      "bento-555.jpg",
       "logintemplate.png",
       "bento-7.webp",
       "bento-8.jpg",
+      "bento-333.png"
     ],
     competitions: [
       "bento-999.webp",
       "login123.webp",
+      "bento-222.png",
       "logintemplate.png",
+      "bento-555.jpg",
       "bento-4.jpg",
       "bento-7.webp",
       "bento-10.webp",
     ],
     practice: [
       "bento-4.jpg",
+      "bento-555.jpg",
       "logintemplate.png",
       "login123.webp",
+      "bento-333.png",
       "bento-8.jpg",
       "bento-7.webp",
+      "bento-444.jpg"
     ],
     potential: [
+      "bento-222.png",
+      "bento-555.jpg",
       "logintemplate.png",
       "bento-4.jpg",
       "bento-6.png",
       "login123.webp",
       "bento-8.jpg",
+      "bento-444.jpg",
       "bento-10.webp",
+      "bento-333.png"
     ],
   };
 
@@ -161,8 +174,8 @@ const BentoGrid = () => {
           setTimeout(() => {
             // End slide animation
             setIsSliding((prev) => ({ ...prev, [box]: false }));
-          }, 50);
-        }, 500); // Wait for exit animation to complete
+          }, 20);
+        }, 600); // Wait for exit animation to complete
       }, 3500 + index * 700); // Stagger the animations
     });
 

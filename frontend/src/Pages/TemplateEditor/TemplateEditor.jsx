@@ -10,7 +10,7 @@ import {
   FEEDBACK_TEMPLATE,
   SOCIAL_MEDIA_TEMPLATE,
   WELCOME_TEMPLATE,
-  ABANDONED_CART_TEMPLATE
+  ABANDONED_CART_TEMPLATE,
 } from "../../EmailTemplates";
 import "./TemplateEditor.css";
 import axios from "axios";
@@ -74,7 +74,7 @@ const TemplateEditor = () => {
       feedback: "Feedback & Survey Template",
       "social-media": "Social Media Connection Template",
       "welcome-user": "Welcome To community Template",
-      "abandoned-cart": "Your Cart Items Feels Lonely , Order Them?"
+      "abandoned-cart": "Your Cart Items Feels Lonely , Order Them?",
     };
     return names[slug] || "Email Template";
   };
@@ -88,7 +88,9 @@ const TemplateEditor = () => {
 
       if (slug === "custom-template") {
         try {
-          const customTemplateData = localStorage.getItem("custom_email_template");
+          const customTemplateData = localStorage.getItem(
+            "custom_email_template"
+          );
           if (customTemplateData) {
             const parsedTemplate = JSON.parse(customTemplateData);
             setEmailSubject(parsedTemplate.name || "Custom Email Template");
@@ -205,15 +207,22 @@ const TemplateEditor = () => {
 
       if (slug === "custom-template") {
         try {
-          const customTemplateData = localStorage.getItem("custom_email_template");
-          let templateData = customTemplateData ? JSON.parse(customTemplateData) : {};
+          const customTemplateData = localStorage.getItem(
+            "custom_email_template"
+          );
+          let templateData = customTemplateData
+            ? JSON.parse(customTemplateData)
+            : {};
 
           templateData = {
             ...templateData,
             name: emailSubject || "Custom Email Template",
           };
 
-          localStorage.setItem("custom_email_template", JSON.stringify(templateData));
+          localStorage.setItem(
+            "custom_email_template",
+            JSON.stringify(templateData)
+          );
         } catch (e) {
           console.error("Error updating custom template data:", e);
         }
@@ -228,16 +237,21 @@ const TemplateEditor = () => {
   };
 
   const handleResetTemplate = () => {
-    toast((t) => (
-      <div className="confirm-toast">
-        <p>Are you sure you want to reset to the original template? All changes will be lost.</p>
-        <div className="confirm-buttons">
-          <button onClick={() => {
-            const storageKey = getStorageKey(slug);
-            localStorage.removeItem(storageKey);
+    toast(
+      (t) => (
+        <div className="confirm-toast">
+          <p>
+            Are you sure you want to reset to the original template? All changes
+            will be lost.
+          </p>
+          <div className="confirm-buttons">
+            <button
+              onClick={() => {
+                const storageKey = getStorageKey(slug);
+                localStorage.removeItem(storageKey);
 
-            if (slug === "custom-template") {
-              const emptyTemplate = `
+                if (slug === "custom-template") {
+                  const emptyTemplate = `
               <!DOCTYPE html>
               <html>
               <head>
@@ -269,23 +283,26 @@ const TemplateEditor = () => {
               </body>
               </html>
               `;
-              setEditorContent(emptyTemplate);
-              localStorage.removeItem("custom_email_template");
-              setEmailSubject("Custom Email Template");
-            } else {
-              setEditorContent(templateMap[slug]);
-            }
+                  setEditorContent(emptyTemplate);
+                  localStorage.removeItem("custom_email_template");
+                  setEmailSubject("Custom Email Template");
+                } else {
+                  setEditorContent(templateMap[slug]);
+                }
 
-            setSaveStatus("Template reset!");
-            setTimeout(() => setSaveStatus(""), 3000);
-            toast.dismiss(t.id);
-          }}>
-            Yes, Reset
-          </button>
-          <button onClick={() => toast.dismiss(t.id)}>Cancel</button>
+                setSaveStatus("Template reset!");
+                setTimeout(() => setSaveStatus(""), 3000);
+                toast.dismiss(t.id);
+              }}
+            >
+              Yes, Reset
+            </button>
+            <button onClick={() => toast.dismiss(t.id)}>Cancel</button>
+          </div>
         </div>
-      </div>
-    ), { duration: Infinity });
+      ),
+      { duration: Infinity }
+    );
   };
 
   const handleSendClick = () => {
@@ -299,15 +316,22 @@ const TemplateEditor = () => {
 
       if (slug === "custom-template") {
         try {
-          const customTemplateData = localStorage.getItem("custom_email_template");
-          let templateData = customTemplateData ? JSON.parse(customTemplateData) : {};
+          const customTemplateData = localStorage.getItem(
+            "custom_email_template"
+          );
+          let templateData = customTemplateData
+            ? JSON.parse(customTemplateData)
+            : {};
 
           templateData = {
             ...templateData,
             name: emailSubject,
           };
 
-          localStorage.setItem("custom_email_template", JSON.stringify(templateData));
+          localStorage.setItem(
+            "custom_email_template",
+            JSON.stringify(templateData)
+          );
         } catch (e) {
           console.error("Error updating custom template name:", e);
         }
@@ -317,7 +341,7 @@ const TemplateEditor = () => {
         templateContent: editorContent,
         emailSubject,
         recipients: [],
-        isScheduled: false
+        isScheduled: false,
       };
 
       navigate(`/templates/${slug}/recipients`, { state });
@@ -337,15 +361,22 @@ const TemplateEditor = () => {
 
       if (slug === "custom-template") {
         try {
-          const customTemplateData = localStorage.getItem("custom_email_template");
-          let templateData = customTemplateData ? JSON.parse(customTemplateData) : {};
+          const customTemplateData = localStorage.getItem(
+            "custom_email_template"
+          );
+          let templateData = customTemplateData
+            ? JSON.parse(customTemplateData)
+            : {};
 
           templateData = {
             ...templateData,
             name: emailSubject,
           };
 
-          localStorage.setItem("custom_email_template", JSON.stringify(templateData));
+          localStorage.setItem(
+            "custom_email_template",
+            JSON.stringify(templateData)
+          );
         } catch (e) {
           console.error("Error updating custom template name:", e);
         }
@@ -354,7 +385,7 @@ const TemplateEditor = () => {
       const state = {
         templateContent: editorContent,
         emailSubject,
-        isScheduled: true
+        isScheduled: true,
       };
 
       navigate(`/templates/${slug}/schedule`, { state });
@@ -382,7 +413,11 @@ const TemplateEditor = () => {
             <h1 className="template-name">{templateName}</h1>
             <div className="editor-actions">
               {saveStatus && (
-                <span className={`save-status ${saveStatus.includes("Error") ? "error" : "success"}`}>
+                <span
+                  className={`save-status ${
+                    saveStatus.includes("Error") ? "error" : "success"
+                  }`}
+                >
                   {saveStatus}
                 </span>
               )}
@@ -415,24 +450,66 @@ const TemplateEditor = () => {
                 resize: true,
                 menubar: true,
                 plugins: [
-                  "advlist", "autolink", "lists", "link", "image", "charmap", "preview",
-                  "anchor", "searchreplace", "visualblocks", "code", "fullscreen",
-                  "insertdatetime", "media", "table", "help", "wordcount"
+                  "advlist",
+                  "autolink",
+                  "lists",
+                  "link",
+                  "image",
+                  "charmap",
+                  "preview",
+                  "anchor",
+                  "searchreplace",
+                  "visualblocks",
+                  "code",
+                  "fullscreen",
+                  "insertdatetime",
+                  "media",
+                  "table",
+                  "help",
+                  "wordcount",
                 ],
-                toolbar: "undo redo | blocks | bold italic forecolor | alignleft aligncenter " +
+                toolbar:
+                  "undo redo | blocks | bold italic forecolor | alignleft aligncenter " +
                   "alignright alignjustify | bullist numlist outdent indent | " +
                   "removeformat | image link | help",
-                content_style: "body { font-family: Arial,sans-serif; font-size: 14px; padding: 20px; }",
+                content_style:
+                  "body { font-family: Arial,sans-serif; font-size: 14px; padding: 20px; }",
                 file_picker_types: "image",
                 branding: false,
                 automatic_uploads: true,
+                // FIX 1: Configure link handling
+                convert_urls: false, // Prevent TinyMCE from converting URLs automatically
+                relative_urls: false, // Use absolute URLs
+                remove_script_host: false, // Keep the protocol and domain
+
+                // FIX 2: Custom link dialog configuration
+                link_assume_external_targets: true, // Assume external links by default
+                link_context_toolbar: true,
+
+                // FIX 3: Link target options
+                target_list: [
+                  { title: "None", value: "" },
+                  { title: "Same window", value: "_self" },
+                  { title: "New window", value: "_blank" },
+                  { title: "Parent window", value: "_parent" },
+                ],
+
+                // FIX 4: Default link target
+                default_link_target: "_blank",
+
+                // FIX 5: URL validation
+                link_title: false, // Disable automatic title fetching which can cause issues
                 images_upload_handler: async (blobInfo) => {
                   return new Promise((resolve, reject) => {
                     const formData = new FormData();
                     formData.append("file", blobInfo.blob());
                     formData.append("upload_preset", uploadPreset);
 
-                    axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, formData)
+                    axios
+                      .post(
+                        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+                        formData
+                      )
                       .then((response) => resolve(response.data.secure_url))
                       .catch((error) => {
                         console.error("Upload error:", error);
@@ -449,14 +526,25 @@ const TemplateEditor = () => {
       </main>
       <div className="send-email-actions">
         <button className="btn-schedule" onClick={handleScheduleClick}>
-          <svg className="schedule-icon" viewBox="0 0 24 24" width="16" height="16">
-            <path fill="currentColor" d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+          <svg
+            className="schedule-icon"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+          >
+            <path
+              fill="currentColor"
+              d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"
+            />
           </svg>
           Schedule Emails
         </button>
         <button className="btn-send" onClick={handleSendClick}>
           <svg className="send-icon" viewBox="0 0 24 24" width="16" height="16">
-            <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+            <path
+              fill="currentColor"
+              d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"
+            />
           </svg>
           Send Emails Now
         </button>
