@@ -102,9 +102,9 @@ body {
 }
 
 .email-generate-button {
+  background-color:#000000;
   display: flex;
   align-items: center;
-  background-color: transparent;
   border: 2px solid #2655eb;
   color: #fff;
   padding: 0.75rem 1.5rem;
@@ -117,7 +117,7 @@ body {
 }
 
 .email-generate-button:hover {
-  background-color: #2655eb;
+  background-color: #2655eb!important;
 }
 
 .email-arrow {

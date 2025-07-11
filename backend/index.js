@@ -23,6 +23,7 @@ app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
 // Routes
 const authRouter = require('./routes/auth');
 const driveRouter = require('./routes/drive');
+const templateRouter = require('./routes/templateRoutes');
 
 
 // Updated root endpoint to show HTML in browser and JSON for API requests
@@ -86,6 +87,7 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRouter);
 app.use('/drive', driveRouter);
+app.use('/api/templates' , templateRouter);
 
 
 // Database connection

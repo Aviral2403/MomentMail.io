@@ -341,3 +341,73 @@ export const getEmailStatus = async (recipients, emailSubject) => {
     return { status: "unknown", error: error.message };
   }
 };
+
+
+
+
+
+
+// Template API functions
+export const saveTemplate = async (templateData) => {
+  try {
+    const response = await api.post('/api/templates', templateData);
+    return response.data;
+  } catch (error) {
+    console.error('Error saving template:', error);
+    throw error;
+  }
+};
+
+export const getUserTemplates = async () => {
+  try {
+    const response = await api.get('/api/templates');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting templates:', error);
+    throw error;
+  }
+};
+
+export const getTemplate = async (templateId) => {
+  try {
+    const response = await api.get(`/api/templates/${templateId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error getting template:', error);
+    throw error;
+  }
+};
+
+export const updateTemplate = async (templateId, templateData) => {
+  try {
+    const response = await api.put(`/api/templates/${templateId}`, templateData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating template:', error);
+    throw error;
+  }
+};
+
+export const deleteTemplate = async (templateId) => {
+  try {
+    const response = await api.delete(`/api/templates/${templateId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting template:', error);
+    throw error;
+  }
+};
+
+export const uploadImage = async (formData) => {
+  try {
+    const response = await api.post('/api/templates/upload-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    throw error;
+  }
+};

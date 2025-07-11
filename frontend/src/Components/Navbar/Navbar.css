@@ -139,7 +139,7 @@
   z-index: 998;
 }
 
-@media screen and (max-width: 525px) {
+@media screen and (max-width: 675px) {
   .menu-button {
     display: block;
     order: -1;
@@ -155,7 +155,7 @@
   }
 }
 
-@media screen and (min-width: 526px) {
+@media screen and (min-width: 676px) {
   .sidebar {
     display: none;
   }
@@ -181,6 +181,7 @@
   align-items: center;
   white-space: nowrap;
   padding: 0.5rem;
+  justify-content: center;
 }
 
 .svg-wrapper {
@@ -199,4 +200,42 @@
   font-size: 1.5rem;
 }
 
-/* Keep any existing CSS from your Navbar.css file */
+/* In your CSS file (e.g., Navbar.css) */
+
+.beta-feature-wrapper {
+  position: relative; /* Allows positioning of the beta tag */
+  display: inline-block; /* Adjusts to the size of its content */
+}
+
+.beta-tag-create {
+  background-color: #2555eb; /* Example: orange for visibility */
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 5px;
+  border-radius: .35rem;
+  position: absolute;
+  top: -15px; /* Adjust as needed to position above "Create" */
+  left: 80%; /* Center horizontally */
+  transform: translateX(-50%); /* Adjust for accurate centering */
+  white-space: nowrap; /* Prevent the tag from wrapping */
+}
+
+
+
+.beta-feature-wrapper-mobile {
+  position: relative; /* Allows positioning of the beta tag */
+  display: inline-block; /* Adjusts to the size of its content */
+}
+
+.beta-tag-create-mobile {
+  background-color: #2555eb;
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 5px;
+  border-radius: .35rem;
+  position: absolute;
+  top: 10px;
+  left: 110%;
+  white-space: nowrap;
+}
+

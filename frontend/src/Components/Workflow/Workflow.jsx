@@ -121,7 +121,7 @@ const Workflow = () => {
               </h3>
               <p>
                 Review your campaign and send your emails to multiple recipients
-                with one click.
+                in few clicks.
               </p>
             </div>
           </div>

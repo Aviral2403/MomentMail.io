@@ -18,13 +18,13 @@ const Navbar = () => {
   const handleLogout = () => {
     // Clear user info from localStorage
     localStorage.removeItem("user-info");
-    
+
     // Close the menu
     closeMenu();
-    
+
     // Redirect to homepage
     navigate("/");
-    
+
     // Reload the page to reset the state (optional)
     window.location.reload();
   };
@@ -50,65 +50,109 @@ const Navbar = () => {
             <Link to="/" className="logo" onClick={closeMenu}>
               <div className="logo-text">
                 <div className="svg-wrapper">
-                  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="m-svg">
+                  <svg
+                    viewBox="0 0 200 200"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="m-svg"
+                  >
                     <defs>
-                      <linearGradient id="leftGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <linearGradient
+                        id="leftGradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="0%"
+                        y2="100%"
+                      >
                         <stop offset="0%" stopColor="#2555eb" />
                         <stop offset="100%" stopColor="#FFFFFF" />
                       </linearGradient>
-                      
-                      <linearGradient id="leftDiagonalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+
+                      <linearGradient
+                        id="leftDiagonalGradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="100%"
+                      >
                         <stop offset="0%" stopColor="#de0a26" />
                         <stop offset="100%" stopColor="#FBBC05" />
                       </linearGradient>
-                      
-                      <linearGradient id="middleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+
+                      <linearGradient
+                        id="middleGradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="100%"
+                      >
                         <stop offset="0%" stopColor="#FBBC05" />
                         <stop offset="100%" stopColor="#34A853" />
                       </linearGradient>
-                      
-                      <linearGradient id="rightDiagonalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+
+                      <linearGradient
+                        id="rightDiagonalGradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="100%"
+                      >
                         <stop offset="0%" stopColor="#6cc173" />
                         <stop offset="100%" stopColor="#4caf50" />
                       </linearGradient>
-                      
-                      <linearGradient id="rightGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+
+                      <linearGradient
+                        id="rightGradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="0%"
+                        y2="100%"
+                      >
                         <stop offset="0%" stopColor="#000000" />
                         <stop offset="100%" stopColor="#FFFFFF" />
                       </linearGradient>
                     </defs>
-                    
+
                     <g>
-                      <path d="M40,40 L40,160 M40,40 L100,120 L160,40 M160,40 L160,160" 
-                            strokeWidth="25" 
-                            strokeLinecap="round" 
-                            fill="none" 
-                            stroke="url(#leftGradient)" 
-                            strokeLinejoin="round" />
-                            
-                      <path d="M40,40 L40,160" 
-                            strokeWidth="25" 
-                            strokeLinecap="round" 
-                            fill="none" 
-                            stroke="url(#leftGradient)" />
-                            
-                      <path d="M40,40 L100,120" 
-                            strokeWidth="25" 
-                            strokeLinecap="round" 
-                            fill="none" 
-                            stroke="url(#leftDiagonalGradient)" />
-                            
-                      <path d="M100,120 L160,40" 
-                            strokeWidth="25" 
-                            strokeLinecap="round" 
-                            fill="none" 
-                            stroke="url(#rightDiagonalGradient)" />
-                            
-                      <path d="M160,40 L160,160" 
-                            strokeWidth="25" 
-                            strokeLinecap="round" 
-                            fill="none" 
-                            stroke="url(#rightGradient)" />
+                      <path
+                        d="M40,40 L40,160 M40,40 L100,120 L160,40 M160,40 L160,160"
+                        strokeWidth="25"
+                        strokeLinecap="round"
+                        fill="none"
+                        stroke="url(#leftGradient)"
+                        strokeLinejoin="round"
+                      />
+
+                      <path
+                        d="M40,40 L40,160"
+                        strokeWidth="25"
+                        strokeLinecap="round"
+                        fill="none"
+                        stroke="url(#leftGradient)"
+                      />
+
+                      <path
+                        d="M40,40 L100,120"
+                        strokeWidth="25"
+                        strokeLinecap="round"
+                        fill="none"
+                        stroke="url(#leftDiagonalGradient)"
+                      />
+
+                      <path
+                        d="M100,120 L160,40"
+                        strokeWidth="25"
+                        strokeLinecap="round"
+                        fill="none"
+                        stroke="url(#rightDiagonalGradient)"
+                      />
+
+                      <path
+                        d="M160,40 L160,160"
+                        strokeWidth="25"
+                        strokeLinecap="round"
+                        fill="none"
+                        stroke="url(#rightGradient)"
+                      />
                     </g>
                   </svg>
                 </div>
@@ -120,8 +164,21 @@ const Navbar = () => {
 
           <div className="nav-links desktop">
             <Link to="/templates" className="nav-link">
-              Templates
+              Library
             </Link>
+
+            <li className="beta-feature-wrapper">
+              {" "}
+              {/* Add a wrapper for positioning */}
+              <span className="beta-tag-create">Beta</span> {/* The Beta tag */}
+              <Link
+                to="/templates/create/new"
+                className="nav-link"
+                onClick={closeMenu}
+              >
+                Create
+              </Link>
+            </li>
 
             <Link to="/dashboard" className="nav-link">
               Dashboard
@@ -130,7 +187,10 @@ const Navbar = () => {
             <Link to="/ask-ai" className="nav-link">
               Ask AI
             </Link>
-            
+            <Link to="/my-templates" className="nav-link" onClick={closeMenu}>
+              Saved
+            </Link>
+
             {isLoggedIn ? (
               <button className="nav-link" onClick={handleLogout}>
                 Logout
@@ -152,14 +212,30 @@ const Navbar = () => {
           </button>
           <div className="sidebar-links">
             <Link to="/templates" className="nav-link" onClick={closeMenu}>
-              Templates
+              Library
             </Link>
+
+            <li className="beta-feature-wrapper-mobile">
+              {" "}
+              {/* Add a wrapper for positioning */}
+              <span className="beta-tag-create-mobile">Beta</span> {/* The Beta tag */}
+              <Link
+                to="/templates/create/new"
+                className="nav-link"
+                onClick={closeMenu}
+              >
+                Create
+              </Link>
+            </li>
 
             <Link to="/dashboard" className="nav-link" onClick={closeMenu}>
               Dashboard
             </Link>
             <Link to="/ask-ai" className="nav-link" onClick={closeMenu}>
               Ask AI
+            </Link>
+            <Link to="/my-templates" className="nav-link" onClick={closeMenu}>
+              Saved
             </Link>
 
             {isLoggedIn ? (

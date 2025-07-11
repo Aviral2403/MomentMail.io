@@ -10,7 +10,7 @@
   "dependencies": {
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
-    "cloudinary": "^2.6.0",
+    "cloudinary": "^2.7.0",
     "cors": "^2.8.5",
     "cron-job": "^1.0.3",
     "date-fns": "^4.1.0",
@@ -20,7 +20,9 @@
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.475.0",
     "mongoose": "^8.10.0",
+    "multer": "^2.0.1",
     "node-cron": "^3.0.3",
+    "react-email-editor": "^1.7.11",
     "react-spring": "^9.7.5",
     "validator": "^13.12.0"
   },

@@ -29,11 +29,17 @@ const Dashboard = () => {
   const [tags, setTags] = useState({});
   const [currentWeek, setCurrentWeek] = useState(0);
 
+  // Pagination and filter states
+  const [scheduledCurrentPage, setScheduledCurrentPage] = useState(1);
+  const [historyCurrentPage, setHistoryCurrentPage] = useState(1);
+  const [scheduledFilter, setScheduledFilter] = useState("all");
+  const [historyFilter, setHistoryFilter] = useState("all");
+  const emailsPerPage = 6;
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 2000);
-
     return () => clearTimeout(timer);
   }, []);
 
@@ -45,22 +51,21 @@ const Dashboard = () => {
         setError("Please login to access the dashboard");
       } else {
         setIsAuthenticated(true);
-        const savedTags = JSON.parse(localStorage.getItem("email-tags") || "{}");
+        const savedTags = JSON.parse(
+          localStorage.getItem("email-tags") || "{}"
+        );
         setTags(savedTags);
       }
     };
-
     checkAuth();
   }, []);
 
   useEffect(() => {
     if (!isAuthenticated) return;
-
     const fetchData = async () => {
       try {
         setLoading(true);
         setError("");
-
         if (activeTab === "scheduled") {
           const response = await getScheduledEmails();
           setScheduledEmails(response.scheduledEmails || []);
@@ -75,20 +80,120 @@ const Dashboard = () => {
         }
       } catch (err) {
         console.error("Error fetching data:", err);
-        setError("Failed to load data. Please try again. Re-load Or Login Again!");
+        setError(
+          "Failed to load data. Please try again. Re-load Or Login Again!"
+        );
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [activeTab, isAuthenticated]);
+
+  // Filter emails based on the selected time range
+  const filterEmailsByDate = (emails, filter) => {
+    const now = new Date();
+    return emails.filter(email => {
+      const emailDate = new Date(email.scheduledAt || email.sentAt);
+      const timeDiff = now - emailDate;
+      const daysDiff = timeDiff / (1000 * 3600 * 24);
+
+      switch (filter) {
+        case "today":
+          return daysDiff <= 1;
+        case "7days":
+          return daysDiff <= 7;
+        case "30days":
+          return daysDiff <= 30;
+        default:
+          return true;
+      }
+    });
+  };
+
+  // Pagination logic
+  const paginate = (items, currentPage) => {
+    const startIndex = (currentPage - 1) * emailsPerPage;
+    return items.slice(startIndex, startIndex + emailsPerPage);
+  };
+
+  const filteredScheduledEmails = filterEmailsByDate(scheduledEmails, scheduledFilter);
+  const filteredHistoryEmails = filterEmailsByDate(emailHistory, historyFilter);
+
+  const paginatedScheduledEmails = paginate(filteredScheduledEmails, scheduledCurrentPage);
+  const paginatedHistoryEmails = paginate(filteredHistoryEmails, historyCurrentPage);
+
+  const totalScheduledPages = Math.ceil(filteredScheduledEmails.length / emailsPerPage);
+  const totalHistoryPages = Math.ceil(filteredHistoryEmails.length / emailsPerPage);
+
+  const handlePageChange = (tab, page) => {
+    if (tab === "scheduled") {
+      setScheduledCurrentPage(page);
+    } else {
+      setHistoryCurrentPage(page);
+    }
+  };
+
+  const handleFilterChange = (tab, filter) => {
+    if (tab === "scheduled") {
+      setScheduledFilter(filter);
+      setScheduledCurrentPage(1);
+    } else {
+      setHistoryFilter(filter);
+      setHistoryCurrentPage(1);
+    }
+  };
 
   useEffect(() => {
     if (calendarView) {
       setCurrentWeek(getCurrentWeekOfMonth());
     }
   }, [calendarView]);
+
+  const normalizeEmailTemplate = (html) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    const elementsWithWidth = tempDiv.querySelectorAll(
+      '[style*="width"], [width]'
+    );
+    elementsWithWidth.forEach((el) => {
+      if (el.hasAttribute("width")) {
+        el.removeAttribute("width");
+      }
+      const style = el.getAttribute("style") || "";
+      if (style.includes("width") || style.includes("max-width")) {
+        const newStyle = style
+          .replace(/width:\s*\d+px/gi, "width: 100%")
+          .replace(/max-width:\s*\d+px/gi, "max-width: 100%");
+        el.setAttribute("style", newStyle);
+      }
+    });
+
+    const elementsWithHeight = tempDiv.querySelectorAll(
+      '[style*="height"], [height]'
+    );
+    elementsWithHeight.forEach((el) => {
+      if (el.hasAttribute("height")) {
+        el.removeAttribute("height");
+      }
+      const style = el.getAttribute("style") || "";
+      if (style.includes("height")) {
+        const newStyle = style.replace(/height:\s*\d+px/gi, "height: auto");
+        el.setAttribute("style", newStyle);
+      }
+    });
+
+    const elementsWithTransform = tempDiv.querySelectorAll(
+      '[style*="transform-origin"]'
+    );
+    elementsWithTransform.forEach((el) => {
+      const style = el.getAttribute("style") || "";
+      const newStyle = style.replace(/transform-origin:\s*[^;]+;?/gi, "");
+      el.setAttribute("style", newStyle);
+    });
+
+    return tempDiv.innerHTML;
+  };
 
   const getCurrentWeekOfMonth = () => {
     const today = new Date();
@@ -160,9 +265,7 @@ const Dashboard = () => {
     try {
       setCancellingId(emailId);
       setError("");
-
       await cancelScheduledEmail(emailId);
-
       const response = await getScheduledEmails();
       setScheduledEmails(response.scheduledEmails || []);
     } catch (err) {
@@ -191,20 +294,18 @@ const Dashboard = () => {
     const firstDayOfMonth = new Date(year, month, 1).getDay();
     const startDate = weekIndex * 7 - firstDayOfMonth + 1;
     const dates = [];
-
     for (let i = 0; i < 7; i++) {
       const date = new Date(year, month, startDate + i);
       dates.push(date);
     }
-
     return dates;
   };
 
   const renderWeeklyCalendar = () => {
     const weeksInMonth = getWeeksInMonth(currentMonth, currentYear);
-    const adjustedWeek = currentWeek >= weeksInMonth ? weeksInMonth - 1 : currentWeek;
+    const adjustedWeek =
+      currentWeek >= weeksInMonth ? weeksInMonth - 1 : currentWeek;
     const weekDates = getWeekDates(adjustedWeek, currentMonth, currentYear);
-
     const timeSlots = [
       { label: "12AM", hour: 0 },
       { label: "3AM", hour: 3 },
@@ -215,7 +316,6 @@ const Dashboard = () => {
       { label: "6PM", hour: 18 },
       { label: "9PM", hour: 21 },
     ];
-
     return (
       <div className="horizontal-calendar-container">
         <div className="horizontal-calendar">
@@ -227,7 +327,6 @@ const Dashboard = () => {
               </div>
             ))}
           </div>
-
           {weekDates.map((date, dayIndex) => {
             const day = date.getDate();
             const isCurrentMonth = date.getMonth() === currentMonth;
@@ -235,7 +334,6 @@ const Dashboard = () => {
               date.getDate() === new Date().getDate() &&
               date.getMonth() === new Date().getMonth() &&
               date.getFullYear() === new Date().getFullYear();
-
             return (
               <div
                 key={`day-${dayIndex}`}
@@ -245,7 +343,11 @@ const Dashboard = () => {
               >
                 <div className="day-header">
                   <div className="calendar-weekday">
-                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dayIndex]}
+                    {
+                      ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
+                        dayIndex
+                      ]
+                    }
                   </div>
                   <div className="calendar-day-number">{day}</div>
                   {!isCurrentMonth && (
@@ -254,7 +356,6 @@ const Dashboard = () => {
                     </div>
                   )}
                 </div>
-
                 {timeSlots.map((slot, timeIndex) => {
                   const slotScheduledEmails = scheduledEmails.filter(
                     (email) => {
@@ -269,7 +370,6 @@ const Dashboard = () => {
                       );
                     }
                   );
-
                   const slotHistoryEmails = emailHistory.filter((email) => {
                     if (email.scheduledAt) return false;
                     const emailDate = new Date(email.sentAt);
@@ -282,14 +382,17 @@ const Dashboard = () => {
                       emailHour < slot.hour + 3
                     );
                   });
-
                   return (
-                    <div key={`slot-${dayIndex}-${timeIndex}`} className="time-slot-cell">
+                    <div
+                      key={`slot-${dayIndex}-${timeIndex}`}
+                      className="time-slot-cell"
+                    >
                       <div className="time-slot-content">
                         {slotScheduledEmails.map((email, emailIndex) => {
                           const emailTag = tags[email._id];
-                          const formattedTime = formatDate(email.scheduledAt).time;
-
+                          const formattedTime = formatDate(
+                            email.scheduledAt
+                          ).time;
                           return (
                             <div
                               key={`email-scheduled-${dayIndex}-${timeIndex}-${emailIndex}`}
@@ -323,11 +426,9 @@ const Dashboard = () => {
                             </div>
                           );
                         })}
-
                         {slotHistoryEmails.map((email, emailIndex) => {
                           const emailTag = tags[email._id];
                           const formattedTime = formatDate(email.sentAt).time;
-
                           return (
                             <div
                               key={`email-history-${dayIndex}-${timeIndex}-${emailIndex}`}
@@ -384,7 +485,6 @@ const Dashboard = () => {
   const handleMonthChange = (increment) => {
     let newMonth = currentMonth + increment;
     let newYear = currentYear;
-
     if (newMonth < 0) {
       newMonth = 11;
       newYear--;
@@ -392,7 +492,6 @@ const Dashboard = () => {
       newMonth = 0;
       newYear++;
     }
-
     setCurrentMonth(newMonth);
     setCurrentYear(newYear);
     setCurrentWeek(0);
@@ -401,7 +500,6 @@ const Dashboard = () => {
   const handleWeekChange = (increment) => {
     const weeksInMonth = getWeeksInMonth(currentMonth, currentYear);
     let newWeek = currentWeek + increment;
-
     if (newWeek < 0) {
       handleMonthChange(-1);
       setCurrentWeek(
@@ -425,7 +523,6 @@ const Dashboard = () => {
 
   const saveTag = () => {
     if (!tagName.trim() || !currentEmailId) return;
-
     const newTags = {
       ...tags,
       [currentEmailId]: {
@@ -433,7 +530,6 @@ const Dashboard = () => {
         color: tagColor,
       },
     };
-
     setTags(newTags);
     localStorage.setItem("email-tags", JSON.stringify(newTags));
     setShowTagModal(false);
@@ -446,6 +542,51 @@ const Dashboard = () => {
     delete newTags[emailId];
     setTags(newTags);
     localStorage.setItem("email-tags", JSON.stringify(newTags));
+  };
+
+  const renderPagination = (currentPage, totalPages, tab) => {
+    return (
+      <div className="dashboard-pagination">
+        <button
+          className="dashboard-pagination-button"
+          onClick={() => handlePageChange(tab, currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+</svg>
+        </button>
+        <span className="dashboard-pagination-info">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          className="dashboard-pagination-button"
+          onClick={() => handlePageChange(tab, currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+</svg>
+        </button>
+      </div>
+    );
+  };
+
+  const renderFilters = (filter, tab) => {
+    return (
+      <div className="dashboard-filters">
+        <select
+          className="dashboard-filter-select"
+          value={filter}
+          onChange={(e) => handleFilterChange(tab, e.target.value)}
+        >
+          <option value="all">All</option>
+          <option value="today">Today</option>
+          <option value="7days">Last 7 Days</option>
+          <option value="30days">Last 30 Days</option>
+        </select>
+      </div>
+    );
   };
 
   if (loading) {
@@ -464,12 +605,9 @@ const Dashboard = () => {
                 <img
                   className="dashboard-auth-icon"
                   src="/auth.png"
-                  
                   width="180"
                   height="180"
-                >
-                  
-                </img>
+                ></img>
                 <h2>Authentication Required</h2>
                 <p>Please login to access your email dashboard</p>
                 <Link to="/login" className="dashboard-login-button">
@@ -505,7 +643,6 @@ const Dashboard = () => {
       <main className="dashboard-main-content">
         <div className="dashboard-inner-container">
           <h1 className="dashboard-page-title">Email Dashboard</h1>
-
           <div className="dashboard-tabs-container">
             <button
               className={`dashboard-tab-button ${
@@ -545,7 +682,6 @@ const Dashboard = () => {
               Calendar
             </button>
           </div>
-
           {error && (
             <div className="dashboard-error-message">
               <svg
@@ -562,7 +698,6 @@ const Dashboard = () => {
               {error}
             </div>
           )}
-
           {calendarView ? (
             <div className="dashboard-calendar-view">
               <div className="calendar-header">
@@ -589,7 +724,6 @@ const Dashboard = () => {
                     &gt;
                   </button>
                 </div>
-
                 <div className="calendar-week-nav">
                   <button
                     className="calendar-nav-button"
@@ -609,9 +743,7 @@ const Dashboard = () => {
                   </button>
                 </div>
               </div>
-
               {renderWeeklyCalendar()}
-
               {emailDetails && (
                 <div
                   className="calendar-email-details-wrapper"
@@ -628,7 +760,6 @@ const Dashboard = () => {
                       ×
                     </button>
                     <h3>{emailDetails.templateName}</h3>
-
                     <div className="calendar-details-content">
                       <div className="calendar-details-row">
                         <span className="calendar-details-label">Status:</span>
@@ -647,17 +778,21 @@ const Dashboard = () => {
                       <div className="calendar-details-row">
                         <span className="calendar-details-label">Time:</span>
                         <span className="calendar-details-value">
-                          {formatDate(
-                            emailDetails.scheduledAt || emailDetails.sentAt
-                          ).time}
+                          {
+                            formatDate(
+                              emailDetails.scheduledAt || emailDetails.sentAt
+                            ).time
+                          }
                         </span>
                       </div>
                       <div className="calendar-details-row">
                         <span className="calendar-details-label">Date:</span>
                         <span className="calendar-details-value">
-                          {formatDate(
-                            emailDetails.scheduledAt || emailDetails.sentAt
-                          ).date}
+                          {
+                            formatDate(
+                              emailDetails.scheduledAt || emailDetails.sentAt
+                            ).date
+                          }
                         </span>
                       </div>
                       {emailDetails.isScheduled !== undefined && (
@@ -669,7 +804,6 @@ const Dashboard = () => {
                         </div>
                       )}
                     </div>
-
                     <div className="calendar-details-actions">
                       {tags[emailDetails._id] ? (
                         <button
@@ -690,7 +824,6 @@ const Dashboard = () => {
                   </div>
                 </div>
               )}
-
               {showTagModal && (
                 <div className="calendar-tag-modal">
                   <div className="calendar-tag-modal-content">
@@ -729,7 +862,8 @@ const Dashboard = () => {
             </div>
           ) : activeTab === "scheduled" ? (
             <div className="dashboard-data-section">
-              {scheduledEmails.length === 0 ? (
+              {renderFilters(scheduledFilter, "scheduled")}
+              {paginatedScheduledEmails.length === 0 ? (
                 <div className="dashboard-empty-state">
                   <img
                     src="/empty.svg"
@@ -754,7 +888,7 @@ const Dashboard = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {scheduledEmails.map((email) => {
+                        {paginatedScheduledEmails.map((email) => {
                           const formattedDate = formatDate(email.scheduledAt);
                           return (
                             <tr key={email._id}>
@@ -794,9 +928,8 @@ const Dashboard = () => {
                       </tbody>
                     </table>
                   </div>
-
                   <div className="dashboard-cards-grid dashboard-scheduled-cards">
-                    {scheduledEmails.map((email) => {
+                    {paginatedScheduledEmails.map((email) => {
                       const formattedDate = formatDate(email.scheduledAt);
                       return (
                         <div key={email._id} className="dashboard-email-card">
@@ -852,16 +985,20 @@ const Dashboard = () => {
                       );
                     })}
                   </div>
+                  {renderPagination(scheduledCurrentPage, totalScheduledPages, "scheduled")}
                 </>
               )}
             </div>
           ) : (
             <div className="dashboard-data-section">
-              {emailHistory.length > 0 ? (
+              {renderFilters(historyFilter, "history")}
+              {paginatedHistoryEmails.length > 0 ? (
                 <div className="dashboard-cards-grid dashboard-history-cards">
-                  {emailHistory.map((email) => {
+                  {paginatedHistoryEmails.map((email) => {
                     const formattedDate = formatDate(email.sentAt);
-                    const sendType = email.isScheduled ? "Scheduled" : "Instant";
+                    const sendType = email.isScheduled
+                      ? "Scheduled"
+                      : "Instant";
                     return (
                       <div key={email._id} className="dashboard-history-card">
                         <div className="dashboard-card-header">
@@ -903,14 +1040,15 @@ const Dashboard = () => {
                               {sendType}
                             </span>
                           </div>
-
                           {email.templateContent && (
                             <div className="dashboard-email-preview">
                               <div className="dashboard-preview-content">
                                 <div
                                   className="dashboard-email-template"
                                   dangerouslySetInnerHTML={{
-                                    __html: email.templateContent,
+                                    __html: normalizeEmailTemplate(
+                                      email.templateContent
+                                    ),
                                   }}
                                 />
                               </div>
@@ -933,6 +1071,7 @@ const Dashboard = () => {
                   <p>No email history found</p>
                 </div>
               )}
+              {renderPagination(historyCurrentPage, totalHistoryPages, "history")}
             </div>
           )}
         </div>

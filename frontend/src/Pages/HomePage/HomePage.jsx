@@ -59,7 +59,7 @@ const HomePage = () => {
           </div>
           <h3 className="hero-subtitle">
             Stop Copy-Pasting, Start Automating –{" "}
-            <span>Email Everyone in One Click!</span>
+            <span>Email Everyone in Few Clicks!</span>
           </h3>
         </div>
 
