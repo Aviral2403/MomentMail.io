@@ -1231,6 +1231,7 @@
   }
   
   .dashboard-pagination-button {
+    background-color: black;
     color: white;
     border: none;
     border-radius: 4px;
@@ -1244,6 +1245,7 @@
   
   .dashboard-pagination-button:disabled {
     cursor: not-allowed;
+    background-color: black;
   }
   
   .dashboard-pagination-info {
@@ -1307,7 +1309,7 @@
   /* Dark theme specific styles */
   @media (prefers-color-scheme: dark) {
     .dashboard-pagination-button {
-        background-color: inherit;
+        background-color: black;
         border: none;
     }
   
@@ -1330,5 +1332,6 @@
 
 .dashboard-pagination-button:disabled:hover{
     color: inherit;
+    background-color: black;
 
 }
