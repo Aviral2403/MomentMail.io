@@ -9,14 +9,16 @@ const Demo = () => {
   const videoRef = useRef(null);
 
   const handlePlayVideo = () => {
-    setIsVideoPlaying(true);
-    setTimeout(() => {
-      if (videoRef.current) {
-        videoRef.current.play();
-        setIsPlaying(true);
-      }
-    }, 100);
-  };
+  setIsVideoPlaying(true);
+  setTimeout(() => {
+    if (videoRef.current) {
+      videoRef.current.setAttribute('playsinline', '');
+      videoRef.current.setAttribute('webkit-playsinline', 'true');
+      videoRef.current.play();
+      setIsPlaying(true);
+    }
+  }, 100);
+};
 
   const handleCloseVideo = () => {
     setIsVideoPlaying(false);
