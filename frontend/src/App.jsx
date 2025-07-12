@@ -20,6 +20,7 @@ import LoadingSkeleton from "./Components/LoadingSkeleton/LoadingSkeleton";
 import useTokenRefresh from "./Hooks/useTokenRefresh";
 import TemplatesList from "./Pages/TemplatesList/TemplatesList";
 import TemplateBuilder from "./Pages/TemplateBuilder/TemplateBuilder";
+import Demo from "./Pages/Demo/Demo";
 
 // Scroll to top component with smooth scrolling
 const ScrollToTop = () => {
@@ -200,6 +201,15 @@ const App = () => {
               <GoogleOAuthWrapper>
                 <TemplateBuilder />
               </GoogleOAuthWrapper>
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/help/demo"
+          element={
+            <Layout>
+              <Demo />
             </Layout>
           }
         />

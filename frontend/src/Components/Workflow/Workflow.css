@@ -195,85 +195,8 @@
   color: rgba(37, 85, 235, 1);
 }
 
-/* Entrance Animations for screens 769px and above */
-@media (min-width: 0px) {
-  /* Initial hidden state for workflow cards - positioned closer to final position */
-  .workflow-card:not(.animate-from-left):not(.animate-from-bottom):not(.animate-from-right) {
-    opacity: 0;
-    transform: translateX(-50vw);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
 
-  .workflow-card.select-card:not(.animate-from-bottom) {
-    opacity: 0;
-    transform: translateY(50vh) translateY(40px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
 
-  .workflow-card.send-card:not(.animate-from-right) {
-    opacity: 0;
-    transform: translateX(50vw);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-
-  /* Animation keyframes - faster and smoother */
-  @keyframes slideInFromLeft {
-    0% {
-      transform: translateX(-50vw);
-      opacity: 0;
-    }
-    100% {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideInFromRight {
-    0% {
-      transform: translateX(50vw);
-      opacity: 0;
-    }
-    100% {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideInFromBottom {
-    0% {
-      transform: translateY(50vh) translateY(40px);
-      opacity: 0;
-    }
-    100% {
-      transform: translateY(40px);
-      opacity: 1;
-    }
-  }
-
-  /* Animation classes - faster animations */
-  .animate-from-left {
-    animation: slideInFromLeft 0.8s ease-out;
-    animation-fill-mode: both;
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  .animate-from-bottom {
-    animation: slideInFromBottom 0.8s ease-out;
-    animation-delay: 0.2s;
-    animation-fill-mode: both;
-    opacity: 1;
-    transform: translateY(40px);
-  }
-
-  .animate-from-right {
-    animation: slideInFromRight 0.8s ease-out;
-    animation-delay: 0.4s;
-    animation-fill-mode: both;
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
 
 @media (max-width: 768px) {
   .workflow-title {
@@ -334,3 +257,4 @@
 .workflow-cards .workflow-card:nth-child(2) {
   margin-bottom: 4rem; /* This targets the second card specifically */
 }
+

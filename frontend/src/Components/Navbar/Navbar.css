@@ -139,7 +139,7 @@
   z-index: 998;
 }
 
-@media screen and (max-width: 675px) {
+@media screen and (max-width: 768px) {
   .menu-button {
     display: block;
     order: -1;
@@ -155,7 +155,7 @@
   }
 }
 
-@media screen and (min-width: 676px) {
+@media screen and (min-width: 769px) {
   .sidebar {
     display: none;
   }

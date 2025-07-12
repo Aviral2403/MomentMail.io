@@ -200,41 +200,41 @@ const TemplateEditor = () => {
     setSaveStatus("");
   };
 
-  const handleSave = () => {
-    try {
-      const storageKey = getStorageKey(slug);
-      localStorage.setItem(storageKey, editorContent);
+  // const handleSave = () => {
+  //   try {
+  //     const storageKey = getStorageKey(slug);
+  //     localStorage.setItem(storageKey, editorContent);
 
-      if (slug === "custom-template") {
-        try {
-          const customTemplateData = localStorage.getItem(
-            "custom_email_template"
-          );
-          let templateData = customTemplateData
-            ? JSON.parse(customTemplateData)
-            : {};
+  //     if (slug === "custom-template") {
+  //       try {
+  //         const customTemplateData = localStorage.getItem(
+  //           "custom_email_template"
+  //         );
+  //         let templateData = customTemplateData
+  //           ? JSON.parse(customTemplateData)
+  //           : {};
 
-          templateData = {
-            ...templateData,
-            name: emailSubject || "Custom Email Template",
-          };
+  //         templateData = {
+  //           ...templateData,
+  //           name: emailSubject || "Custom Email Template",
+  //         };
 
-          localStorage.setItem(
-            "custom_email_template",
-            JSON.stringify(templateData)
-          );
-        } catch (e) {
-          console.error("Error updating custom template data:", e);
-        }
-      }
+  //         localStorage.setItem(
+  //           "custom_email_template",
+  //           JSON.stringify(templateData)
+  //         );
+  //       } catch (e) {
+  //         console.error("Error updating custom template data:", e);
+  //       }
+  //     }
 
-      setSaveStatus("Saved successfully!");
-      setTimeout(() => setSaveStatus(""), 3000);
-    } catch (error) {
-      setSaveStatus("Error saving template");
-      console.error("Error saving template:", error);
-    }
-  };
+  //     setSaveStatus("Saved successfully!");
+  //     setTimeout(() => setSaveStatus(""), 3000);
+  //   } catch (error) {
+  //     setSaveStatus("Error saving template");
+  //     console.error("Error saving template:", error);
+  //   }
+  // };
 
   const handleResetTemplate = () => {
     toast(
@@ -412,7 +412,7 @@ const TemplateEditor = () => {
             </Link>
             <h1 className="template-name">{templateName}</h1>
             <div className="editor-actions">
-              {saveStatus && (
+              {/* {saveStatus && (
                 <span
                   className={`save-status ${
                     saveStatus.includes("Error") ? "error" : "success"
@@ -420,13 +420,13 @@ const TemplateEditor = () => {
                 >
                   {saveStatus}
                 </span>
-              )}
+              )} */}
               <button className="btn-reset" onClick={handleResetTemplate}>
                 Reset
               </button>
-              <button className="btn-save" onClick={handleSave}>
+              {/* <button className="btn-save" onClick={handleSave}>
                 Save
-              </button>
+              </button> */}
             </div>
           </div>
           <div className="email-header">

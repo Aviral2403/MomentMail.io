@@ -10,7 +10,9 @@
   overflow: hidden;
   margin: 0;
   padding: 5rem 0rem;
+  
 }
+
 
 .home-content {
   max-width: 95vw;
@@ -49,7 +51,7 @@
 .static-text {
   color: whitesmoke;
   font-size: clamp(2.5rem, 5vw, 5rem);
-  font-family: "Montserrat";
+  font-family: -webkit-body;
   font-weight: 400;
 }
 
@@ -66,16 +68,16 @@
   margin-bottom: 1rem;
   max-width: 80%;
   margin: 0 auto;
-  font-family: "Montserrat";
-  font-style: italic;
-  font-weight: 300;
+  font-family: -webkit-body;
+  /* font-style: italic; */
+  font-weight: 100!important;
 }
 
 .hero-subtitle span {
   color: whitesmoke !important;
   font-size: clamp(1.25rem, 2.5vw, 2rem);
-  font-family: 'Montserrat';
-  font-weight: 300;
+  font-family: -webkit-body;
+  font-weight: 100;
 }
 
 .dual-scroll-showcase {
@@ -363,3 +365,4 @@
     left: 0.5rem;
   }
 }
+

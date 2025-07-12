@@ -162,7 +162,13 @@ const Navbar = () => {
             </Link>
           </div>
 
+          
+
           <div className="nav-links desktop">
+
+            <Link to="/help/demo" className="nav-link">
+              Demo
+            </Link>
             <Link to="/templates" className="nav-link">
               Library
             </Link>
@@ -184,9 +190,18 @@ const Navbar = () => {
               Dashboard
             </Link>
 
-            <Link to="/ask-ai" className="nav-link">
-              Ask AI
-            </Link>
+            <li className="beta-feature-wrapper">
+              {" "}
+              {/* Add a wrapper for positioning */}
+              <span className="beta-tag-create">Beta</span> {/* The Beta tag */}
+              <Link
+                to="/ask-ai"
+                className="nav-link"
+                onClick={closeMenu}
+              >
+                Ask AI
+              </Link>
+            </li>
             <Link to="/my-templates" className="nav-link" onClick={closeMenu}>
               Saved
             </Link>
@@ -210,7 +225,14 @@ const Navbar = () => {
           <button className="close-button" onClick={toggleMenu}>
             <X size={24} />
           </button>
+
+
           <div className="sidebar-links">
+
+            <Link to="/help/demo" className="nav-link">
+              Demo
+            </Link>
+
             <Link to="/templates" className="nav-link" onClick={closeMenu}>
               Library
             </Link>
@@ -231,9 +253,18 @@ const Navbar = () => {
             <Link to="/dashboard" className="nav-link" onClick={closeMenu}>
               Dashboard
             </Link>
-            <Link to="/ask-ai" className="nav-link" onClick={closeMenu}>
-              Ask AI
-            </Link>
+            <li className="beta-feature-wrapper-mobile">
+              {" "}
+              {/* Add a wrapper for positioning */}
+              <span className="beta-tag-create-mobile">Beta</span> {/* The Beta tag */}
+              <Link
+                to="/ask-ai"
+                className="nav-link"
+                onClick={closeMenu}
+              >
+                Ask AI
+              </Link>
+            </li>
             <Link to="/my-templates" className="nav-link" onClick={closeMenu}>
               Saved
             </Link>

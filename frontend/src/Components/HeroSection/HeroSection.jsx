@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './HeroSection.css';
+import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -36,11 +37,12 @@ const HeroSection = () => {
         <div className={`mm-dark-hero-block ${isVisible ? 'mm-animate-in' : 'mm-animate-out'}`}>
           <p className="mm-dark-top-subtitle">Send Bulk Emails Effortlessly with Google Sheets Data</p>
           <h1 className="mm-dark-primary-heading">
-            Effortless & Seamless Way to <br />
+            Effortless & Seamless Way To <br />
             Send <span className="mm-dark-blue-highlight">Bulk Emails</span>
           </h1>
-         
-          <button className="mm-dark-try-button">Try for Free</button>
+         <Link to="/help/demo">
+          <button className="mm-dark-try-button">View Demo</button>
+         </Link>
         </div>
       </main>
     </div>

@@ -5,6 +5,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
+    
     <footer className="footer">
       <div className="footer-container">
         <div className="footer-content">
