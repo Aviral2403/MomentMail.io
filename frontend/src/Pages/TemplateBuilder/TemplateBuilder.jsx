@@ -424,7 +424,7 @@ const TemplateBuilder = () => {
             },
             features: {
               preview: true,
-              stockImages: false,
+              stockImages: true,
               undoRedo: true,
               textEditor: {
                 spellChecker: true,

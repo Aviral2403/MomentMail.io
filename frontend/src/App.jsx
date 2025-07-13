@@ -21,6 +21,7 @@ import useTokenRefresh from "./Hooks/useTokenRefresh";
 import TemplatesList from "./Pages/TemplatesList/TemplatesList";
 import TemplateBuilder from "./Pages/TemplateBuilder/TemplateBuilder";
 import Demo from "./Pages/Demo/Demo";
+import ProtectedRoute from "./Components/ProtectedRoute/ProtectedRoute";
 
 // Scroll to top component with smooth scrolling
 const ScrollToTop = () => {
@@ -86,7 +87,7 @@ const App = () => {
           element={
             <Layout>
               <GoogleOAuthWrapper>
-                <Templates />
+                  <Templates />
               </GoogleOAuthWrapper>
             </Layout>
           }
@@ -104,7 +105,9 @@ const App = () => {
           element={
             <Layout>
               <GoogleOAuthWrapper>
-                <TemplateEditor />
+                <ProtectedRoute>
+                  <TemplateEditor />
+                </ProtectedRoute>
               </GoogleOAuthWrapper>
             </Layout>
           }
@@ -114,7 +117,9 @@ const App = () => {
           element={
             <Layout>
               <GoogleOAuthWrapper>
-                <RecipientSelector />
+                <ProtectedRoute>
+                  <RecipientSelector />
+                </ProtectedRoute>
               </GoogleOAuthWrapper>
             </Layout>
           }
@@ -124,7 +129,9 @@ const App = () => {
           element={
             <Layout>
               <GoogleOAuthWrapper>
-                <EmailPreview />
+                <ProtectedRoute>
+                  <EmailPreview />
+                </ProtectedRoute>
               </GoogleOAuthWrapper>
             </Layout>
           }
@@ -134,7 +141,9 @@ const App = () => {
           element={
             <Layout>
               <GoogleOAuthWrapper>
-                <ScheduleDateTime />
+                <ProtectedRoute>
+                  <ScheduleDateTime />
+                </ProtectedRoute>
               </GoogleOAuthWrapper>
             </Layout>
           }
@@ -144,7 +153,9 @@ const App = () => {
           element={
             <Layout>
               <GoogleOAuthWrapper>
-                <Dashboard />
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
               </GoogleOAuthWrapper>
             </Layout>
           }
@@ -173,13 +184,14 @@ const App = () => {
             </Layout>
           }
         />
-
         <Route
           path="/my-templates"
           element={
             <Layout>
               <GoogleOAuthWrapper>
-                <TemplatesList />
+                <ProtectedRoute>
+                  <TemplatesList />
+                </ProtectedRoute>
               </GoogleOAuthWrapper>
             </Layout>
           }
@@ -189,7 +201,9 @@ const App = () => {
           element={
             <Layout>
               <GoogleOAuthWrapper>
-                <TemplateBuilder />
+                <ProtectedRoute>
+                  <TemplateBuilder />
+                </ProtectedRoute>
               </GoogleOAuthWrapper>
             </Layout>
           }
@@ -199,12 +213,13 @@ const App = () => {
           element={
             <Layout>
               <GoogleOAuthWrapper>
-                <TemplateBuilder />
+                <ProtectedRoute>
+                  <TemplateBuilder />
+                </ProtectedRoute>
               </GoogleOAuthWrapper>
             </Layout>
           }
         />
-
         <Route
           path="/help/demo"
           element={

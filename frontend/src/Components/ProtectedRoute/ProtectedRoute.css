@@ -1,0 +1,213 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+.protected-route-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: black;
+  margin-top: 4rem;
+  position: relative; /* Add this to establish stacking context */
+}
+
+.protected-route-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 75vh;
+  background: radial-gradient(
+    ellipse 120% 80% at 50% 0%,
+    rgba(37, 85, 235, 0.3) 0%,
+    rgba(37, 85, 235, 0.1) 40%,
+    transparent 80%
+  );
+  z-index: 1;
+  pointer-events: none; /* Add this to prevent blocking clicks */
+}
+
+.protected-route-container::after {
+  content: "";
+  position: absolute;
+  top: 50vh;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      ellipse 40% 30% at 20% 70%,
+      rgba(37, 85, 235, 0.1) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 35% 25% at 80% 60%,
+      rgba(37, 85, 235, 0.08) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 30% 20% at 60% 80%,
+      rgba(37, 85, 235, 0.06) 0%,
+      transparent 70%
+    );
+  z-index: 1;
+  pointer-events: none; /* Add this to prevent blocking clicks */
+}
+
+.protected-route-auth-required {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  position: relative; /* Add this */
+  z-index: 2; /* Add this to ensure content is above background */
+}
+
+.protected-route-auth-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.protected-route-auth-message h2 {
+  color: #d7d7d7;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.protected-route-auth-message p {
+  color: #dcdcdc;
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.5;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.protected-route-login-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-family: 'Montserrat', sans-serif;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  position: relative; /* Add this */
+  z-index: 3; /* Add this to ensure button is clickable */
+  cursor: pointer; /* Add this to ensure proper cursor */
+}
+
+.protected-route-login-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
+.protected-route-error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: #ff000036;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.875rem;
+  font-family: 'Montserrat', sans-serif;
+  max-width: 500px;
+  border-left: 2px solid red;
+  position: relative; /* Add this */
+  z-index: 2; /* Add this */
+}
+
+.protected-route-error-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: #dc2626;
+}
+
+.protected-route-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: 1rem;
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.protected-route-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #333;
+  border-top: 4px solid #2555eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .protected-route-container {
+    padding: 1rem;
+  }
+  
+  .protected-route-auth-required {
+    padding: 1rem;
+    min-height: 300px;
+  }
+  
+  .protected-route-auth-message h2 {
+    font-size: 1.25rem;
+  }
+  
+  .protected-route-auth-message p {
+    font-size: 0.875rem;
+  }
+  
+  .protected-route-login-button {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+  }
+  
+  .protected-route-error-message {
+    font-size: 0.8rem;
+    padding: 0.625rem 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .protected-route-auth-required {
+    min-height: 250px;
+  }
+  
+  .protected-route-auth-message h2 {
+    font-size: 1.125rem;
+  }
+  
+  .protected-route-auth-message p {
+    font-size: 0.8rem;
+  }
+  
+  .protected-route-login-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+}
