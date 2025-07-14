@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useLayoutEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./Components/Navbar/Navbar";
 import Footer from "./Components/Footer/Footer";
@@ -23,16 +23,45 @@ import TemplateBuilder from "./Pages/TemplateBuilder/TemplateBuilder";
 import Demo from "./Pages/Demo/Demo";
 import ProtectedRoute from "./Components/ProtectedRoute/ProtectedRoute";
 
-// Scroll to top component with smooth scrolling
+// Scroll to top component with multiple approaches
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "smooth",
-    });
+  
+  // Primary scroll method - immediate execution before paint
+  useLayoutEffect(() => {
+    // Force immediate scroll to top
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   }, [pathname]);
+  
+  // Secondary scroll method - handles any delayed content loading
+  useEffect(() => {
+    // Multiple approaches to ensure scroll happens
+    const scrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    // Immediate scroll
+    scrollToTop();
+
+    // Delayed scroll for any async content
+    const timer1 = setTimeout(scrollToTop, 0);
+    const timer2 = setTimeout(scrollToTop, 100);
+    
+    // Additional scroll after potential content load
+    const timer3 = setTimeout(scrollToTop, 300);
+
+    // Cleanup
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+    };
+  }, [pathname]);
+  
   return null;
 };
 

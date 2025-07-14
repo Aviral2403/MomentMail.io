@@ -269,7 +269,7 @@ const CreateTemplate = () => {
         <div className="custom-template-header">
           <div className="custom-email-from">
             <div className="custom-label">From:</div>
-            <div className="custom-value">{userEmail}</div>
+            <div className="custom-value">{userEmail || `user@company.com`}</div>
           </div>
           <div className="custom-email-subject">
             <div className="custom-label">Subject:</div>

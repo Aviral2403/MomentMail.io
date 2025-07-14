@@ -7,18 +7,28 @@ const Demo = () => {
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
+  const videoSectionRef = useRef(null);
+
+  const handleScrollToVideo = () => {
+    if (videoSectionRef.current) {
+      videoSectionRef.current.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
 
   const handlePlayVideo = () => {
-  setIsVideoPlaying(true);
-  setTimeout(() => {
-    if (videoRef.current) {
-      videoRef.current.setAttribute('playsinline', '');
-      videoRef.current.setAttribute('webkit-playsinline', 'true');
-      videoRef.current.play();
-      setIsPlaying(true);
-    }
-  }, 100);
-};
+    setIsVideoPlaying(true);
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.setAttribute('playsinline', '');
+        videoRef.current.setAttribute('webkit-playsinline', 'true');
+        videoRef.current.play();
+        setIsPlaying(true);
+      }
+    }, 100);
+  };
 
   const handleCloseVideo = () => {
     setIsVideoPlaying(false);
@@ -73,20 +83,16 @@ const Demo = () => {
           </p>
 
           <div className="demo-hero-buttons">
-            <button className="demo-btn-primary" onClick={handlePlayVideo}>
+            <button className="demo-btn-primary" onClick={handleScrollToVideo}>
               View Demo
             </button>
           </div>
         </div>
       </section>
 
-      
-
       {/* Video Section */}
-      <section className="demo-video-section">
-        
+      <section className="demo-video-section" ref={videoSectionRef}>
         <div className="demo-video-container">
-            
           <div className="demo-video-preview" onClick={handlePlayVideo}>
             <div className="demo-video-thumbnail">
               {/* ADD YOUR THUMBNAIL IMAGE HERE */}
@@ -106,7 +112,6 @@ const Demo = () => {
                   <path d="M32 25L58 40L32 55V25Z" fill="rgba(37, 60, 235, 0.93)" />
                 </svg>
               </div>
-              
             </div>
           </div>
         </div>
@@ -163,9 +168,8 @@ const Demo = () => {
             </div>
           </div>
         </div>
-        
       )}
-      </div>
+    </div>
   );
 };
 

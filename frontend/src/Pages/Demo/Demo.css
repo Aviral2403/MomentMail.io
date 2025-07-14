@@ -71,7 +71,7 @@
 }
 
 .demo-hero-title .demo-gradient-text {
-  background: linear-gradient(135deg, #2555eb, #7c3aed);
+  background: #2555eb;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -98,7 +98,7 @@
 }
 
 .demo-btn-primary {
-  background: linear-gradient(135deg, #2555eb, #7c3aed);
+  background: #2555eb;
   color: white;
   padding: 14px 36px;
   border: none;
@@ -113,7 +113,7 @@
 
 .demo-btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(37, 85, 235, 0.3);
+  box-shadow: 0 8px 25px rgba(26, 80, 243, 0.4);
 }
 
 .demo-floating-images {
@@ -775,3 +775,5 @@
     height: auto; /* Remove fixed height */
   }
 }
+
+
