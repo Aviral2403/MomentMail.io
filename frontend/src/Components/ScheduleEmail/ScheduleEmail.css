@@ -171,3 +171,7 @@ body {
 .mm-dark-try-button .schedule{
   max-width: 5rem;
 }
+
+.mm-dark-try-button .schedule:focus{
+  outline: none;
+}

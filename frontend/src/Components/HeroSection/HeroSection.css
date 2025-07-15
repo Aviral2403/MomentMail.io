@@ -102,3 +102,7 @@ body {
     font-size: 14px;
   }
 }
+
+.mm-dark-try-button:focus{
+  outline: none;
+}

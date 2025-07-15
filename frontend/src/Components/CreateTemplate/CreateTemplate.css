@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
+body,html{
+
+    background-color: black!important;
+}
+
 .custom-template-card {
     position: relative;
     /* background-color: #ffffff; */
@@ -310,4 +315,9 @@
 }
 .custom-template-description .custom-strong{
   color: whitesmoke;
+}
+
+.custom-btn-preview:focus,
+.custom-btn-use:focus{
+    outline:none
 }

@@ -776,4 +776,8 @@
   }
 }
 
+.demo-btn-primary:focus{
+  outline: none;
+}
+
 

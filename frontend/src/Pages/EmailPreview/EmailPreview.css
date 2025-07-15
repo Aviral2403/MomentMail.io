@@ -191,7 +191,7 @@ body {
 
 .status-container {
   border-radius: 12px;
-  padding: 25px;
+  padding: 25px 0px;
 }
 
 .status-title {
@@ -250,32 +250,30 @@ body {
 }
 
 .status-complete {
-  color: #40a042!important;
+  color: #40a042 !important;
 }
 
 .status-error {
-  color: #e53e3e!important;
+  color: #e53e3e !important;
 }
 
 /* Add styles for the new back to templates button */
 .btn-back {
-  
-    color: rgb(255, 255, 255);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: left;
-    background: none;
-    border-width: initial;
-    border-style: none;
-    border-color: initial;
-    border-image: initial;
-    padding: 6px;
-    border-radius: 6px;
-    transition: background-color 0.2s;
-    justify-content: start;
+  color: rgb(255, 255, 255);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  background: none;
+  border-width: initial;
+  border-style: none;
+  border-color: initial;
+  border-image: initial;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  justify-content: start;
 }
-
 
 .btn-back:hover {
   background-color: #2a46d2;
@@ -303,7 +301,9 @@ body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* UPDATED MEDIA QUERIES */
@@ -323,7 +323,7 @@ body {
   .sheets-content {
     flex: 0 0 60%;
   }
-  
+
   .sheets-icon {
     max-width: 100%;
   }
@@ -339,12 +339,12 @@ body {
   .sheets-container {
     padding: 20px;
   }
-  
+
   .sheets-image {
     flex: 0 0 45%;
     padding-right: 15px;
   }
-  
+
   .sheets-content {
     flex: 0 0 55%;
   }
@@ -359,7 +359,7 @@ body {
   }
 
   .status-container {
-    padding: 20px;
+    padding: 20px 0;
   }
 
   .sheets-button {
@@ -398,7 +398,7 @@ body {
   .sheets-content {
     flex: 0 0 100%;
   }
-  
+
   .sheets-icon {
     max-width: 60%;
   }
@@ -430,7 +430,7 @@ body {
   }
 
   .status-container {
-    padding: 15px;
+    padding: 15px 0;
   }
 }
 
@@ -439,12 +439,12 @@ body {
   .mail-row {
     display: block;
   }
-  
+
   .mail-label {
     width: 100%;
     margin-bottom: 6px;
   }
-  
+
   .sheets-icon {
     max-width: 70%;
   }
@@ -453,16 +453,29 @@ body {
 .glance {
   border: 1px solid whitesmoke;
   border-radius: 1.5rem;
-  padding: .75rem;
+  padding: 0.75rem;
 }
 
-.back-button a{
-  text-decoration: none!important;
+.back-button-dashboard a {
+  text-decoration: none !important;
+}
+
+.back-button-dashboard {
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  /* justify-content: center; */
+  padding: 4px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
 }
 
 /* Styles for scheduled status text */
 .status-badge.scheduled {
-  color: #FFA000;
+  color: #ffa000;
 }
 
 /* Styles for the scheduled footer message */
@@ -477,17 +490,16 @@ body {
 
 /* Go to Dashboard button styling */
 .btn-dashboard {
-  background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 15px;
-    transition: background-color 0.2s;
-    min-width: 200px;
-    margin-top: 15px;
-    margin-left: 2.2rem;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.2s;
+  margin-top: 15px;
+  width: fit-content;
 }
 
 .btn-dashboard:hover {
@@ -500,13 +512,12 @@ body {
     padding: 10px 15px;
     font-size: 14px;
   }
-  
+
   .bt.status-footern-dashboard {
     width: 100%;
     padding: 12px;
   }
 }
-
 
 /* For email recipient truncation on small screens */
 @media (max-width: 500px) {
@@ -516,26 +527,23 @@ body {
     text-overflow: ellipsis;
     max-width: 150px;
   }
-  
+
   .email-recipient-name::after {
     content: attr(data-domain);
     display: none;
   }
-  
+
   .email-recipient-name {
     position: relative;
   }
-  
+
   .email-recipient-name:hover {
     overflow: visible;
     z-index: 1;
     background: white;
-    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   }
 }
-
-
-
 
 /* Add these styles to your EmailPreview.css file */
 
@@ -553,7 +561,6 @@ body {
 .status-badge {
   transition: all 0.3s ease;
 }
-
 
 .status-badge.processing {
   color: #2563eb;
@@ -606,8 +613,12 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Make sure the email list has a fixed height with scrolling for many emails */
@@ -622,12 +633,6 @@ body {
   color: #10b981;
 }
 
-
-
-
-
-
-
 /* Add these styles to your EmailPreview.css file */
 
 /* Improved animations and visual cues */
@@ -639,15 +644,11 @@ body {
   margin-bottom: 8px;
 }
 
-
-
 .email-recipients-list.sent {
   /* border-left-color: #4CAF50; */
   /* background: rgba(76, 175, 80, 0.08); */
   animation: slideOut 1.2s forwards;
 }
-
-
 
 /* Status badges with better visual differentiation */
 .status-badge {
@@ -662,12 +663,9 @@ body {
   font-weight: 500;
 }
 
-
 .status-badge.failed {
   color: #e53e3e;
 }
-
-
 
 .status-badge.processing {
   color: #3a57e8;
@@ -675,7 +673,7 @@ body {
 }
 
 .status-badge.scheduled {
-  color: #FFA000;
+  color: #ffa000;
 }
 
 /* Inline loading spinner next to processing text */
@@ -769,7 +767,7 @@ body {
 .status-footer:not(.scheduled):not(.status-complete):not(.status-error):after {
   content: "";
   height: 4px;
-  background: linear-gradient(90deg, #3a57e8 0%, #4CAF50 100%);
+  background: linear-gradient(90deg, #3a57e8 0%, #4caf50 100%);
   position: absolute;
   top: -12px;
   left: 0;
@@ -782,10 +780,8 @@ body {
 .status-footer-container {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  justify-content: center;
 }
-
-
 
 /* Add these styles to your existing EmailPreview.css file */
 
@@ -793,7 +789,7 @@ body {
 .scheduled-status {
   font-size: 15px;
   font-weight: normal;
-  color: #FFA000;
+  color: #ffa000;
   margin-left: 8px;
 }
 
@@ -819,7 +815,6 @@ body {
   position: relative;
   padding-left: 24px;
 }
-
 
 /* Status transition animations */
 .email-recipients-list.scheduled.processing {

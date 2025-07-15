@@ -265,6 +265,14 @@
     justify-content: center;
     background-color: inherit;
     cursor: pointer;
+  
+  }
+
+  .saved-templates-edit-button:focus,
+  .saved-templates-delete-button:focus,
+  .saved-templates-schedule-button:focus,
+  .saved-templates-use-button:focus{
+    outline: none;
   }
   
   .saved-templates-edit-button {

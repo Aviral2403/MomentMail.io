@@ -337,7 +337,7 @@ const TemplatePreview = () => {
   return (
     <div className="preview-container">
       <div className="back-button-container">
-        <Link to="/templates" className="back-button">
+        <Link to="/templates" className="back-button-preview">
           <IoMdArrowRoundBack className="back-icon" />
           <span>Back to Templates</span>
         </Link>

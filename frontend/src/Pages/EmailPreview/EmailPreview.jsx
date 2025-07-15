@@ -567,7 +567,7 @@ const EmailPreview = () => {
       <div className="email-preview-content">
         {allProcessed && (
           <div className="status-summary">
-            <div className="back-button">
+            <div className="back-button-dashboard">
               <Link to="/templates">
                 <button className="btn-back" onClick={handleBackToTemplates}>
                   <IoMdArrowRoundBack /> Back to Templates
