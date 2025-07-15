@@ -166,7 +166,7 @@ const Navbar = () => {
 
           <div className="nav-links desktop">
 
-            <Link to="/help/demo" className="nav-link">
+            <Link to="/help/demo" className="nav-link" onClick={closeMenu}>
               Demo
             </Link>
             <Link to="/templates" className="nav-link">
@@ -229,7 +229,7 @@ const Navbar = () => {
 
           <div className="sidebar-links">
 
-            <Link to="/help/demo" className="nav-link">
+            <Link to="/help/demo" className="nav-link" onClick={closeMenu}>
               Demo
             </Link>
 

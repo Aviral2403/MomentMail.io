@@ -207,7 +207,7 @@
 }
 
 .cta-button {
-  background: linear-gradient(45deg, #2563eb, #7c3aed);
+  background: #2555eb;
   color: white;
   padding: 1rem 2rem;
   margin-bottom: 0.5rem;
@@ -220,6 +220,7 @@
 
 .cta-button:hover {
   transform: translateY(-8px);
+  background-color: #1047ed;
 }
 
 .cta-subtitle {

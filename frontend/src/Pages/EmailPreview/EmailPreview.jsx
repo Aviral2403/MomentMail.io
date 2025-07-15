@@ -13,21 +13,139 @@ const extractUsername = (email) => {
 
 const createPreviewTemplate = (templateContent, recipientSample) => {
   if (!templateContent) return "";
-  if (!recipientSample) return templateContent;
   
-  const username = extractUsername(recipientSample);
+  // For PREVIEW only - don't replace placeholders, keep them as is for preview
+  // This ensures the preview shows [Customer Name] instead of actual email usernames
+  return templateContent;
+};
+
+// Enhanced helper function to make Unlayer content responsive
+const makeUnlayerResponsive = (htmlContent) => {
+  if (!htmlContent) return "";
   
-  // Replace common placeholders - for PREVIEW only
-  return templateContent
-    .replace(/\[Customer Name\]/gi, username)
-    .replace(/\[customer\.name\]/gi, username)
-    .replace(/\[customer\.email\]/gi, recipientSample)
-    .replace(/\[User\]/gi, username)
-    .replace(/\[user\]/gi, username)
-    .replace(/\[First Name\]/gi, username)
-    .replace(/\[firstname\]/gi, username)
-    .replace(/\[username\]/gi, username)
-    .replace(/\[email\]/gi, recipientSample);
+  // Check if this is already a hardcoded responsive template
+  if (htmlContent.includes('max-width: 600px') && htmlContent.includes('margin: 0 auto')) {
+    return htmlContent;
+  }
+  
+  // This is Unlayer content - make it responsive
+  let processedContent = htmlContent;
+  
+  // Replace fixed widths with responsive ones
+  processedContent = processedContent
+    // Replace fixed table widths
+    .replace(/width:\s*500px/g, 'width: 100%')
+    .replace(/max-width:\s*500px/g, 'max-width: 100%')
+    .replace(/min-width:\s*500px/g, 'min-width: 100%')
+    // Replace fixed column widths
+    .replace(/min-width:\s*320px/g, 'min-width: 100%')
+    .replace(/max-width:\s*320px/g, 'max-width: 100%')
+    // Make images responsive
+    .replace(/width="480"/g, 'width="100%"')
+    .replace(/max-width:\s*480px/g, 'max-width: 100%')
+    // Fix table layout
+    .replace(/table-layout:\s*fixed/g, 'table-layout: auto');
+  
+  // Enhanced responsive wrapper specifically for Unlayer content
+  return `
+    <style>
+      /* Responsive styles for Unlayer content */
+      .unlayer-responsive * {
+        box-sizing: border-box !important;
+      }
+      
+      .unlayer-responsive table {
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: auto !important;
+        border-collapse: collapse !important;
+      }
+      
+      .unlayer-responsive td {
+        width: 100% !important;
+        max-width: 100% !important;
+        word-wrap: break-word !important;
+        word-break: break-word !important;
+      }
+      
+      .unlayer-responsive img {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        display: block !important;
+      }
+      
+      .unlayer-responsive .u-row {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+      }
+      
+      .unlayer-responsive .u-col {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: block !important;
+      }
+      
+      .unlayer-responsive .u-row-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 2px !important;
+      }
+      
+      /* Force responsiveness on nested structures */
+      .unlayer-responsive div[style*="max-width: 500px"],
+      .unlayer-responsive div[style*="min-width: 500px"] {
+        max-width: 100% !important;
+        min-width: 100% !important;
+      }
+      
+      .unlayer-responsive div[style*="max-width: 320px"],
+      .unlayer-responsive div[style*="min-width: 320px"] {
+        max-width: 100% !important;
+        min-width: 100% !important;
+      }
+      
+      /* Text responsiveness */
+      .unlayer-responsive h1 {
+        font-size: 18px !important;
+        line-height: 1.2 !important;
+      }
+      
+      .unlayer-responsive p {
+        font-size: 14px !important;
+        line-height: 1.4 !important;
+      }
+      
+      /* Padding adjustments for mobile */
+      .unlayer-responsive td[style*="padding"] {
+        padding: 8px !important;
+      }
+    </style>
+    <table style="width: 100%; max-width: 100%; margin: 0; padding: 0; border-collapse: collapse;" role="presentation" cellspacing="0" cellpadding="0">
+      <tbody>
+        <tr>
+          <td style="padding: 0; margin: 0; width: 100%;">
+            <div class="unlayer-responsive" style="width: 100%; max-width: 100%; overflow-x: hidden; word-wrap: break-word; word-break: break-word;">
+              ${processedContent}
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+};
+
+// Enhanced wrapper for hardcoded templates
+const wrapHardcodedTemplate = (htmlContent) => {
+  if (!htmlContent) return "";
+  
+  // Hardcoded templates are already responsive, just ensure they fit in container
+  return `
+    <div style="width: 100%; max-width: 100%; overflow-x: hidden;">
+      ${htmlContent}
+    </div>
+  `;
 };
 
 const EmailPreview = () => {
@@ -89,16 +207,25 @@ const EmailPreview = () => {
     minute: "2-digit",
   });
 
-  // Create preview template with sample data from first recipient
+  // Create preview template - keep placeholders for preview
   useEffect(() => {
-    if (templateContent && recipients && recipients.length > 0) {
-      // Use first recipient as an example for the preview
-      const previewContent = createPreviewTemplate(templateContent, recipients[0]);
-      setPreviewTemplateContent(previewContent);
-    } else {
-      setPreviewTemplateContent(templateContent || "");
+    if (templateContent) {
+      // Don't replace placeholders for preview - keep them as [Customer Name]
+      const previewContent = createPreviewTemplate(templateContent, null);
+      
+      // Check if this is a hardcoded template or Unlayer content
+      const isHardcoded = previewContent.includes('max-width: 600px') && previewContent.includes('margin: 0 auto');
+      
+      let responsiveContent;
+      if (isHardcoded) {
+        responsiveContent = wrapHardcodedTemplate(previewContent);
+      } else {
+        responsiveContent = makeUnlayerResponsive(previewContent);
+      }
+      
+      setPreviewTemplateContent(responsiveContent);
     }
-  }, [templateContent, recipients]);
+  }, [templateContent]);
 
   // Initial setup for the component
   useEffect(() => {
@@ -627,9 +754,9 @@ const EmailPreview = () => {
                 <div className="mail-row message-row">
                   <div className="mail-label">Message</div>
                   <div className="mail-value message-content">
-                    {/* Show the original template content with placeholders in preview */}
+                    {/* Show the responsive wrapped template content */}
                     <div
-                      dangerouslySetInnerHTML={{ __html: templateContent }}
+                      dangerouslySetInnerHTML={{ __html: previewTemplateContent }}
                     />
                   </div>
                 </div>
