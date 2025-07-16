@@ -28,7 +28,6 @@ const Dashboard = () => {
   const [tagColor, setTagColor] = useState("#3b82f6");
   const [tags, setTags] = useState({});
   const [currentWeek, setCurrentWeek] = useState(0);
-
   // Pagination and filter states
   const [scheduledCurrentPage, setScheduledCurrentPage] = useState(1);
   const [historyCurrentPage, setHistoryCurrentPage] = useState(1);
@@ -37,18 +36,12 @@ const Dashboard = () => {
   const emailsPerPage = 6;
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
     const checkAuth = () => {
       const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
       if (!userInfo || !userInfo.token) {
         setIsAuthenticated(false);
         setError("Please login to access the dashboard");
+        setLoading(false);
       } else {
         setIsAuthenticated(true);
         const savedTags = JSON.parse(
@@ -62,10 +55,12 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!isAuthenticated) return;
+
     const fetchData = async () => {
       try {
         setLoading(true);
         setError("");
+
         if (activeTab === "scheduled") {
           const response = await getScheduledEmails();
           setScheduledEmails(response.scheduledEmails || []);
@@ -87,6 +82,7 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
+
     fetchData();
   }, [activeTab, isAuthenticated]);
 
@@ -97,7 +93,6 @@ const Dashboard = () => {
       const emailDate = new Date(email.scheduledAt || email.sentAt);
       const timeDiff = now - emailDate;
       const daysDiff = timeDiff / (1000 * 3600 * 24);
-
       switch (filter) {
         case "today":
           return daysDiff <= 1;
@@ -119,10 +114,8 @@ const Dashboard = () => {
 
   const filteredScheduledEmails = filterEmailsByDate(scheduledEmails, scheduledFilter);
   const filteredHistoryEmails = filterEmailsByDate(emailHistory, historyFilter);
-
   const paginatedScheduledEmails = paginate(filteredScheduledEmails, scheduledCurrentPage);
   const paginatedHistoryEmails = paginate(filteredHistoryEmails, historyCurrentPage);
-
   const totalScheduledPages = Math.ceil(filteredScheduledEmails.length / emailsPerPage);
   const totalHistoryPages = Math.ceil(filteredHistoryEmails.length / emailsPerPage);
 
@@ -168,7 +161,6 @@ const Dashboard = () => {
         el.setAttribute("style", newStyle);
       }
     });
-
     const elementsWithHeight = tempDiv.querySelectorAll(
       '[style*="height"], [height]'
     );
@@ -182,7 +174,6 @@ const Dashboard = () => {
         el.setAttribute("style", newStyle);
       }
     });
-
     const elementsWithTransform = tempDiv.querySelectorAll(
       '[style*="transform-origin"]'
     );
@@ -191,7 +182,6 @@ const Dashboard = () => {
       const newStyle = style.replace(/transform-origin:\s*[^;]+;?/gi, "");
       el.setAttribute("style", newStyle);
     });
-
     return tempDiv.innerHTML;
   };
 
@@ -316,6 +306,7 @@ const Dashboard = () => {
       { label: "6PM", hour: 18 },
       { label: "9PM", hour: 21 },
     ];
+
     return (
       <div className="horizontal-calendar-container">
         <div className="horizontal-calendar">
@@ -553,8 +544,8 @@ const Dashboard = () => {
           disabled={currentPage === 1}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-</svg>
+            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </button>
         <span className="dashboard-pagination-info">
           Page {currentPage} of {totalPages}
@@ -565,8 +556,8 @@ const Dashboard = () => {
           disabled={currentPage === totalPages}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-</svg>
+            <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </button>
       </div>
     );
@@ -607,7 +598,8 @@ const Dashboard = () => {
                   src="/auth.png"
                   width="180"
                   height="180"
-                ></img>
+                  alt="Authentication Required"
+                />
                 <h2>Authentication Required</h2>
                 <p>Please login to access your email dashboard</p>
                 <Link to="/login" className="dashboard-login-button">
@@ -863,7 +855,9 @@ const Dashboard = () => {
           ) : activeTab === "scheduled" ? (
             <div className="dashboard-data-section">
               {renderFilters(scheduledFilter, "scheduled")}
-              {paginatedScheduledEmails.length === 0 ? (
+              {loading ? (
+                <LoadingSkeleton type="dashboard" activeTab={activeTab} />
+              ) : paginatedScheduledEmails.length === 0 ? (
                 <div className="dashboard-empty-state">
                   <img
                     src="/empty.svg"
@@ -992,7 +986,9 @@ const Dashboard = () => {
           ) : (
             <div className="dashboard-data-section">
               {renderFilters(historyFilter, "history")}
-              {paginatedHistoryEmails.length > 0 ? (
+              {loading ? (
+                <LoadingSkeleton type="dashboard" activeTab={activeTab} />
+              ) : paginatedHistoryEmails.length > 0 ? (
                 <div className="dashboard-cards-grid dashboard-history-cards">
                   {paginatedHistoryEmails.map((email) => {
                     const formattedDate = formatDate(email.sentAt);

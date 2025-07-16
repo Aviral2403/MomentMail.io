@@ -79,10 +79,7 @@
       min-width: 250px;
     }
   
-    .hero-subtitle {
-      font-size: 1.3rem;
-      max-width: 90%;
-    }
+    
   
     .templates-container {
       gap: .5rem;
@@ -133,10 +130,7 @@
       font-size: 2.5rem;
     }
   
-    .hero-subtitle {
-      font-size: 1.25rem;
-      max-width: 90%;
-    }
+    
   
     .templates-container {
       gap: 0.5rem;
@@ -170,9 +164,7 @@
       font-size: 2rem;
     }
   
-    .hero-subtitle {
-      font-size: 1.2rem;
-    }
+    
   
     .templates-container {
       padding: 0 0.5rem;

@@ -648,7 +648,7 @@
 .recipient-selector-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  /* align-items: center; */
   margin-bottom: 2rem;
   flex-wrap: wrap;
   gap: 1rem;
@@ -755,6 +755,9 @@
 
 .btn-connect-drive:hover {
   background-color:#2563eb;
+}
+.btn-connect-drive:focus{
+  outline: none;
 }
 
 .btn-connect-drive:disabled {

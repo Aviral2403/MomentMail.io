@@ -39,7 +39,12 @@ const HomePage = () => {
                 <span className="gradient-text">
                   <RotatingText
                     ref={rotatingTextRef}
-                    texts={["Effortless!", "Effective!", "Efficient!", "Simple!"]}
+                    texts={[
+                      "Effortless!",
+                      "Effective!",
+                      "Efficient!",
+                      "Simple!",
+                    ]}
                     mainClassName="rotating-text-highlight"
                     staggerFrom="last"
                     initial={{ y: "100%" }}
@@ -58,13 +63,33 @@ const HomePage = () => {
             </h1>
           </div>
           <h3 className="hero-subtitle">
-            Stop Copy-Pasting, Start Automating –{" "}
-            <span>Email Everyone In Few Clicks!</span>
+            Stop Copy-Pasting, Start Automating, Email Everyone In Few Clicks!
           </h3>
+          <div className="homepage-action-buttons">
+            <div className="homepage-send-button">
+              <Link to="/templates">
+                <button className="send-button-homepage">Send Now 
+                  <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                </button>
+              </Link>
+            </div>
+          </div>
         </div>
 
         <DualScroll />
-
         <HeroSection />
 
         <Workflow />
@@ -76,10 +101,9 @@ const HomePage = () => {
             overflow: "hidden",
           }}
         >
-          
-            <TemplatesHero />
-            <EmailMarketingAI />
-            <ScheduleEmail />
+          <TemplatesHero />
+          <EmailMarketingAI />
+          <ScheduleEmail />
         </div>
 
         <div className="features-grid">
@@ -113,7 +137,7 @@ const HomePage = () => {
           ))}
         </div>
 
-        <BentoGrid/>
+        <BentoGrid />
 
         <div className="tagline">
           <p className="text-xl">
