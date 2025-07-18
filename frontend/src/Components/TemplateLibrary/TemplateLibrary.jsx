@@ -17,6 +17,7 @@ const TemplateLibrary = () => {
         <div className="template-lib-image-container">
           <img
             src="/Email_Templates.png"
+            loading="lazy"
             alt="Email template hero"
             className="template-lib-hero-image"
           />

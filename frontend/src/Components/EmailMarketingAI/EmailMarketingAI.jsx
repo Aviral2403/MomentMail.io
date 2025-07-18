@@ -87,6 +87,7 @@ const EmailMarketingAI = () => {
         >
           <img
             src="/Marketing_AI.png"
+            loading="lazy"
             alt="emaill Marketing AI Interface"
             className="email-hero-image"
            

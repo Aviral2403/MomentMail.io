@@ -197,6 +197,7 @@ const BentoGrid = () => {
             <img
               src={imageCategories.travel[currentImages.travel]}
               alt="Travel"
+              loading="lazy"
               className="bento-image"
             />
             <div className="bento-overlay"></div>
@@ -225,6 +226,7 @@ const BentoGrid = () => {
             <img
               src={imageCategories.walking[currentImages.walking]}
               alt="Walking"
+              loading="lazy"
               className="bento-image"
             />
             <div className="bento-overlay"></div>
@@ -252,6 +254,7 @@ const BentoGrid = () => {
             <img
               src={imageCategories.potential[currentImages.potential]}
               alt="Unlock Potential"
+              loading="lazy"
               className="bento-image"
             />
             <div className="bento-overlay bento-dark"></div>
@@ -270,6 +273,7 @@ const BentoGrid = () => {
             <img
               src={imageCategories.competitions[currentImages.competitions]}
               alt="Statistics"
+              loading="lazy"
               className="bento-image"
             />
             <div className="bento-overlay bento-yellow-bg"></div>

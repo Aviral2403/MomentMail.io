@@ -119,16 +119,16 @@ const ProtectedRoute = ({ children }) => {
       <div className="protected-page-container">
         <div className="protected-floating-images">
           <div className="protected-floating-image protected-image-1">
-            <img src="/bento-8.jpg" alt="Image 1" />
+            <img src="/bento-8.jpg" loading="lazy" alt="Image 1" />
           </div>
           <div className="protected-floating-image protected-image-2">
-            <img src="/bento-333.png" alt="Image 2" />
+            <img src="/bento-333.png" loading="lazy" alt="Image 2" />
           </div>
           <div className="protected-floating-image protected-image-3">
-            <img src="/bento-7.webp" alt="Image 3" />
+            <img src="/bento-7.webp" loading="lazy" alt="Image 3" />
           </div>
           <div className="protected-floating-image protected-image-4">
-            <img src="/template-10.webp" alt="Image 4" />
+            <img src="/template-10.webp" loading="lazy" alt="Image 4" />
           </div>
         </div>
         
@@ -147,16 +147,16 @@ const ProtectedRoute = ({ children }) => {
       <div className="protected-page-container">
         <div className="protected-floating-images">
           <div className="protected-floating-image protected-image-1">
-            <img src="/bento-8.jpg" alt="Image 1" />
+            <img src="/bento-8.jpg" loading="lazy" alt="Image 1" />
           </div>
           <div className="protected-floating-image protected-image-2">
-            <img src="/template-10.webp" alt="Image 2" />
+            <img src="/template-10.webp" loading="lazy" alt="Image 2" />
           </div>
           <div className="protected-floating-image protected-image-3">
-            <img src="/bento-7.webp" alt="Image 3" />
+            <img src="/bento-7.webp" loading="lazy" alt="Image 3" />
           </div>
           <div className="protected-floating-image protected-image-4">
-            <img src="/bento-333.png" alt="Image 4" />
+            <img src="/bento-333.png" loading="lazy" alt="Image 4" />
           </div>
         </div>
 
@@ -178,6 +178,7 @@ const ProtectedRoute = ({ children }) => {
                 <img
                   className="protected-auth-icon"
                   src="/auth.png"
+                  loading="lazy"
                   width="180"
                   height="180"
                   alt="Authentication required"

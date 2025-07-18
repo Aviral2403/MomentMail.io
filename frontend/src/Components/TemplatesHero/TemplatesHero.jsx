@@ -10,6 +10,7 @@ const TemplatesHero = () => {
         <div className="th-image-container">
           <img
             src="/templateshero.jpg"
+            loading="lazy"
             alt="Email template hero"
             className="th-hero-image"
           />

@@ -159,6 +159,7 @@ const TemplatesList = () => {
             <img
               className="saved-templates-auth-icon"
               src="/auth.png"
+              loading="lazy"
               width="180"
               height="180"
               alt="Authentication required"
@@ -237,6 +238,7 @@ const TemplatesList = () => {
             <>
               <img
                 src="/empty.svg"
+                loading="lazy"
                 className="dashboard-empty-icon"
                 width="256"
                 height="256"
@@ -249,7 +251,7 @@ const TemplatesList = () => {
               <div className="saved-templates-create-new-template">
                 <p>You haven't created any templates yet.</p>
 
-                <img src="/create-new.png" alt="" width="180" height="180" />
+                <img src="/create-new.png" loading="lazy" alt="" width="180" height="180" />
                 <Link
                   to="/templates/create/new"
                   className="saved-templates-create-first-template"

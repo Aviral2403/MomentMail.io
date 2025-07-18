@@ -596,6 +596,7 @@ const Dashboard = () => {
                 <img
                   className="dashboard-auth-icon"
                   src="/auth.png"
+                  loading="lazy"
                   width="180"
                   height="180"
                   alt="Authentication Required"
@@ -861,6 +862,7 @@ const Dashboard = () => {
                 <div className="dashboard-empty-state">
                   <img
                     src="/empty.svg"
+                    loading="lazy"
                     className="dashboard-empty-icon"
                     width="256"
                     height="256"
@@ -1059,6 +1061,7 @@ const Dashboard = () => {
                 <div className="dashboard-empty-state">
                   <img
                     src="/empty.svg"
+                    loading="lazy"
                     className="scheduled-dashboard-empty-icon"
                     width="256"
                     height="256"

@@ -168,7 +168,7 @@ const RollingGallery = ({
                 }deg) translateZ(${radius}px)`,
               }}
             >
-              <img src={url} alt={`gallery-${i}`} className="gallery-img" />
+              <img src={url} alt={`gallery-${i}`} loading="lazy" className="gallery-img" />
             </div>
           ))}
         </motion.div>

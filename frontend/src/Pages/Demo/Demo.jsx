@@ -57,16 +57,16 @@ const Demo = () => {
       <section className="demo-hero-container">
         <div className="demo-floating-images">
           <div className="demo-floating-image demo-image-1">
-            <img src="/template-2233.jpg" alt="Image 1" />
+            <img src="/template-2233.jpg" loading="lazy" alt="Image 1" />
           </div>
           <div className="demo-floating-image demo-image-2">
-            <img src="/template-1122.webp" alt="Image 2" />
+            <img src="/template-1122.webp" loading="lazy" alt="Image 2" />
           </div>
           <div className="demo-floating-image demo-image-3">
-            <img src="/bento-2.png" alt="Image 3" />
+            <img src="/bento-2.png" loading="lazy" alt="Image 3" />
           </div>
           <div className="demo-floating-image demo-image-4">
-            <img src="/bento-1.png" alt="Image 4" />
+            <img src="/bento-1.png" loading="lazy" alt="Image 4" />
           </div>
         </div>
 

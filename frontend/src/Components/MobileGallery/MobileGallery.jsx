@@ -36,6 +36,7 @@ const MobileGallery = ({ images = [] }) => {
           >
             <img
               src={images[currentIndex]}
+              loading="lazy"
               alt={`gallery-${currentIndex}`}
               className="mobile-gallery-img"
             />

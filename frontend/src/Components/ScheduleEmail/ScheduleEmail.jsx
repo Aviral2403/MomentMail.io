@@ -11,6 +11,7 @@ const ScheduleEmail = () => {
         <div className="schedule-email-image-container">
           <img
             src="/schedule.png"
+            loading="lazy"
             alt="emaill Marketing AI Interface"
             className="schedule-email-hero-image"
           />
