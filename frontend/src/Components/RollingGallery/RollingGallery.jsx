@@ -1,7 +1,12 @@
 /* eslint-disable react/prop-types */
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useMotionValue, useAnimation, useTransform } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useAnimation,
+  useTransform,
+} from "framer-motion";
 import "./RollingGallery.css";
 import MobileGallery from "../MobileGallery/MobileGallery";
 
@@ -9,45 +14,50 @@ const IMGS = [
   // "template-1.webp",
   // "template-7.jpg",
   // "template-4.webp",
-   "bento-1.png",
-   "bento-2.png",
-   "bento-7.webp",
   "template-9.jpg",
+  "bento-1.png",
+  "bento-7.webp",
   "template-10.webp",
   "templates-3.webp",
   "bento-8.jpg",
+  "bento-2.png",
   // "templates-4.webp",
-
-
-
-
 ];
 
-const RollingGallery = ({ autoplay = false, pauseOnHover = false, images = [] }) => {
+const RollingGallery = ({
+  autoplay = false,
+  pauseOnHover = false,
+  images = [],
+}) => {
   images = IMGS;
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 520);
   const [isPaused, setIsPaused] = useState(false);
   const [screenSize, setScreenSize] = useState({
     width: window.innerWidth,
-    visibleImages: window.innerWidth > 1024 ? 3 : window.innerWidth > 768 ? 2 : 1,
-    cylinderWidth: window.innerWidth > 1024 ? 2400 : window.innerWidth > 768 ? 1800 : 1200
+    visibleImages:
+      window.innerWidth > 1024 ? 3 : window.innerWidth > 768 ? 2 : 1,
+    cylinderWidth:
+      window.innerWidth > 1024 ? 2400 : window.innerWidth > 768 ? 1800 : 1200,
   });
 
   const rotation = useMotionValue(0);
   const controls = useAnimation();
   const autoplayRef = useRef();
-  const transform = useTransform(rotation, (value) => `rotate3d(0, 1, 0, ${value}deg)`);
+  const transform = useTransform(
+    rotation,
+    (value) => `rotate3d(0, 1, 0, ${value}deg)`
+  );
 
   const calculateDimensions = () => {
     const width = window.innerWidth;
     setIsMobile(width <= 520);
     const visibleImages = width > 1024 ? 3 : width > 768 ? 2 : 1;
     const cylinderWidth = width > 1024 ? 2400 : width > 768 ? 1800 : 1200;
-    
+
     setScreenSize({
       width,
       visibleImages,
-      cylinderWidth
+      cylinderWidth,
     });
   };
 
@@ -62,11 +72,11 @@ const RollingGallery = ({ autoplay = false, pauseOnHover = false, images = [] })
       // Set up continuous rotation animation
       controls.start({
         rotateY: [rotation.get(), rotation.get() - 360],
-        transition: { 
+        transition: {
           duration: 25, // Slow continuous rotation that takes 30 seconds for full 360°
           ease: "linear", // Linear for continuous smooth rotation
           repeat: Infinity, // Loop infinitely
-          repeatType: "loop"
+          repeatType: "loop",
         },
       });
     }
@@ -100,12 +110,12 @@ const RollingGallery = ({ autoplay = false, pauseOnHover = false, images = [] })
       // Just apply momentum if autoplay is off
       controls.start({
         rotateY: rotation.get() + info.velocity.x * dragFactor,
-        transition: { 
-          type: "spring", 
-          stiffness: 30, 
-          damping: 25, 
-          mass: 0.5, 
-          ease: "easeOut" 
+        transition: {
+          type: "spring",
+          stiffness: 30,
+          damping: 25,
+          mass: 0.5,
+          ease: "easeOut",
         },
       });
     }
@@ -153,7 +163,9 @@ const RollingGallery = ({ autoplay = false, pauseOnHover = false, images = [] })
               className="gallery-item"
               style={{
                 width: `${faceWidth}px`,
-                transform: `rotateY(${i * (360 / faceCount)}deg) translateZ(${radius}px)`,
+                transform: `rotateY(${
+                  i * (360 / faceCount)
+                }deg) translateZ(${radius}px)`,
               }}
             >
               <img src={url} alt={`gallery-${i}`} className="gallery-img" />

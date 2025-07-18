@@ -12,37 +12,40 @@ const imageItems = [
   { id: 7, content: <img src="/template-2233.jpg" alt="Scroll item 7" /> },
   { id: 8, content: <img src="/login123.webp" alt="Scroll item 8" /> },
   { id: 9, content: <img src="/template-9.jpg" alt="Scroll item 9" /> },
+  { id: 10, content: <img src="/template-9999.png" alt="Scroll item 10" /> },
 ];
 
-// Function to create sequential order for left side (1-9 repeated)
-const createLeftSequence = (items, copies = 3) => {
-  let sequence = [];
-  for (let i = 0; i < copies; i++) {
-    sequence.push(...items);
-  }
-  return sequence;
-};
-
-// Function to create offset sequence for right side (5-9, 1-4 repeated)
-const createRightSequence = (items, copies = 3) => {
-  let sequence = [];
-  // Create offset sequence: items 5-9, then 1-4
-  const offsetSequence = [...items.slice(6), ...items.slice(0, 6)];
+// Create custom sequences as specified
+const createCustomSequences = (items, copies = 3) => {
+  const leftSequence = [];
+  const rightSequence = [];
   
-  for (let i = 0; i < copies; i++) {
-    sequence.push(...offsetSequence);
+  // Left sequence: 2, 4, 6, 8, 10, then 1, 3, 5, 7, 9
+  const leftEvenItems = [items[1], items[3], items[5], items[7], items[9]]; // IDs 2, 4, 6, 8, 10
+  const leftOddItems = [items[8], items[6], items[4], items[2], items[0]];  // IDs 1, 3, 5, 7, 9
+  
+  const rightItems = [items[0], items[2], items[4], items[6], items[8], items[9], items[7], items[5], items[3], items[1]];
+  
+  for (let copy = 0; copy < copies; copy++) {
+    // Left sequence: 2, 4, 6, 8, 10, then 1, 3, 5, 7, 9
+    leftSequence.push(...leftEvenItems, ...leftOddItems);
+    
+    // Right sequence: 10, 8, 6, 4, 2, 9, 7, 5, 3, 1
+    rightSequence.push(...rightItems);
   }
-  return sequence;
+  
+  return { leftSequence, rightSequence };
 };
 
 const DualScroll = () => {
   const containerRef = useRef(null);
-
+  
   // Use memo to prevent re-creation on every render
   const { leftItems, rightItems } = useMemo(() => {
+    const { leftSequence, rightSequence } = createCustomSequences(imageItems);
     return {
-      leftItems: createLeftSequence(imageItems),
-      rightItems: createRightSequence(imageItems)
+      leftItems: leftSequence,
+      rightItems: rightSequence
     };
   }, []);
 
@@ -56,7 +59,7 @@ const DualScroll = () => {
             isTilted={true}
             tiltDirection="left"
             autoplay={true}
-            autoplaySpeed={4.5}
+            autoplaySpeed={3.5}
             autoplayDirection="down"
             pauseOnHover={true}
             itemMinHeight={250}
@@ -69,7 +72,7 @@ const DualScroll = () => {
             isTilted={true}
             tiltDirection="left"
             autoplay={true}
-            autoplaySpeed={4.5} // Slightly different speed to prevent sync
+            autoplaySpeed={3.5}
             autoplayDirection="up"
             pauseOnHover={true}
             itemMinHeight={250}
