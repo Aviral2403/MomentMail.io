@@ -155,3 +155,52 @@
       margin-bottom: 2rem;
     }
   }
+
+  .terms-nav-item button:focus{
+    outline:none
+  }
+
+
+
+.terms-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 75vh;
+  background: radial-gradient(
+    ellipse 120% 80% at 50% 0%,
+    rgba(37, 85, 235, 0.3) 0%,
+    rgba(37, 85, 235, 0.1) 40%,
+    transparent 80%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+.terms-container::after {
+  content: "";
+  position: absolute;
+  top: 50vh;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      ellipse 40% 30% at 20% 70%,
+      rgba(37, 85, 235, 0.1) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 35% 25% at 80% 60%,
+      rgba(37, 85, 235, 0.08) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 30% 20% at 60% 80%,
+      rgba(37, 85, 235, 0.06) 0%,
+      transparent 70%
+    );
+  z-index: 1;
+  pointer-events: none;
+}
