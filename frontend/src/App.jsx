@@ -22,11 +22,12 @@ import TemplatesList from "./Pages/TemplatesList/TemplatesList";
 import TemplateBuilder from "./Pages/TemplateBuilder/TemplateBuilder";
 import Demo from "./Pages/Demo/Demo";
 import ProtectedRoute from "./Components/ProtectedRoute/ProtectedRoute";
+import LeadGeneration from "./Pages/LeadGeneration/LeadGeneration";
 
 // Scroll to top component with multiple approaches
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  
+
   // Primary scroll method - immediate execution before paint
   useLayoutEffect(() => {
     // Force immediate scroll to top
@@ -34,7 +35,7 @@ const ScrollToTop = () => {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
   }, [pathname]);
-  
+
   // Secondary scroll method - handles any delayed content loading
   useEffect(() => {
     // Multiple approaches to ensure scroll happens
@@ -50,7 +51,7 @@ const ScrollToTop = () => {
     // Delayed scroll for any async content
     const timer1 = setTimeout(scrollToTop, 0);
     const timer2 = setTimeout(scrollToTop, 100);
-    
+
     // Additional scroll after potential content load
     const timer3 = setTimeout(scrollToTop, 300);
 
@@ -61,7 +62,7 @@ const ScrollToTop = () => {
       clearTimeout(timer3);
     };
   }, [pathname]);
-  
+
   return null;
 };
 
@@ -116,7 +117,7 @@ const App = () => {
           element={
             <Layout>
               <GoogleOAuthWrapper>
-                  <Templates />
+                <Templates />
               </GoogleOAuthWrapper>
             </Layout>
           }
@@ -244,6 +245,19 @@ const App = () => {
               <GoogleOAuthWrapper>
                 <ProtectedRoute>
                   <TemplateBuilder />
+                </ProtectedRoute>
+              </GoogleOAuthWrapper>
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/lead-generation"
+          element={
+            <Layout>
+              <GoogleOAuthWrapper>
+                <ProtectedRoute>
+                  <LeadGeneration />
                 </ProtectedRoute>
               </GoogleOAuthWrapper>
             </Layout>

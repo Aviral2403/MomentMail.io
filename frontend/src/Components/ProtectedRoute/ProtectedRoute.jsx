@@ -10,8 +10,13 @@ const routeContent = {
     subtitle: 'Please login to access your dashboard and view your analytics',
     features: ['View Analytics', 'Manage Projects', 'Track Progress']
   },
+  '/lead-generation': {
+    title: 'Lead Management',
+    subtitle: 'Please login to capture, organize, and track your leads',
+    features: [ 'Capture Leads', 'Boost Sales', 'Grow Outreach', 'Increase Conversions']
+  },
   '/my-templates': {
-    title: 'Templates Library',
+    title: 'Saved Templates Collection',
     subtitle: 'Please login to access your personal template collection',
     features: ['View Templates', 'Create New', 'Edit Existing']
   },

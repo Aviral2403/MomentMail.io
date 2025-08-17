@@ -1,0 +1,401 @@
+.lead-generation-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  color: #fff;
+  background-color: #121212;
+  min-height: 100vh;
+  margin-top: 8rem;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #333;
+}
+
+.tab {
+  padding: 10px 20px;
+  background-color: transparent;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+.tab:hover {
+  color: #fff;
+}
+
+.tab.active {
+  color: #2555eb;
+  border-bottom: 2px solid #2555eb;
+}
+
+.tab-content {
+  background-color: #1e1e1e;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.generate-leads h2,
+.lead-history h2,
+.generated-leads h2,
+.lead-details h2 {
+  color: #2555eb;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #ddd;
+}
+
+.form-group input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  background-color: #333;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+}
+
+.source-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #333;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  margin: 0;
+}
+
+.generate-button {
+  background-color: #2555eb;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.generate-button:hover {
+  background-color: #1a4ac5;
+}
+
+.generate-button:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
+.history-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.history-card {
+  background-color: #252525;
+  border-radius: 8px;
+  padding: 15px;
+  transition: transform 0.3s;
+}
+
+.history-card:hover {
+  transform: translateY(-5px);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.card-header h3 {
+  margin: 0;
+  color: #2555eb;
+}
+
+.date {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.card-body p {
+  margin: 5px 0;
+  color: #ddd;
+}
+
+.view-details-button {
+  background-color: #2555eb;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.leads-table-container {
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.leads-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leads-table th,
+.leads-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #333;
+}
+
+.leads-table th {
+  background-color: #252525;
+  color: #2555eb;
+}
+
+.leads-table tr:hover {
+  background-color: #252525;
+}
+
+.tag-button {
+  background-color: #2555eb;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.back-button {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tag {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.remove-tag {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+}
+
+.notes-section textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px;
+  background-color: #333;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.save-notes-button {
+  background-color: #2555eb;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Success and Progress Messages */
+.lead-generation-success-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 8px;
+  color: #155724;
+  margin-bottom: 16px;
+}
+
+.lead-generation-success-icon {
+  color: #28a745;
+  flex-shrink: 0;
+}
+
+.lead-generation-progress-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #e3f2fd;
+  border: 1px solid #bbdefb;
+  border-radius: 8px;
+  color: #1565c0;
+  margin-bottom: 16px;
+}
+
+.spinner, .button-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #2555eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Info Box */
+.info-box {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.info-box h3 {
+  margin: 0 0 12px 0;
+  color: #495057;
+}
+
+.info-box ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.info-box li {
+  margin-bottom: 8px;
+  color: #6c757d;
+}
+
+/* Field Hints */
+.field-hint {
+  font-size: 0.85em;
+  color: #6c757d;
+  font-weight: normal;
+}
+
+.source-count {
+  color: #6c757d;
+  font-style: italic;
+  margin-top: 8px;
+  display: block;
+}
+
+/* Loading States */
+.generate-button.loading {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.loading-info {
+ margin-top: 16px;
+ padding: 16px;
+ background: #fff3cd;
+ border: 1px solid #ffeaa7;
+ border-radius: 8px;
+ text-align: center;
+}
+
+.loading-info p {
+ margin: 8px 0;
+ color: #856404;
+}
+
+/* Button Loading State */
+.generate-button {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 10px;
+ min-height: 48px;
+}
+
+.generate-button:disabled {
+ opacity: 0.7;
+ cursor: not-allowed;
+}
+
+/* Form Improvements */
+.checkbox-label {
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ padding: 8px 12px;
+ border: 1px solid #e9ecef;
+ border-radius: 6px;
+ margin-bottom: 8px;
+ cursor: pointer;
+ transition: background-color 0.2s;
+}
+
+.checkbox-label:hover {
+ background-color: #f8f9fa;
+}
+
+.checkbox-label input[type="checkbox"]:disabled + span {
+ color: #6c757d;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+ .source-checkboxes {
+   display: grid;
+   grid-template-columns: 1fr;
+   gap: 8px;
+ }
+ 
+ .leads-table-container {
+   overflow-x: auto;
+ }
+ 
+ .info-box {
+   padding: 12px;
+ }
+}
