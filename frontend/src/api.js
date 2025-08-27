@@ -444,223 +444,22 @@ export const uploadImage = async (formData) => {
   }
 };
 
-// Enhanced Lead Generation API with better error handling and retry logic
-const createLeadAPI = () => {
-  const leadAPI = axios.create({
-    baseURL: API_BASE_URL,
-    timeout: 180000, // 3 minutes timeout for lead generation
-  });
+// Add these to your existing api.js
 
-  // Add request interceptor to include auth token
-  leadAPI.interceptors.request.use(
-    async (config) => {
-      console.log(`Making lead API request to: ${config.url}`);
-      
-      let userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-      
-      if (userInfo?.token) {
-        // Check token expiry before making request
-        if (isTokenExpiringSoon(userInfo.token)) {
-          console.log('Token expiring soon, refreshing before lead API request...');
-          try {
-            const refreshResult = await refreshAuthToken(userInfo.token);
-            if (refreshResult.refreshed && refreshResult.token) {
-              userInfo = { ...userInfo, token: refreshResult.token };
-              localStorage.setItem('user-info', JSON.stringify(userInfo));
-            }
-          } catch (refreshError) {
-            console.error('Token refresh failed before lead API request:', refreshError);
-          }
-        }
-        
-        config.headers.Authorization = `Bearer ${userInfo.token}`;
-      }
-      
-      // Add request timestamp for debugging
-      config.metadata = { startTime: Date.now() };
-      
-      return config;
-    },
-    (error) => {
-      console.error('Lead API request interceptor error:', error);
-      return Promise.reject(error);
-    }
-  );
-
-  // Enhanced response interceptor for lead API
-  leadAPI.interceptors.response.use(
-    (response) => {
-      const duration = response.config.metadata ? 
-        Date.now() - response.config.metadata.startTime : 0;
-      
-      console.log('Lead API Success:', {
-        url: response.config.url,
-        method: response.config.method,
-        status: response.status,
-        duration: `${duration}ms`,
-        dataSize: response.data ? JSON.stringify(response.data).length : 0
-      });
-      
-      return response;
-    },
-    async (error) => {
-      const duration = error.config?.metadata ? 
-        Date.now() - error.config.metadata.startTime : 0;
-        
-      console.error('Lead API Error:', {
-        url: error.config?.url,
-        method: error.config?.method,
-        status: error.response?.status,
-        duration: `${duration}ms`,
-        message: error.message,
-        data: error.response?.data
-      });
-      
-      // Enhanced error messages for different scenarios
-      if (error.code === 'ECONNABORTED') {
-        error.userMessage = 'The lead generation is taking longer than expected. This is normal for comprehensive searches. Please wait and the system will continue processing.';
-      } else if (error.response?.status === 429) {
-        const retryAfter = error.response.headers['retry-after'] || 60;
-        error.userMessage = `You have made too many requests. Please wait ${retryAfter} seconds before trying again.`;
-      } else if (error.response?.status === 401) {
-        error.userMessage = 'Your session has expired. Please login again to continue.';
-        // Auto-redirect to login
-        setTimeout(() => {
-          localStorage.removeItem('user-info');
-          window.location.href = '/login';
-        }, 2000);
-      } else if (error.response?.status >= 500) {
-        error.userMessage = 'Server error occurred during lead generation. Please try again in a few minutes.';
-      } else if (error.response?.status === 422) {
-        error.userMessage = error.response.data?.message || 'No leads could be generated with the current search parameters. Try different keywords or sources.';
-      } else if (!error.response) {
-        error.userMessage = 'Network connectivity issue. Please check your internet connection and try again.';
-      }
-      
-      return Promise.reject(error);
-    }
-  );
-
-  return leadAPI;
-};
-
-const leadAPI = createLeadAPI();
-
-// Enhanced lead generation function with retry logic
-export const generateLeads = async (data, onProgress) => {
-  const startTime = Date.now();
-  console.log('='.repeat(50));
-  console.log('STARTING LEAD GENERATION REQUEST');
-  console.log('='.repeat(50));
-  console.log('Request data:', data);
-  
+export const generateLeads = async (searchData) => {
   try {
-    // Enhanced validation
-    if (!data.keyword || data.keyword.trim().length < 2) {
-      throw new Error('Keyword must be at least 2 characters long');
-    }
-
-    if (!data.sources || !Array.isArray(data.sources) || data.sources.length === 0) {
-      throw new Error('At least one source must be selected');
-    }
-
-    if (data.sources.length > 4) {
-      throw new Error('Maximum 4 sources allowed to prevent timeouts');
-    }
-
-    if (!data.location || data.location.trim().length < 2) {
-      throw new Error('Location must be at least 2 characters long');
-    }
-
-    // Clean the data
-    const cleanData = {
-      keyword: data.keyword.trim(),
-      sources: data.sources.filter(s => s && s.trim()),
-      location: data.location.trim(),
-      emailDomain: data.emailDomain ? data.emailDomain.trim() : ''
-    };
-
-    console.log('Cleaned data:', cleanData);
-    console.log('Sending request to /api/leads/generate...');
-    
-    // Call progress callback if provided
-    if (onProgress) {
-      onProgress('Initializing lead generation...');
-      
-      // Simulate progress updates
-      const progressInterval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const messages = [
-          'Connecting to search engines...',
-          'Processing search queries...',
-          'Extracting contact information...',
-          'Analyzing results with AI...',
-          'Finalizing lead data...'
-        ];
-        
-        const messageIndex = Math.floor(elapsed / 15000) % messages.length;
-        onProgress(messages[messageIndex]);
-      }, 10000);
-      
-      // Clear interval after request completes
-      setTimeout(() => clearInterval(progressInterval), 180000);
-    }
-    
-    const response = await leadAPI.post('/api/leads/generate', cleanData);
-    
-    const duration = Date.now() - startTime;
-    console.log('='.repeat(50));
-    console.log('LEAD GENERATION COMPLETED');
-    console.log('='.repeat(50));
-    console.log(`Duration: ${Math.round(duration / 1000)}s`);
-    console.log('Response:', {
-      success: response.data?.success,
-      leadCount: response.data?.data?.leads?.length || 0,
-      sources: response.data?.data?.stats?.successfulSources || 0
-    });
-    
-    if (onProgress) {
-      onProgress('Lead generation completed!');
-    }
-    
-    return response;
-    
+    const response = await api.post('/api/leads/generate', searchData);
+    return response.data;
   } catch (error) {
-    const duration = Date.now() - startTime;
-    console.error('='.repeat(50));
-    console.error('LEAD GENERATION FAILED');
-    console.error('='.repeat(50));
-    console.error(`Duration: ${Math.round(duration / 1000)}s`);
-    console.error('Error:', error.message);
-    
-    if (onProgress) {
-      onProgress('Lead generation failed');
-    }
-    
-    // Use enhanced error message if available
-    const userMessage = error.userMessage || error.response?.data?.message || error.message;
-    
-    // Create enhanced error object
-    const enhancedError = new Error(userMessage);
-    enhancedError.originalError = error;
-    enhancedError.duration = duration;
-    enhancedError.status = error.response?.status;
-    enhancedError.data = error.response?.data;
-    
-    throw enhancedError;
+    console.error('Error generating leads:', error);
+    throw error;
   }
 };
 
-// Remaining lead API functions
-export const getLeadHistory = async () => {
+export const getLeadHistory = async (page = 1, limit = 20) => {
   try {
-    console.log('Fetching lead history...');
-    const response = await leadAPI.get('/api/leads/history');
-    console.log('Lead history response:', {
-      success: response.data?.success,
-      count: response.data?.data?.length || 0
-    });
-    return response;
+    const response = await api.get(`/api/leads/history?page=${page}&limit=${limit}`);
+    return response.data;
   } catch (error) {
     console.error('Error fetching lead history:', error);
     throw error;
@@ -669,51 +468,30 @@ export const getLeadHistory = async () => {
 
 export const getLeadDetails = async (id) => {
   try {
-    console.log('Fetching lead details for ID:', id);
-    const response = await leadAPI.get(`/api/leads/history/${id}`);
-    console.log('Lead details response:', {
-      success: response.data?.success,
-      leadCount: response.data?.data?.leads?.length || 0
-    });
-    return response;
+    const response = await api.get(`/api/leads/history/${id}`);
+    return response.data;
   } catch (error) {
     console.error('Error fetching lead details:', error);
     throw error;
   }
 };
 
-export const addTagToLead = async (data) => {
+export const updateLeadNotes = async (searchId, leadIndex, updateData) => {
   try {
-    console.log('Adding tag to lead:', data);
-    const response = await leadAPI.post('/api/leads/tag', data);
-    console.log('Add tag response:', response.data);
-    return response;
+    const response = await api.put(`/api/leads/update/${searchId}/${leadIndex}`, updateData);
+    return response.data;
   } catch (error) {
-    console.error('Error adding tag:', error);
+    console.error('Error updating lead notes:', error);
     throw error;
   }
 };
 
-export const removeTagFromLead = async (tagId) => {
+export const deleteSearch = async (id) => {
   try {
-    console.log('Removing tag:', tagId);
-    const response = await leadAPI.delete(`/api/leads/tag/${tagId}`);
-    console.log('Remove tag response:', response.data);
-    return response;
+    const response = await api.delete(`/api/leads/delete/${id}`);
+    return response.data;
   } catch (error) {
-    console.error('Error removing tag:', error);
-    throw error;
-  }
-};
-
-export const addNoteToLead = async (leadId, data) => {
-  try {
-    console.log('Adding note to lead:', leadId, data);
-    const response = await leadAPI.put(`/api/leads/note/${leadId}`, data);
-    console.log('Add note response:', response.data);
-    return response;
-  } catch (error) {
-    console.error('Error adding note:', error);
+    console.error('Error deleting search:', error);
     throw error;
   }
 };
