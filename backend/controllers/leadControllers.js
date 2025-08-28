@@ -1,603 +1,574 @@
-const Lead = require('../models/Lead');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const LeadSearch = require("../models/Lead");
+const searchApiManager = require("../utils/searchApiManager");
+const crawlerManager = require("../utils/CrawlerManager");
+const SearchUtils = require("../utils/searchUtils");
+const proxyManager = require("../utils/proxyManager");
+const { v4: uuidv4 } = require('uuid');
 
-const proxyManager = require('../utils/proxyManager');
-const browserManager = require('../utils/browserManager');
-const SearchUtils = require('../utils/searchUtils');
-
-const cleanJsonString = (str) => {
-  str = str.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
-  str = str.replace(/,\s*([\]}])/g, "$1");
-  str = str.replace(/:\s*'([^']*)'/g, ': "$1"');
-  str = str.replace(/([{,]\s*)([a-zA-Z0-9_]+)(\s*:)/g, '$1"$2"$3');
-  return str;
-};
-
-const searchWithPuppeteer = async (searchUrl, platform, retryCount = 0, maxRetries = 3) => {
-  let page = null;
-  
-  try {
-    console.log(`Searching with Puppeteer: ${searchUrl.substring(0, 80)}...`);
-    
-    const delay = SearchUtils.getSearchDelay(retryCount);
-    console.log(`Waiting ${delay}ms before search...`);
-    await new Promise(resolve => setTimeout(resolve, delay));
-    
-    page = await browserManager.createPage();
-    
-    let referer = 'https://www.google.com/';
-    if (platform.includes('facebook')) referer = 'https://www.facebook.com/';
-    else if (platform.includes('linkedin')) referer = 'https://www.linkedin.com/';
-    
-    await page.setExtraHTTPHeaders({
-      'Referer': referer
-    });
-    
-    await page.goto(searchUrl, {
-      waitUntil: 'networkidle2',
-      timeout: 60000
-    });
-    
-    const hasCaptcha = await page.evaluate(() => {
-      return document.body.textContent.includes('captcha') || 
-             document.body.textContent.includes('CAPTCHA') ||
-             document.querySelector('iframe[src*="recaptcha"]') !== null;
-    });
-    
-    if (hasCaptcha) {
-      console.log('Captcha detected, attempting to solve...');
-      const captchaSolved = await browserManager.solveCaptcha(
-        page, 
-        searchUrl, 
-        process.env.GOOGLE_SITE_KEY
-      );
-      
-      if (!captchaSolved && retryCount < maxRetries) {
-        console.log('Captcha solving failed, retrying...');
-        await browserManager.closePage(page);
-        return await searchWithPuppeteer(searchUrl, platform, retryCount + 1, maxRetries);
-      }
-    }
-    
-    const isSearchResults = await page.evaluate(() => {
-      return document.querySelector('#search, .g, .result, .results') !== null ||
-             document.body.textContent.includes('results') ||
-             document.title.includes('Search');
-    });
-    
-    if (!isSearchResults) {
-      console.log('Not on search results page, might be blocked');
-      await browserManager.takeScreenshot(page, `blocked-${platform}-${Date.now()}`);
-      
-      if (retryCount < maxRetries) {
-        console.log('Retrying with different approach...');
-        await browserManager.closePage(page);
-        return await searchWithPuppeteer(searchUrl, platform, retryCount + 1, maxRetries);
-      }
-      
-      throw new Error('Failed to access search results');
-    }
-    
-    await browserManager.scrollPage(page, 3);
-    await page.waitForTimeout(2000 + Math.random() * 3000);
-    
-    const resultLinks = await page.$$('a[href*="http"]');
-    if (resultLinks.length > 3) {
-      for (let i = 0; i < Math.min(2, resultLinks.length); i++) {
-        const randomIndex = Math.floor(Math.random() * resultLinks.length);
-        try {
-          await resultLinks[randomIndex].click();
-          await page.waitForTimeout(1500 + Math.random() * 2000);
-          await page.goBack();
-          await page.waitForTimeout(1000 + Math.random() * 1500);
-        } catch (error) {
-          console.log('Error clicking link:', error.message);
-        }
-      }
-    }
-    
-    const content = await page.content();
-    await browserManager.closePage(page);
-    
-    return content;
-    
-  } catch (error) {
-    if (page) {
-      await browserManager.closePage(page);
-    }
-    
-    console.error(`Puppeteer search error (attempt ${retryCount + 1}):`, error.message);
-    
-    if (retryCount < maxRetries) {
-      console.log(`Retrying in 5 seconds... (${retryCount + 1}/${maxRetries})`);
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      return await searchWithPuppeteer(searchUrl, platform, retryCount + 1, maxRetries);
-    }
-    
-    throw error;
-  }
-};
-
-const scrapeDirectoryWithPuppeteer = async (directory, keyword, location) => {
-  let page = null;
-  
-  try {
-    console.log(`Scraping directory: ${directory.name} - ${directory.url}`);
-    
-    page = await browserManager.createPage();
-    
-    await page.goto(directory.url, {
-      waitUntil: 'networkidle2',
-      timeout: 60000
-    });
-    
-    const isBlocked = await page.evaluate(() => {
-      return document.body.textContent.includes('captcha') || 
-             document.body.textContent.includes('blocked') ||
-             document.body.textContent.includes('access denied');
-    });
-    
-    if (isBlocked) {
-      console.log('Directory blocked, attempting to solve captcha...');
-      const captchaSolved = await browserManager.solveCaptcha(page, directory.url);
-      
-      if (!captchaSolved) {
-        throw new Error('Failed to bypass directory blocking');
-      }
-    }
-    
-    await browserManager.scrollPage(page, 2);
-    await page.waitForTimeout(3000 + Math.random() * 2000);
-    
-    const listings = await page.evaluate((dirName) => {
-      const results = [];
-      
-      if (dirName === 'yellowpages') {
-        document.querySelectorAll('.result, .business-listing, .listing').forEach((listing) => {
-          const nameElem = listing.querySelector('.business-name, .name, h2, h3');
-          const phoneElem = listing.querySelector('.phone, .phones, [href^="tel:"]');
-          const websiteElem = listing.querySelector('.website-link, [href*="http"]');
-          
-          if (nameElem) {
-            results.push({
-              businessName: nameElem.textContent.trim(),
-              phone: phoneElem ? phoneElem.textContent.trim() : 'N/A',
-              website: websiteElem ? websiteElem.href : 'N/A',
-              email: 'N/A',
-              socialLinks: [],
-              source: 'yellowpages'
-            });
-          }
-        });
-      } else if (dirName === 'yelp') {
-        document.querySelectorAll('[data-testid="serp-ia-card"], .businessListing').forEach((listing) => {
-          const nameElem = listing.querySelector('h3, h4, .business-name');
-          const phoneElem = listing.querySelector('[href^="tel:"], .phone');
-          const websiteElem = listing.querySelector('[href*="biz_redir"]');
-          
-          if (nameElem) {
-            results.push({
-              businessName: nameElem.textContent.trim(),
-              phone: phoneElem ? phoneElem.textContent.trim() : 'N/A',
-              website: websiteElem ? websiteElem.href : 'N/A',
-              email: 'N/A',
-              socialLinks: [],
-              source: 'yelp'
-            });
-          }
-        });
-      }
-      
-      return results;
-    }, directory.name);
-    
-    await browserManager.closePage(page);
-    return listings;
-    
-  } catch (error) {
-    if (page) {
-      await browserManager.closePage(page);
-    }
-    
-    console.error(`Directory scraping failed for ${directory.name}:`, error.message);
-    return [];
-  }
-};
-
-const processSearchResults = async (html, platform, keyword, location) => {
-  try {
-    if (!html || html.length < 100) {
-      console.log(`No substantial results found for ${platform}`);
-      return [];
-    }
-
-    const $ = require('cheerio').load(html);
-    
-    let searchResults = '';
-    
-    const selectors = ['#main', '#results', '.results', '#web', 'body'];
-    
-    for (const selector of selectors) {
-      const content = $(selector).text();
-      if (content && content.length > 200) {
-        searchResults = content;
-        break;
-      }
-    }
-    
-    if (!searchResults) {
-      console.log(`Could not extract content for ${platform}`);
-      return [];
-    }
-
-    searchResults = searchResults.substring(0, 10000);
-
-    const prompt = `Extract business leads from ${platform} search results for "${keyword}" in "${location}".
-    
-    IMPORTANT: Return ONLY a valid JSON array with no additional text, explanations, or markdown formatting.
-    
-    Each object must have these exact fields:
-    - businessName (string, required - the company/business name)
-    - email (string - valid email address or "N/A" if not found)
-    - phone (string - phone number or "N/A" if not found)
-    - website (string - website URL or "N/A" if not found)  
-    - socialLinks (array of strings - social media URLs, empty array if none)
-    - source (string - exactly "${platform}")
-    
-    Rules:
-    1. Only include businesses that are relevant to "${keyword}"
-    2. Only include entries that have at least one contact method (email, phone, or website)
-    3. Clean phone numbers (remove extra characters, keep numbers and basic formatting)
-    4. Ensure email addresses are valid format
-    5. Make sure website URLs are complete
-    6. Maximum 20 results
-    
-    Search results text: ${searchResults}`;
-
-    console.log(`Processing ${platform} results with AI...`);
-    const result = await model.generateContent(prompt);
-    const generatedText = result.response.text();
-    
-    let jsonString = generatedText
-      .replace(/```json\n?/g, "")
-      .replace(/\n?```/g, "")
-      .replace(/^[^[{]*/, "")
-      .replace(/[^}\]]*$/, "")
-      .trim();
-    
-    jsonString = cleanJsonString(jsonString);
-    
-    let leads;
+class LeadController {
+  async generateLeads(req, res) {
     try {
-      leads = JSON.parse(jsonString);
-    } catch (parseError) {
-      console.error(`JSON parsing failed for ${platform}:`, parseError.message);
-      console.log('Raw AI response:', generatedText);
-      return [];
-    }
-    
-    if (!Array.isArray(leads)) {
-      console.error(`AI response is not an array for ${platform}`);
-      return [];
-    }
-
-    const validLeads = leads
-      .filter(lead => 
-        lead && 
-        typeof lead === 'object' &&
-        lead.businessName && 
-        lead.businessName.trim() &&
-        (lead.email !== 'N/A' || lead.phone !== 'N/A' || lead.website !== 'N/A')
-      )
-      .map(lead => ({
-        businessName: lead.businessName.trim(),
-        email: lead.email === 'N/A' ? 'N/A' : lead.email,
-        phone: lead.phone === 'N/A' ? 'N/A' : lead.phone,
-        website: lead.website === 'N/A' ? 'N/A' : lead.website,
-        socialLinks: Array.isArray(lead.socialLinks) ? lead.socialLinks : [],
-        source: platform
-      }));
-
-    console.log(`Processed ${validLeads.length} valid leads from ${platform}`);
-    return validLeads;
-    
-  } catch (error) {
-    console.error(`Error processing ${platform} results:`, error.message);
-    return [];
-  }
-};
-
-exports.generateLeads = async (req, res) => {
-  const startTime = Date.now();
-  
-  try {
-    const { keyword, platforms, location, emailDomain } = req.body;
-    const userId = req.user._id;
-    
-    if (!keyword || !platforms || platforms.length === 0) {
-      return res.status(400).json({ message: 'Keyword and at least one platform are required' });
-    }
-
-    console.log('Starting enhanced lead generation with Puppeteer:', { 
-      keyword, 
-      platforms, 
-      location, 
-      emailDomain 
-    });
-
-    const proxyTest = await proxyManager.testProxy();
-    if (!proxyTest) {
-      console.warn('Proxy test failed, continuing without proxy...');
-    }
-
-    let allLeads = [];
-    const processedPlatforms = [];
-
-    if (location) {
-      console.log('\n=== Trying Direct Directory Scraping ===');
-      const directories = [
-        {
-          name: 'yellowpages',
-          url: `https://www.yellowpages.com/search?search_terms=${encodeURIComponent(keyword)}&geo_location_terms=${encodeURIComponent(location)}`
-        },
-        {
-          name: 'yelp',
-          url: `https://www.yelp.com/search?find_desc=${encodeURIComponent(keyword)}&find_loc=${encodeURIComponent(location)}`
-        }
-      ];
-
-      for (const directory of directories) {
-        try {
-          const directoryLeads = await scrapeDirectoryWithPuppeteer(directory, keyword, location);
-          if (directoryLeads.length > 0) {
-            allLeads.push(...directoryLeads);
-            processedPlatforms.push(directory.name);
-            console.log(`Found ${directoryLeads.length} leads from ${directory.name}`);
-          }
-        } catch (error) {
-          console.error('Directory scraping failed:', error.message);
-        }
-      }
-    }
-
-    for (const platform of platforms) {
-      try {
-        console.log(`\n=== Processing ${platform} ===`);
-        
-        const queries = SearchUtils.generateMultipleQueries(keyword, platform, location, emailDomain);
-        let platformLeads = [];
-        
-        for (let queryIndex = 0; queryIndex < Math.min(queries.length, 2); queryIndex++) {
-          const query = queries[queryIndex];
-          const searchUrls = SearchUtils.generateSearchUrls(query, 1);
-          
-          for (const url of searchUrls) {
-            try {
-              console.log(`Searching with Google dork: ${query.substring(0, 60)}...`);
-              let html = null;
-              
-              try {
-                html = await searchWithPuppeteer(url, platform);
-              } catch (mainError) {
-                console.log(`Main scraping failed: ${mainError.message}`);
-                continue;
-              }
-              
-              if (html) {
-                const leads = await processSearchResults(html, platform, keyword, location);
-                platformLeads.push(...leads);
-                
-                if (leads.length > 0) {
-                  console.log(`✓ Found ${leads.length} leads from ${platform}`);
-                }
-              }
-              
-              await new Promise(resolve => setTimeout(resolve, SearchUtils.getSearchDelay()));
-              
-            } catch (error) {
-              console.error(`✗ Failed to process search: ${error.message}`);
-              continue;
-            }
-          }
-          
-          if (platformLeads.length >= 15) break;
-        }
-        
-        if (platformLeads.length > 0) {
-          allLeads.push(...platformLeads);
-          processedPlatforms.push(platform);
-          console.log(`Total from ${platform}: ${platformLeads.length} leads`);
-        }
-        
-      } catch (platformError) {
-        console.error(`Error processing ${platform}:`, platformError.message);
-        continue;
-      }
-    }
-
-    const uniqueLeads = [];
-    const seenBusinesses = new Set();
-    
-    for (const lead of allLeads) {
-      if (SearchUtils.validateLead(lead)) {
-        const normalizedName = lead.businessName.toLowerCase().trim();
-        if (!seenBusinesses.has(normalizedName)) {
-          seenBusinesses.add(normalizedName);
-          uniqueLeads.push(lead);
-        }
-      }
-    }
-
-    console.log(`\nFinal results: ${uniqueLeads.length} unique leads from ${allLeads.length} total`);
-
-    const proxy = proxyManager.getProxyConfig();
-    const leadDoc = new Lead({
-      userId,
-      searchQuery: {
+      const {
         keyword,
-        platforms: processedPlatforms,
-        location: location || '',
-        emailDomain: emailDomain || ''
-      },
-      leads: uniqueLeads,
-      proxyUsed: {
-        host: proxy.host,
-        port: proxy.port,
-        username: proxy.auth.username
-      },
-      stats: {
-        totalFound: allLeads.length,
-        uniqueFound: uniqueLeads.length,
-        processingTime: Date.now() - startTime
+        platforms,
+        location,
+        emailDomain,
+        maxResults = 20,
+      } = req.body;
+
+      console.log("\n=== STARTING ENHANCED LEAD GENERATION ===");
+      console.log("Parameters:", {
+        keyword,
+        platforms,
+        location,
+        emailDomain,
+        maxResults,
+      });
+
+      // Validate input
+      if (!keyword || !platforms || !location) {
+        return res.status(400).json({
+          success: false,
+          error: "Missing required parameters: keyword, platforms, location",
+        });
       }
-    });
 
-    await leadDoc.save();
-
-    await browserManager.closeBrowser();
-    await proxyManager.closeAnonymizedProxy();
-
-    console.log(`✅ Lead generation completed successfully`);
-
-    res.status(200).json({
-      success: true,
-      searchId: leadDoc._id,
-      query: { 
-        keyword, 
-        platforms: processedPlatforms, 
-        location: location || '', 
-        emailDomain: emailDomain || '' 
-      },
-      leads: uniqueLeads,
-      stats: {
-        total: allLeads.length,
-        unique: uniqueLeads.length,
-        processingTime: Date.now() - startTime
+      if (!Array.isArray(platforms) || platforms.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: "Platforms must be a non-empty array",
+        });
       }
-    });
-    
-  } catch (error) {
-    await browserManager.closeBrowser();
-    await proxyManager.closeAnonymizedProxy();
-    
-    console.error('❌ Lead generation error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Failed to generate leads',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
-    });
+
+      // Create search ID for grouping
+      const searchId = uuidv4();
+      
+      // Create initial lead search document
+      const leadSearch = new LeadSearch({
+        searchId,
+        keyword,
+        location,
+        platforms,
+        emailDomain: emailDomain || '',
+        maxResults,
+        contacts: [],
+        stats: {
+          totalSearches: 0,
+          totalUrlsFound: 0,
+          totalUrlsCrawled: 0,
+          successfulCrawls: 0,
+          leadsGenerated: 0
+        },
+        searchApiUsage: searchApiManager.getStats()
+      });
+
+      await leadSearch.save();
+      console.log(`Created lead search document with ID: ${searchId}`);
+
+      // Test and prepare services
+      console.log("\n=== TESTING SERVICES ===");
+      
+      // Test proxy connection
+      const proxyWorking = await proxyManager.testProxy();
+      console.log(`Proxy status: ${proxyWorking ? 'Working' : 'Failed'}`);
+
+      // Test search API
+      const searchApiWorking = await searchApiManager.testConnection();
+      console.log(`Search API status: ${searchApiWorking ? 'Working' : 'Failed'}`);
+      
+      if (!searchApiWorking) {
+        return res.status(500).json({
+          success: false,
+          error: "Google Search API connection failed. Please check your API credentials.",
+        });
+      }
+
+      // Initialize results tracking
+      const allResults = [];
+      const searchPromises = [];
+      let totalSearches = 0;
+
+      console.log("\n=== EXECUTING SEARCHES ===");
+
+      // Process each platform
+      for (const platform of platforms) {
+        console.log(`\n--- Processing platform: ${platform} ---`);
+
+        // Generate multiple search queries for this platform
+        const queries = SearchUtils.generateMultipleQueries(
+          keyword,
+          platform,
+          location,
+          emailDomain
+        );
+        
+        console.log(`Generated ${queries.length} queries for ${platform}:`, queries);
+
+        // Execute searches
+        for (const query of queries) {
+          const remainingQueries = searchApiManager.getStats().remainingQueries;
+          
+          if (remainingQueries <= 0) {
+            console.log("Daily search quota reached, stopping searches");
+            break;
+          }
+
+          console.log(`Executing search: "${query}"`);
+          totalSearches++;
+
+          searchPromises.push(
+            searchApiManager
+              .search(query, { num: 10 })
+              .then((searchResults) => {
+                if (searchResults.success && searchResults.data.items) {
+                  const resultCount = searchResults.data.items.length;
+                  console.log(`✓ Search successful: ${resultCount} results for "${query}"`);
+
+                  // Extract and validate URLs
+                  const urls = searchResults.data.items
+                    .map((item) => item.link)
+                    .filter((url) => {
+                      const isValid = SearchUtils.isValidUrl(url);
+                      const isBusiness = SearchUtils.isBusinessWebsite(url);
+                      return isValid && isBusiness;
+                    });
+
+                  console.log(`Extracted ${urls.length} valid business URLs`);
+
+                  return {
+                    platform,
+                    query,
+                    urls,
+                    searchInfo: searchResults.searchInformation,
+                  };
+                } else {
+                  console.log(`✗ No results found for query: "${query}"`);
+                  return { platform, query, urls: [], searchInfo: null };
+                }
+              })
+              .catch((error) => {
+                console.error(`✗ Search failed for "${query}":`, error.message);
+                return { platform, query, urls: [], error: error.message };
+              })
+          );
+
+          // Add delay between search requests
+          await SearchUtils.delay(1500);
+        }
+
+        // Break if quota exhausted
+        if (searchApiManager.getStats().remainingQueries <= 0) {
+          break;
+        }
+      }
+
+      // Wait for all searches to complete
+      console.log(`\nWaiting for ${searchPromises.length} searches to complete...`);
+      const searchResults = await Promise.all(searchPromises);
+      
+      console.log("\n=== SEARCH RESULTS SUMMARY ===");
+      console.log(`Completed ${searchResults.length} search queries`);
+
+      // Collect and deduplicate URLs
+      const allUrls = [];
+      const urlSources = {};
+      let totalUrlsFound = 0;
+
+      searchResults.forEach((result) => {
+        if (result.urls && result.urls.length > 0) {
+          totalUrlsFound += result.urls.length;
+          
+          result.urls.forEach((url) => {
+            const normalizedUrl = SearchUtils.normalizeUrl(url);
+            if (!allUrls.includes(normalizedUrl)) {
+              allUrls.push(normalizedUrl);
+              urlSources[normalizedUrl] = result.platform;
+            }
+          });
+        }
+      });
+
+      const uniqueUrlCount = allUrls.length;
+      const urlsToCrawl = Math.min(maxResults, uniqueUrlCount);
+      
+      console.log(`Total URLs found: ${totalUrlsFound}`);
+      console.log(`Unique URLs: ${uniqueUrlCount}`);
+      console.log(`URLs to crawl: ${urlsToCrawl}`);
+
+      // Update search stats
+      leadSearch.stats.totalSearches = totalSearches;
+      leadSearch.stats.totalUrlsFound = totalUrlsFound;
+      leadSearch.stats.totalUrlsCrawled = urlsToCrawl;
+      await leadSearch.save();
+
+      if (urlsToCrawl === 0) {
+        return res.json({
+          success: true,
+          message: "No URLs found to crawl. Try different search parameters.",
+          searchId,
+          stats: {
+            totalSearches: totalSearches,
+            totalUrlsFound: totalUrlsFound,
+            totalUrlsCrawled: 0,
+            successfulCrawls: 0,
+            leadsGenerated: 0,
+            searchApiUsage: searchApiManager.getStats(),
+          },
+          leads: [],
+        });
+      }
+
+      console.log("\n=== STARTING URL CRAWLING ===");
+      
+      // Crawl URLs and extract contact information
+      const crawlResults = await crawlerManager.crawlMultipleUrls(
+        allUrls.slice(0, urlsToCrawl),
+        { 
+          useProxy: proxyWorking, 
+          solveCaptcha: true,
+          timeout: 30000
+        }
+      );
+
+      console.log("\n=== PROCESSING CRAWL RESULTS ===");
+      
+      const successfulCrawls = crawlResults.filter(r => r.success).length;
+      console.log(`Successful crawls: ${successfulCrawls}/${crawlResults.length}`);
+
+      // Process successful crawl results and save to database
+      const leads = [];
+      
+      for (const result of crawlResults) {
+        if (result.success && result.contactInfo) {
+          const contactInfo = result.contactInfo;
+          
+          // Validate that we have meaningful contact information
+          const hasValidEmail = contactInfo.emails && 
+            contactInfo.emails.length > 0 && 
+            contactInfo.emails[0] !== 'N/A';
+          
+          const hasValidPhone = contactInfo.phones && 
+            contactInfo.phones.length > 0 && 
+            contactInfo.phones[0] !== 'N/A';
+          
+          const hasValidBusiness = contactInfo.businessName && 
+            contactInfo.businessName !== 'Unknown Business';
+
+          // Only include leads with at least some valid contact info
+          if (hasValidEmail || hasValidPhone || hasValidBusiness) {
+            const contactData = {
+              businessName: contactInfo.businessName || SearchUtils.extractBusinessNameFromUrl(result.url),
+              email: hasValidEmail ? contactInfo.emails[0] : 'N/A',
+              emails: contactInfo.emails || ['N/A'],
+              phone: hasValidPhone ? contactInfo.phones[0] : 'N/A',
+              phones: contactInfo.phones || ['N/A'],
+              website: contactInfo.website || result.url,
+              socialLinks: contactInfo.socialLinks || [],
+              sourceUrl: result.url,
+              platform: urlSources[result.url] || "unknown",
+              status: "new",
+              lastContacted: null,
+              notes: ""
+            };
+
+            leads.push(contactData);
+
+            // Add contact to the search document
+            leadSearch.contacts.push(contactData);
+            leadSearch.stats.leadsGenerated += 1;
+            leadSearch.stats.successfulCrawls += 1;
+            
+            console.log(`✓ Extracted lead: ${contactData.businessName}`);
+          } else {
+            console.log(`Skipping lead with insufficient contact info: ${result.url}`);
+          }
+        } else if (result.success) {
+          console.log(`No contact info extracted from: ${result.url}`);
+        } else {
+          console.log(`Failed to crawl: ${result.url} - ${result.error}`);
+        }
+      }
+
+      // Save all contacts to the database
+      await leadSearch.save();
+
+      console.log("\n=== FINAL RESULTS ===");
+      console.log(`Total leads generated: ${leads.length}`);
+      console.log(`Leads saved to database search: ${leadSearch._id}`);
+
+      // Send comprehensive response
+      const response = {
+        success: true,
+        message: `Successfully generated ${leads.length} leads`,
+        searchId: leadSearch.searchId,
+        stats: {
+          totalSearches: totalSearches,
+          totalUrlsFound: totalUrlsFound,
+          totalUrlsCrawled: urlsToCrawl,
+          successfulCrawls: successfulCrawls,
+          leadsGenerated: leads.length,
+          searchApiUsage: searchApiManager.getStats(),
+          proxyStatus: proxyManager.getStats(),
+          crawlerStatus: crawlerManager.getStats(),
+        },
+        leads: leads,
+      };
+
+      res.json(response);
+
+    } catch (error) {
+      console.error("\n=== LEAD GENERATION ERROR ===");
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      
+      res.status(500).json({
+        success: false,
+        error: error.message,
+        message: "Lead generation failed due to an internal error",
+        stats: {
+          searchApiUsage: searchApiManager.getStats(),
+          proxyStatus: proxyManager.getStats(),
+          crawlerStatus: crawlerManager.getStats(),
+        }
+      });
+    }
   }
-};
 
-exports.getLeadHistory = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
-    const skip = (page - 1) * limit;
+  async getLeads(req, res) {
+    try {
+      const { page = 1, limit = 20, status, platform, keyword, searchId } = req.query;
+      const filter = {};
 
-    const history = await Lead.find({ userId })
-      .select('searchQuery createdAt leads.length stats')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+      if (searchId) {
+        // Get specific search with its contacts
+        const leadSearch = await LeadSearch.findOne({ searchId });
+        
+        if (!leadSearch) {
+          return res.status(404).json({
+            success: false,
+            error: "Search not found"
+          });
+        }
 
-    const total = await Lead.countDocuments({ userId });
+        // Filter contacts if status or platform provided
+        let filteredContacts = leadSearch.contacts;
+        if (status && status !== "all") {
+          filteredContacts = filteredContacts.filter(contact => contact.status === status);
+        }
+        if (platform) {
+          filteredContacts = filteredContacts.filter(contact => contact.platform === platform);
+        }
 
-    res.status(200).json({
-      history,
-      pagination: {
-        page,
-        limit,
+        return res.json({
+          success: true,
+          search: {
+            id: leadSearch.searchId,
+            keyword: leadSearch.keyword,
+            location: leadSearch.location,
+            platforms: leadSearch.platforms,
+            createdAt: leadSearch.createdAt,
+            stats: leadSearch.stats
+          },
+          leads: filteredContacts,
+          total: filteredContacts.length,
+          totalPages: 1,
+          currentPage: 1
+        });
+      }
+
+      // Get all searches with pagination
+      if (keyword) filter.keyword = new RegExp(keyword, "i");
+      if (platform) filter.platforms = platform;
+
+      const searches = await LeadSearch.find(filter)
+        .sort({ createdAt: -1 })
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .select('-contacts'); // Don't include contacts in list view
+
+      const total = await LeadSearch.countDocuments(filter);
+
+      res.json({
+        success: true,
+        searches,
+        totalPages: Math.ceil(total / limit),
+        currentPage: parseInt(page),
         total,
-        pages: Math.ceil(total / limit)
+      });
+    } catch (error) {
+      console.error("Error fetching leads:", error);
+      res.status(500).json({ 
+        success: false,
+        error: "Failed to fetch leads" 
+      });
+    }
+  }
+
+  async updateLead(req, res) {
+    try {
+      const { searchId, contactIndex } = req.params;
+      const updateData = req.body;
+
+      const leadSearch = await LeadSearch.findOne({ searchId });
+      
+      if (!leadSearch) {
+        return res.status(404).json({ 
+          success: false,
+          error: "Lead search not found" 
+        });
       }
-    });
-  } catch (error) {
-    console.error('Error fetching lead history:', error);
-    res.status(500).json({ message: 'Failed to fetch lead history' });
+
+      if (contactIndex >= leadSearch.contacts.length) {
+        return res.status(404).json({ 
+          success: false,
+          error: "Contact not found" 
+        });
+      }
+
+      // Update the specific contact
+      leadSearch.contacts[contactIndex] = {
+        ...leadSearch.contacts[contactIndex],
+        ...updateData,
+        lastContacted: updateData.status === 'contacted' ? new Date() : leadSearch.contacts[contactIndex].lastContacted
+      };
+
+      leadSearch.updatedAt = new Date();
+      await leadSearch.save();
+
+      res.json({
+        success: true,
+        lead: leadSearch.contacts[contactIndex],
+        searchId: leadSearch.searchId
+      });
+    } catch (error) {
+      console.error("Error updating lead:", error);
+      res.status(500).json({ 
+        success: false,
+        error: "Failed to update lead" 
+      });
+    }
   }
-};
 
-exports.getLeadDetails = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const searchId = req.params.id;
+  async deleteLeadSearch(req, res) {
+    try {
+      const { searchId } = req.params;
 
-    const leadDoc = await Lead.findOne({ _id: searchId, userId });
-    
-    if (!leadDoc) {
-      return res.status(404).json({ message: 'Lead search not found' });
+      const result = await LeadSearch.deleteOne({ searchId });
+
+      if (result.deletedCount === 0) {
+        return res.status(404).json({ 
+          success: false,
+          error: "Lead search not found" 
+        });
+      }
+
+      res.json({ 
+        success: true,
+        message: "Lead search deleted successfully" 
+      });
+    } catch (error) {
+      console.error("Error deleting lead search:", error);
+      res.status(500).json({ 
+        success: false,
+        error: "Failed to delete lead search" 
+      });
     }
-
-    res.status(200).json(leadDoc);
-  } catch (error) {
-    console.error('Error fetching lead details:', error);
-    res.status(500).json({ message: 'Failed to fetch lead details' });
   }
-};
 
-exports.updateLeadNotes = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const { searchId, leadIndex } = req.params;
-    const { notes, tags } = req.body;
+  async getStats(req, res) {
+    try {
+      const totalSearches = await LeadSearch.countDocuments();
+      const totalLeads = await LeadSearch.aggregate([
+        { $unwind: "$contacts" },
+        { $count: "totalLeads" }
+      ]);
+      
+      const newLeads = await LeadSearch.aggregate([
+        { $unwind: "$contacts" },
+        { $match: { "contacts.status": "new" } },
+        { $count: "count" }
+      ]);
 
-    const leadDoc = await Lead.findOne({ _id: searchId, userId });
-    
-    if (!leadDoc) {
-      return res.status(404).json({ message: 'Lead search not found' });
+      const contactedLeads = await LeadSearch.aggregate([
+        { $unwind: "$contacts" },
+        { $match: { "contacts.status": "contacted" } },
+        { $count: "count" }
+      ]);
+
+      const convertedLeads = await LeadSearch.aggregate([
+        { $unwind: "$contacts" },
+        { $match: { "contacts.status": "converted" } },
+        { $count: "count" }
+      ]);
+
+      // Get leads by platform
+      const leadsByPlatform = await LeadSearch.aggregate([
+        { $unwind: "$contacts" },
+        { $group: { _id: "$contacts.platform", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]);
+
+      // Get searches by keyword
+      const searchesByKeyword = await LeadSearch.aggregate([
+        { $group: { _id: "$keyword", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 10 },
+      ]);
+
+      res.json({
+        success: true,
+        stats: {
+          totalSearches,
+          totalLeads: totalLeads[0]?.totalLeads || 0,
+          newLeads: newLeads[0]?.count || 0,
+          contactedLeads: contactedLeads[0]?.count || 0,
+          convertedLeads: convertedLeads[0]?.count || 0,
+          leadsByPlatform,
+          searchesByKeyword,
+        },
+        services: {
+          searchApi: searchApiManager.getStats(),
+          crawler: crawlerManager.getStats(),
+          proxy: proxyManager.getStats(),
+        }
+      });
+    } catch (error) {
+      console.error("Error getting stats:", error);
+      res.status(500).json({ 
+        success: false,
+        error: "Failed to get statistics" 
+      });
     }
-
-    if (leadIndex >= leadDoc.leads.length) {
-      return res.status(400).json({ message: 'Invalid lead index' });
-    }
-
-    if (notes !== undefined) {
-      leadDoc.leads[leadIndex].notes = notes;
-    }
-
-    if (tags !== undefined) {
-      leadDoc.leads[leadIndex].tags = Array.isArray(tags) ? tags : [tags];
-    }
-
-    await leadDoc.save();
-
-    res.status(200).json({ 
-      success: true,
-      message: 'Lead updated successfully'
-    });
-  } catch (error) {
-    console.error('Error updating lead:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Failed to update lead'
-    });
   }
-};
 
-exports.deleteSearch = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const searchId = req.params.id;
+  async getSearchDetail(req, res) {
+    try {
+      const { searchId } = req.params;
 
-    const result = await Lead.deleteOne({ _id: searchId, userId });
-    
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ message: 'Lead search not found' });
+      const leadSearch = await LeadSearch.findOne({ searchId });
+      
+      if (!leadSearch) {
+        return res.status(404).json({ 
+          success: false,
+          error: "Search not found" 
+        });
+      }
+
+      res.json({
+        success: true,
+        search: leadSearch
+      });
+    } catch (error) {
+      console.error("Error getting search detail:", error);
+      res.status(500).json({ 
+        success: false,
+        error: "Failed to get search details" 
+      });
     }
-
-    res.status(200).json({ 
-      success: true,
-      message: 'Search deleted successfully'
-    });
-  } catch (error) {
-    console.error('Error deleting search:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Failed to delete search'
-    });
   }
-};
+}
+
+module.exports = new LeadController();

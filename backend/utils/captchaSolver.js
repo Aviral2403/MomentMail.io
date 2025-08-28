@@ -60,6 +60,60 @@ class CaptchaSolver {
     }
   }
 
+  async solveHCaptcha(siteUrl, siteKey) {
+    try {
+      console.log('Submitting hCaptcha task to Anti-Captcha...');
+      
+      // Create task
+      const taskResponse = await axios.post(`${this.baseUrl}/createTask`, {
+        clientKey: this.apiKey,
+        task: {
+          type: "HCaptchaTaskProxyless",
+          websiteURL: siteUrl,
+          websiteKey: siteKey
+        }
+      });
+
+      if (taskResponse.data.errorId > 0) {
+        throw new Error(`Anti-Captcha error: ${taskResponse.data.errorDescription}`);
+      }
+
+      const taskId = taskResponse.data.taskId;
+      console.log(`hCaptcha task created: ${taskId}`);
+
+      // Poll for solution
+      let solution = null;
+      let attempts = 0;
+      const maxAttempts = 20;
+
+      while (!solution && attempts < maxAttempts) {
+        attempts++;
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        
+        const resultResponse = await axios.post(`${this.baseUrl}/getTaskResult`, {
+          clientKey: this.apiKey,
+          taskId: taskId
+        });
+
+        if (resultResponse.data.status === 'ready') {
+          solution = resultResponse.data.solution.gRecaptchaResponse;
+          console.log('hCaptcha solved successfully');
+        } else if (resultResponse.data.errorId > 0) {
+          throw new Error(`Anti-Captcha error: ${resultResponse.data.errorDescription}`);
+        }
+      }
+
+      if (!solution) {
+        throw new Error('hCaptcha solving timeout');
+      }
+
+      return solution;
+    } catch (error) {
+      console.error('hCaptcha solving error:', error.message);
+      throw error;
+    }
+  }
+
   async getBalance() {
     try {
       const response = await axios.post(`${this.baseUrl}/getBalance`, {

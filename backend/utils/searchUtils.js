@@ -1,35 +1,34 @@
 const userAgents = require('./userAgents');
 
 class SearchUtils {
-  static generateGoogleDorkQuery(keyword, source, location, emailDomain = '') {
+  static generateGoogleSearchQuery(keyword, source, location, emailDomain = '') {
+    // More targeted queries for better results
     const baseQueries = {
-      google: `("${keyword}" AND "${location}") (email OR contact OR "@gmail.com" OR "@yahoo.com" OR "phone" OR "call")`,
-      facebook: `site:facebook.com ("${keyword}" "${location}") (contact OR email OR phone OR business)`,
-      instagram: `site:instagram.com ("${keyword}" "${location}") (contact OR email OR "dm me" OR "inquiries")`,
-      linkedin: `(site:linkedin.com/in OR site:linkedin.com/company) ("${keyword}" "${location}") (contact OR email OR phone)`,
-      fiverr: `site:fiverr.com ("${keyword}") (contact OR email OR "${location}")`,
-      upwork: `site:upwork.com/freelancers ("${keyword}") (contact OR email OR "${location}")`,
-      google_maps: `site:google.com/maps ("${keyword}" "${location}") (phone OR contact OR website)`,
-      job_boards: `(site:indeed.com OR site:monster.com OR site:careerbuilder.com OR site:glassdoor.com) ("${keyword}" "${location}") (contact OR email OR apply)`,
-      reddit: `site:reddit.com ("${keyword}" "${location}") (contact OR email OR hire OR freelance)`,
-      directory: `("${keyword}" "${location}") ("contact us" OR "get in touch" OR "email us" OR "call us") filetype:html`,
-      yellowpages: `site:yellowpages.com ("${keyword}" "${location}") OR site:yellowpages.ca ("${keyword}" "${location}")`,
-      yelp: `site:yelp.com ("${keyword}" "${location}") (phone OR contact OR website)`,
-      sulekha: `site:sulekha.com ("${keyword}" "${location}") (contact OR phone)`,
-      craigslist: `site:craigslist.org ("${keyword}" "${location}") (contact OR email OR phone)`,
-      angieslist: `site:angieslist.com ("${keyword}" "${location}")`,
-      thumbtack: `site:thumbtack.com ("${keyword}" "${location}")`,
-      houzz: `site:houzz.com ("${keyword}" "${location}")`,
-      bing: `site:bing.com ("${keyword}" "${location}") (contact OR email OR phone)`,
-      twitter: `site:twitter.com ("${keyword}" "${location}") (contact OR email)`,
-      pinterest: `site:pinterest.com ("${keyword}" "${location}") (business OR contact)`
+      google: `"${keyword}" "${location}" (contact OR email OR phone OR "contact us")`,
+      facebook: `site:facebook.com "${keyword}" "${location}" pages`,
+      instagram: `site:instagram.com "${keyword}" "${location}" business`,
+      linkedin: `site:linkedin.com "${keyword}" "${location}" company`,
+      yellowpages: `site:yellowpages.com "${keyword}" "${location}"`,
+      yelp: `site:yelp.com "${keyword}" "${location}"`,
+      sulekha: `site:sulekha.com "${keyword}" "${location}" business`,
+      fiverr: `site:fiverr.com "${keyword}" "${location}" profile`,
+      upwork: `site:upwork.com "${keyword}" "${location}" freelancer`,
+      google_maps: `"${keyword}" "${location}" "google maps" contact`,
+      job_boards: `(site:indeed.com OR site:monster.com) "${keyword}" "${location}" contact`,
+      reddit: `site:reddit.com "${keyword}" "${location}" business`,
+      angieslist: `site:angieslist.com "${keyword}" "${location}"`,
+      thumbtack: `site:thumbtack.com "${keyword}" "${location}"`,
+      houzz: `site:houzz.com "${keyword}" "${location}" professional`,
+      bing: `"${keyword}" "${location}" contact information`,
+      twitter: `site:twitter.com "${keyword}" "${location}" business`,
+      pinterest: `site:pinterest.com "${keyword}" "${location}" business`
     };
 
-    let query = baseQueries[source] || `("${keyword}" "${location}") (email OR contact OR phone)`;
+    let query = baseQueries[source] || `"${keyword}" "${location}" contact email phone`;
     
     if (emailDomain && emailDomain.trim()) {
       const domain = emailDomain.startsWith('@') ? emailDomain : `@${emailDomain}`;
-      query += ` AND "${domain}"`;
+      query += ` ${domain}`;
     }
 
     return query;
@@ -38,80 +37,62 @@ class SearchUtils {
   static generateMultipleQueries(keyword, source, location, emailDomain = '') {
     const queries = [];
     
-    queries.push(this.generateGoogleDorkQuery(keyword, source, location, emailDomain));
+    // Main query
+    queries.push(this.generateGoogleSearchQuery(keyword, source, location, emailDomain));
     
+    // Alternative targeted queries
     const variations = [
-      `"${keyword}" "${location}" contact email phone`,
-      `"${keyword}" "${location}" "contact us" phone`,
-      `"${keyword}" "${location}" business directory`,
-      `"${keyword}" "${location}" company email address`
+      `"${keyword}" "${location}" "contact us" (phone OR email)`,
+      `"${keyword}" "${location}" directory business listing`,
+      `"${keyword}" "${location}" professional services contact`,
+      `"${keyword}" services "${location}" "get in touch"`
     ];
 
     if (source !== 'google') {
       const siteMap = {
-        facebook: 'facebook.com',
-        instagram: 'instagram.com', 
-        linkedin: 'linkedin.com',
+        facebook: 'facebook.com/pages',
+        instagram: 'instagram.com',
+        linkedin: 'linkedin.com/company',
         twitter: 'twitter.com',
-        yelp: 'yelp.com',
+        yelp: 'yelp.com/biz',
         yellowpages: 'yellowpages.com',
-        reddit: 'reddit.com'
+        reddit: 'reddit.com/r',
+        sulekha: 'sulekha.com'
       };
 
       if (siteMap[source]) {
-        variations.forEach(variation => {
-          queries.push(`site:${siteMap[source]} ${variation}`);
-        });
+        const siteQuery = `site:${siteMap[source]} "${keyword}" "${location}" contact`;
+        queries.push(siteQuery);
       }
     } else {
-      queries.push(...variations);
+      queries.push(...variations.slice(0, 2)); // Add 2 variations for google
     }
 
     return queries.slice(0, 3);
   }
 
-  static generateSearchUrls(query, pages = 1) {
-    const encodedQuery = encodeURIComponent(query);
-    const urls = [];
-    
-    for (let i = 0; i < pages; i++) {
-      const start = i * 10;
-      urls.push(`https://www.google.com/search?q=${encodedQuery}&num=10&start=${start}&hl=en&gl=us&pws=0&filter=0&safe=off`);
-    }
-    
-    return urls;
-  }
-
-  static generateAlternativeUrls(keyword, location, source) {
-    const encodedKeyword = encodeURIComponent(keyword);
-    const encodedLocation = encodeURIComponent(location);
-    const encodedSource = encodeURIComponent(source);
-    
-    return [
-      `https://www.bing.com/search?q=${encodedKeyword}+${encodedLocation}+${encodedSource}+contact+email+phone&count=50`,
-      `https://duckduckgo.com/?q=${encodedKeyword}+${encodedLocation}+${encodedSource}+email+contact&ia=web`,
-      `https://search.yahoo.com/search?p=${encodedKeyword}+${encodedLocation}+${encodedSource}+contact+phone&n=50`
-    ];
-  }
-
-  static getRandomUserAgent() {
-    return userAgents[Math.floor(Math.random() * userAgents.length)];
-  }
-
   static extractSocialLinks(text) {
     const socialPatterns = {
-      facebook: /(?:https?:\/\/)?(?:www\.)?(?:facebook|fb)\.com\/[a-zA-Z0-9.\-]+/gi,
+      facebook: /(?:https?:\/\/)?(?:www\.)?(?:facebook|fb)\.com\/[a-zA-Z0-9.\-_]+/gi,
       instagram: /(?:https?:\/\/)?(?:www\.)?instagram\.com\/[a-zA-Z0-9._]+/gi,
       twitter: /(?:https?:\/\/)?(?:www\.)?(?:twitter|x)\.com\/[a-zA-Z0-9_]+/gi,
-      linkedin: /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/(?:in|company)\/[a-zA-Z0-9.\-]+/gi,
-      youtube: /(?:https?:\/\/)?(?:www\.)?youtube\.com\/(?:channel\/|user\/|@)[a-zA-Z0-9.\-]+/gi
+      linkedin: /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/(?:in|company)\/[a-zA-Z0-9.\-_]+/gi,
+      youtube: /(?:https?:\/\/)?(?:www\.)?youtube\.com\/(?:channel\/|user\/|@|c\/)[a-zA-Z0-9.\-_]+/gi,
+      pinterest: /(?:https?:\/\/)?(?:www\.)?pinterest\.com\/[a-zA-Z0-9._]+/gi
     };
 
     const links = [];
     for (const [platform, pattern] of Object.entries(socialPatterns)) {
       const matches = text.match(pattern);
       if (matches) {
-        links.push(...matches.map(link => link.startsWith('http') ? link : `https://${link}`));
+        matches.forEach(match => {
+          const cleanLink = match.startsWith('http') ? match : `https://${match}`;
+          // Filter out generic/promotional links
+          if (!cleanLink.includes('/share') && !cleanLink.includes('/like') && 
+              !cleanLink.includes('/follow') && !cleanLink.includes('?')) {
+            links.push(cleanLink);
+          }
+        });
       }
     }
 
@@ -119,182 +100,158 @@ class SearchUtils {
   }
 
   static extractEmails(text) {
-    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
-    const emails = text.match(emailRegex) || [];
-    
-    const filtered = emails.filter(email => {
-      const domain = email.split('@')[1];
-      const excludedDomains = ['example.com', 'test.com', 'domain.com', 'email.com'];
-      return !excludedDomains.includes(domain.toLowerCase());
-    });
-    
-    return [...new Set(filtered)];
-  }
-
-  static extractPhoneNumbers(text) {
-    const phonePatterns = [
-      /\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g,
-      /\+\d{1,3}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}/g,
-      /\d{10}/g
+    // Multiple email regex patterns for better matching
+    const patterns = [
+      /\b[A-Za-z0-9]([A-Za-z0-9._%+-]*[A-Za-z0-9])?@[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?\.[A-Za-z]{2,}\b/g,
+      /mailto:([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/gi
     ];
     
-    const phones = [];
-    phonePatterns.forEach(pattern => {
-      const matches = text.match(pattern) || [];
-      phones.push(...matches);
-    });
+    const emails = new Set();
     
-    const cleaned = phones
-      .map(phone => phone.replace(/[^\d+]/g, ''))
-      .filter(phone => phone.length >= 10)
-      .map(phone => {
-        if (phone.length === 10 && !phone.startsWith('+')) {
-          return `(${phone.substr(0,3)}) ${phone.substr(3,3)}-${phone.substr(6,4)}`;
-        }
-        return phone;
-      });
-    
-    return [...new Set(cleaned)];
-  }
-
-  static extractWebsites(text) {
-    const urlRegex = /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&=]*)/g;
-    const domainRegex = /(?:www\.)?[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*\.(com|org|net|gov|edu|mil|int|co|io|ai|tech|app)/g;
-    
-    const urls = text.match(urlRegex) || [];
-    const domains = text.match(domainRegex) || [];
-    
-    const allUrls = [
-      ...urls,
-      ...domains.map(domain => domain.startsWith('www.') || domain.startsWith('http') ? domain : `https://${domain}`)
-    ];
-    
-    const filtered = allUrls.filter(url => {
-      const excludedDomains = ['example.com', 'test.com', 'domain.com', 'google.com', 'facebook.com', 'twitter.com'];
-      return !excludedDomains.some(excluded => url.includes(excluded));
-    });
-    
-    return [...new Set(filtered)];
-  }
-
-  static cleanText(text) {
-    return text
-      .replace(/\s+/g, ' ')
-      .replace(/[^\x20-\x7E]/g, '')
-      .trim();
-  }
-
-  static extractBusinessNames(text, keyword) {
-    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-    const businessNames = new Set();
-    
-    lines.forEach(line => {
-      if (line.toLowerCase().includes(keyword.toLowerCase()) && 
-          line.length > 5 && 
-          line.length < 100 &&
-          !/^(http|www|@)/.test(line) &&
-          !/^\d+$/.test(line)) {
-        
-        let cleaned = line
-          .replace(/[^\w\s&.-]/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-        
-        if (cleaned.length > 3) {
-          businessNames.add(cleaned);
-        }
+    patterns.forEach(pattern => {
+      const matches = text.match(pattern);
+      if (matches) {
+        matches.forEach(match => {
+          const email = match.replace('mailto:', '').toLowerCase().trim();
+          if (this.isValidEmail(email)) {
+            emails.add(email);
+          }
+        });
       }
     });
     
-    return Array.from(businessNames);
-  }
-
-  static getSearchDelay(requestCount = 0) {
-    const baseDelay = 2000;
-    const randomDelay = Math.floor(Math.random() * 3000);
-    const escalationDelay = Math.floor(requestCount / 5) * 1000;
-    
-    return Math.min(baseDelay + randomDelay + escalationDelay, 15000);
-  }
-
-  static validateLead(lead) {
-    if (!lead || typeof lead !== 'object') return false;
-    if (!lead.businessName || typeof lead.businessName !== 'string') return false;
-    if (lead.businessName.trim().length < 2) return false;
-    
-    const hasEmail = lead.email && lead.email !== 'N/A' && this.isValidEmail(lead.email);
-    const hasPhone = lead.phone && lead.phone !== 'N/A' && lead.phone.replace(/\D/g, '').length >= 10;
-    const hasWebsite = lead.website && lead.website !== 'N/A' && this.isValidUrl(lead.website);
-    
-    return hasEmail || hasPhone || hasWebsite;
+    return Array.from(emails);
   }
 
   static isValidEmail(email) {
+    if (!email || !email.includes('@') || email.length < 5) return false;
+    
+    const [local, domain] = email.split('@');
+    
+    // Filter out common false positives
+    const excludedDomains = [
+      'example.com', 'test.com', 'domain.com', 'email.com', 
+      'noreply.com', 'no-reply.com', 'donotreply.com'
+    ];
+    
+    const excludedPrefixes = [
+      'noreply', 'no-reply', 'donotreply', 'admin', 'webmaster', 
+      'postmaster', 'info', 'support'
+    ];
+    
+    if (excludedDomains.includes(domain.toLowerCase())) return false;
+    if (excludedPrefixes.includes(local.toLowerCase())) return false;
+    
+    // Basic email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
 
+  static extractPhoneNumbers(text) {
+    const phonePatterns = [
+      /(\+\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g,
+      /(\+\d{1,3}[-.\s]?)?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g,
+      /\d{3}[-.\s]\d{3}[-.\s]\d{4}/g,
+      /\(\d{3}\)\s?\d{3}[-.\s]?\d{4}/g
+    ];
+    
+    const phones = new Set();
+    
+    phonePatterns.forEach(pattern => {
+      const matches = text.match(pattern);
+      if (matches) {
+        matches.forEach(match => {
+          const cleaned = match.replace(/[^\d+]/g, '');
+          // Validate phone number length and format
+          if (cleaned.length >= 10 && cleaned.length <= 15) {
+            phones.add(match.trim());
+          }
+        });
+      }
+    });
+    
+    return Array.from(phones);
+  }
+
+  static extractBusinessNameFromUrl(url) {
+    try {
+      const parsedUrl = new URL(url);
+      const hostname = parsedUrl.hostname;
+      
+      // Remove www. and extract domain name
+      const domain = hostname.replace('www.', '');
+      const domainParts = domain.split('.');
+      
+      if (domainParts.length > 1) {
+        // Convert to readable format
+        const name = domainParts[0]
+          .replace(/[-_]/g, ' ')
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        
+        return name;
+      }
+      
+      return domain;
+    } catch (error) {
+      console.error('Error extracting business name from URL:', error);
+      return 'Unknown Business';
+    }
+  }
+
+  static getRandomUserAgent() {
+    return userAgents[Math.floor(Math.random() * userAgents.length)];
+  }
+
+  static delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   static isValidUrl(url) {
     try {
-      new URL(url.startsWith('http') ? url : `https://${url}`);
-      return true;
-    } catch {
+      const parsedUrl = new URL(url);
+      return ['http:', 'https:'].includes(parsedUrl.protocol);
+    } catch (error) {
       return false;
     }
   }
 
-  static createFallbackLeads(keyword, location) {
-    return [];
-  }
-
-  static shouldApplyRateLimit(platform, requestCount) {
-    const rateLimits = {
-      google: { maxRequests: 10, timeWindow: 60000 },
-      bing: { maxRequests: 15, timeWindow: 60000 },
-      duckduckgo: { maxRequests: 20, timeWindow: 60000 },
-      facebook: { maxRequests: 5, timeWindow: 60000 },
-      linkedin: { maxRequests: 5, timeWindow: 60000 },
-      default: { maxRequests: 8, timeWindow: 60000 }
-    };
-    
-    const limit = rateLimits[platform] || rateLimits.default;
-    return requestCount >= limit.maxRequests;
-  }
-
-  static generateSearchStrategy(keyword, platforms, location) {
-    const strategies = [];
-    
-    if (location) {
-      strategies.push({
-        type: 'directory',
-        priority: 1,
-        platforms: ['yellowpages', 'yelp'],
-        approach: 'direct_scrape'
-      });
+  static normalizeUrl(url) {
+    try {
+      const parsed = new URL(url);
+      // Remove query parameters and fragments for deduplication
+      return `${parsed.protocol}//${parsed.hostname}${parsed.pathname}`.replace(/\/$/, '');
+    } catch (error) {
+      return url;
     }
+  }
+
+  static cleanText(text) {
+    if (!text) return '';
     
-    strategies.push({
-      type: 'google_site_search',
-      priority: 2,
-      platforms: platforms.filter(p => ['facebook', 'linkedin', 'twitter'].includes(p)),
-      approach: 'google_dork'
-    });
-    
-    strategies.push({
-      type: 'alternative_engines',
-      priority: 3,
-      platforms: ['bing', 'duckduckgo'],
-      approach: 'multi_engine'
-    });
-    
-    strategies.push({
-      type: 'general_search',
-      priority: 4,
-      platforms: ['google'],
-      approach: 'broad_search'
-    });
-    
-    return strategies.sort((a, b) => a.priority - b.priority);
+    return text
+      .replace(/\s+/g, ' ')
+      .replace(/[\r\n\t]/g, ' ')
+      .trim();
+  }
+
+  static isBusinessWebsite(url) {
+    try {
+      const parsedUrl = new URL(url);
+      const hostname = parsedUrl.hostname.toLowerCase();
+      
+      // Filter out non-business domains
+      const nonBusinessDomains = [
+        'google.com', 'facebook.com', 'twitter.com', 'instagram.com',
+        'linkedin.com', 'youtube.com', 'pinterest.com', 'tiktok.com',
+        'wikipedia.org', 'amazon.com', 'ebay.com'
+      ];
+      
+      return !nonBusinessDomains.some(domain => hostname.includes(domain));
+    } catch (error) {
+      return true; // Assume it's business if we can't parse
+    }
   }
 }
 

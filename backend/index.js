@@ -9,11 +9,11 @@ dotenv.config();
 const app = express();
 
 // Import managers
-const proxyManager = require('./utils/proxyManager');
-const browserManager = require('./utils/browserManager');
+const searchApiManager = require('./utils/searchApiManager');
+const crawlerManager = require('./utils/crawlerManager');
 
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174', 'https://yourdomain.com']
+    origin: ['http://localhost:5173', 'http://localhost:5174', 'https://momentmail-io.onrender.com/']
 }));
 
 app.use(express.json());
@@ -33,9 +33,8 @@ app.get('/health', async (req, res) => {
     timestamp: new Date().toISOString(),
     services: {
       database: 'unknown',
-      proxy: 'unknown',
-      gemini: 'unknown',
-      browser: 'unknown'
+      searchApi: 'unknown',
+      crawler: 'unknown'
     }
   };
 
@@ -48,24 +47,21 @@ app.get('/health', async (req, res) => {
     health.status = 'degraded';
   }
 
-  // Test proxy
+  // Test search API
   try {
-    const proxyWorking = await Promise.race([
-      proxyManager.testProxy(),
-      new Promise(resolve => setTimeout(() => resolve(false), 3000))
-    ]);
-    health.services.proxy = proxyWorking ? 'working' : 'failed';
+    const apiWorking = await searchApiManager.testConnection();
+    health.services.searchApi = apiWorking ? 'working' : 'failed';
   } catch (error) {
-    health.services.proxy = 'failed';
+    health.services.searchApi = 'failed';
   }
 
-  // Test browser
+  // Test crawler
   try {
-    const browserStats = browserManager.getStats();
-    health.services.browser = browserStats.browserActive ? 'active' : 'inactive';
-    health.browserStats = browserStats;
+    const crawlerStats = crawlerManager.getStats();
+    health.services.crawler = crawlerStats.active ? 'ready' : 'inactive';
+    health.crawlerStats = crawlerStats;
   } catch (error) {
-    health.services.browser = 'error';
+    health.services.crawler = 'error';
   }
 
   res.json(health);
@@ -87,7 +83,7 @@ app.get('/', (req, res) => {
       <body>
           <div class="container">
               <h1>🚀 Lead Generation Backend Server</h1>
-              <p>Your server is running successfully with Puppeteer integration</p>
+              <p>Your server is running successfully with Google Search API integration</p>
               <p>Visit <a href="/health">/health</a> to check services status</p>
           </div>
       </body>
@@ -133,17 +129,16 @@ const startServer = async () => {
   
   console.log('\n🔧 Testing external services...');
   
-  // Test proxy
-  const proxyWorking = await proxyManager.testProxy();
-  console.log(`🌐 Proxy: ${proxyWorking ? '✅ Working' : '❌ Failed'}`);
+  // Test search API
+  const apiWorking = await searchApiManager.testConnection();
+  console.log(`🔍 Search API: ${apiWorking ? '✅ Working' : '❌ Failed'}`);
   
-  // Test browser
+  // Test crawler
   try {
-    await browserManager.getBrowser();
-    console.log('🌐 Browser: ✅ Ready');
-    await browserManager.closeBrowser();
+    const crawlerStats = crawlerManager.getStats();
+    console.log('🕷️  Crawler: ✅ Ready');
   } catch (error) {
-    console.log('🌐 Browser: ❌ Failed -', error.message);
+    console.log('🕷️  Crawler: ❌ Failed -', error.message);
   }
   
   const PORT = process.env.PORT || 5000;
@@ -162,15 +157,11 @@ const startServer = async () => {
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   console.log('\n🛑 Received SIGTERM. Shutting down gracefully...');
-  await browserManager.closeBrowser();
-  await proxyManager.closeAnonymizedProxy();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
   console.log('\n🛑 Received SIGINT. Shutting down gracefully...');
-  await browserManager.closeBrowser();
-  await proxyManager.closeAnonymizedProxy();
   process.exit(0);
 });
 

@@ -1,7 +1,7 @@
 // api.js - Enhanced with better token management and lead generation handling
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 // Enhanced token refresh function
 export const refreshAuthToken = async (token) => {
@@ -53,10 +53,13 @@ const isTokenExpiringSoon = (token) => {
 };
 
 // Create enhanced axios instance with interceptors
-const createApiInstance = () => {
+const createApiInstance = (timeout = 30000) => {
   const apiInstance = axios.create({
     baseURL: API_BASE_URL,
-    timeout: 30000,
+    timeout,
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 
   // Enhanced request interceptor
@@ -69,16 +72,19 @@ const createApiInstance = () => {
 
       if (!isAuthExcluded) {
         let userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
+        let token = userInfo.token || localStorage.getItem("token");
         
-        if (userInfo.token) {
+        if (token) {
           // Check if token is expiring soon and refresh preemptively
-          if (isTokenExpiringSoon(userInfo.token)) {
+          if (isTokenExpiringSoon(token)) {
             console.log('Token expiring soon, refreshing before request...');
             try {
-              const refreshResult = await refreshAuthToken(userInfo.token);
+              const refreshResult = await refreshAuthToken(token);
               if (refreshResult.refreshed && refreshResult.token) {
+                token = refreshResult.token;
                 userInfo = { ...userInfo, token: refreshResult.token };
                 localStorage.setItem('user-info', JSON.stringify(userInfo));
+                localStorage.setItem('token', refreshResult.token);
               }
             } catch (refreshError) {
               console.error('Preemptive token refresh failed:', refreshError);
@@ -86,7 +92,7 @@ const createApiInstance = () => {
             }
           }
           
-          config.headers.Authorization = `Bearer ${userInfo.token}`;
+          config.headers.Authorization = `Bearer ${token}`;
           console.log("Adding auth token to request:", config.url);
         }
       }
@@ -127,18 +133,22 @@ const createApiInstance = () => {
 
         try {
           const userInfo = JSON.parse(localStorage.getItem("user-info") || "{}");
-          if (!userInfo.token) {
+          const token = userInfo.token || localStorage.getItem("token");
+          
+          if (!token) {
             console.log("No token available for refresh, redirecting to login");
             localStorage.removeItem("user-info");
+            localStorage.removeItem("token");
             window.location.href = "/login";
             return Promise.reject(error);
           }
 
-          const refreshResult = await refreshAuthToken(userInfo.token);
+          const refreshResult = await refreshAuthToken(token);
 
           if (refreshResult.requiresReauth) {
             console.log("Refresh requires reauthentication");
             localStorage.removeItem("user-info");
+            localStorage.removeItem("token");
             window.location.href = "/login";
             return Promise.reject(error);
           }
@@ -147,6 +157,7 @@ const createApiInstance = () => {
             console.log("Token refreshed successfully, retrying original request");
             const updatedUserInfo = { ...userInfo, token: refreshResult.token };
             localStorage.setItem("user-info", JSON.stringify(updatedUserInfo));
+            localStorage.setItem("token", refreshResult.token);
 
             originalRequest.headers.Authorization = `Bearer ${refreshResult.token}`;
             return apiInstance(originalRequest);
@@ -154,6 +165,7 @@ const createApiInstance = () => {
         } catch (refreshError) {
           console.error("Token refresh failed during error handling:", refreshError);
           localStorage.removeItem("user-info");
+          localStorage.removeItem("token");
           window.location.href = "/login";
           return Promise.reject(refreshError);
         }
@@ -166,7 +178,11 @@ const createApiInstance = () => {
   return apiInstance;
 };
 
+// Create default API instance
 const api = createApiInstance();
+
+// Create API instance with extended timeout for lead generation
+const leadApi = createApiInstance(300000); // 5 minutes timeout
 
 // Debounce function for preventing duplicate requests
 const debounce = (fn, delay) => {
@@ -215,11 +231,12 @@ const debounce = (fn, delay) => {
   };
 };
 
-// Existing API functions (keeping them unchanged)
+// === AUTHENTICATION APIs ===
 export const googleAuth = (code) => {
   return axios.get(`${API_BASE_URL}/auth/google?code=${code}`);
 };
 
+// === EMAIL APIs ===
 export const sendEmails = debounce(
   async (templateContent, recipients, templateName, options = {}) => {
     try {
@@ -298,6 +315,54 @@ export const cancelScheduledEmail = async (scheduledEmailId) => {
   }
 };
 
+export const getEmailStatus = async (recipients, emailSubject) => {
+  try {
+    console.log(
+      "Making email status request to:",
+      `${API_BASE_URL}/drive/email-status`
+    );
+    console.log("Request payload:", { recipients, emailSubject });
+
+    const response = await api.post("/drive/email-status", {
+      recipients,
+      emailSubject,
+    });
+
+    console.log("Email status response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error checking email status:", error);
+
+    if (error.response) {
+      console.error("Response status:", error.response.status);
+      console.error("Response data:", error.response.data);
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    }
+
+    return { status: "unknown", error: error.message };
+  }
+};
+
+// === GOOGLE DRIVE APIs ===
+export const connectGoogleDrive = async (code) => {
+  console.log('Connecting Google Drive with code:', code ? 'present' : 'missing');
+  try {
+    const response = await axios.get(`${API_BASE_URL}/drive/connect-drive`, {
+      params: { code }
+    });
+    console.log('Drive connection successful:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Drive connection failed:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+    throw error;
+  }
+};
+
 export const fetchSpreadsheets = async () => {
   try {
     const response = await api.get("/drive/spreadsheets");
@@ -332,54 +397,7 @@ export const fetchColumnData = async (spreadsheetId, column) => {
   }
 };
 
-export const connectGoogleDrive = async (code) => {
-  console.log('Connecting Google Drive with code:', code ? 'present' : 'missing');
-  try {
-    const response = await axios.get(`${API_BASE_URL}/drive/connect-drive`, {
-      params: { code }
-    });
-    console.log('Drive connection successful:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('Drive connection failed:', {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message
-    });
-    throw error;
-  }
-};
-
-export const getEmailStatus = async (recipients, emailSubject) => {
-  try {
-    console.log(
-      "Making email status request to:",
-      `${API_BASE_URL}/drive/email-status`
-    );
-    console.log("Request payload:", { recipients, emailSubject });
-
-    const response = await api.post("/drive/email-status", {
-      recipients,
-      emailSubject,
-    });
-
-    console.log("Email status response:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Error checking email status:", error);
-
-    if (error.response) {
-      console.error("Response status:", error.response.status);
-      console.error("Response data:", error.response.data);
-    } else if (error.request) {
-      console.error("No response received:", error.request);
-    }
-
-    return { status: "unknown", error: error.message };
-  }
-};
-
-// Template API functions
+// === TEMPLATE APIs ===
 export const saveTemplate = async (templateData) => {
   try {
     const response = await api.post('/api/templates', templateData);
@@ -444,21 +462,87 @@ export const uploadImage = async (formData) => {
   }
 };
 
-// Add these to your existing api.js
-
+// === LEAD GENERATION APIs ===
 export const generateLeads = async (searchData) => {
   try {
-    const response = await api.post('/api/leads/generate', searchData);
+    console.log("Generating leads with data:", searchData);
+    const response = await leadApi.post('/api/leads/generate', searchData);
+    console.log("Lead generation response:", response.data);
     return response.data;
   } catch (error) {
-    console.error('Error generating leads:', error);
+    console.error('Error generating leads:', {
+      message: error.response?.data?.message || error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
     throw error;
   }
 };
 
+export const getLeads = async (params = {}) => {
+  try {
+    console.log("Fetching leads with params:", params);
+    const response = await api.get('/api/leads', { params });
+    console.log("Leads fetch response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching leads:', error);
+    throw error;
+  }
+};
+
+export const getSearchDetail = async (searchId) => {
+  try {
+    console.log("Fetching search detail:", searchId);
+    const response = await api.get(`/api/leads/search/${searchId}`);
+    console.log("Search detail response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching search detail:', error);
+    throw error;
+  }
+};
+
+export const updateLead = async (searchId, contactIndex, data) => {
+  try {
+    console.log("Updating lead:", searchId, contactIndex, data);
+    const response = await api.put(`/api/leads/${searchId}/contact/${contactIndex}`, data);
+    console.log("Lead update response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating lead:', error);
+    throw error;
+  }
+};
+
+export const deleteLeadSearch = async (searchId) => {
+  try {
+    console.log("Deleting lead search:", searchId);
+    const response = await api.delete(`/api/leads/${searchId}`);
+    console.log("Lead search delete response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting lead search:', error);
+    throw error;
+  }
+};
+
+export const getLeadStats = async () => {
+  try {
+    console.log("Fetching lead statistics");
+    const response = await api.get('/api/leads/stats');
+    console.log("Lead stats response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching lead stats:', error);
+    throw error;
+  }
+};
+
+// === LEGACY LEAD APIs (for backward compatibility) ===
 export const getLeadHistory = async (page = 1, limit = 20) => {
   try {
-    const response = await api.get(`/api/leads/history?page=${page}&limit=${limit}`);
+    const response = await api.get(`/api/leads?page=${page}&limit=${limit}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching lead history:', error);
@@ -468,7 +552,7 @@ export const getLeadHistory = async (page = 1, limit = 20) => {
 
 export const getLeadDetails = async (id) => {
   try {
-    const response = await api.get(`/api/leads/history/${id}`);
+    const response = await api.get(`/api/leads/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching lead details:', error);
@@ -476,9 +560,9 @@ export const getLeadDetails = async (id) => {
   }
 };
 
-export const updateLeadNotes = async (searchId, leadIndex, updateData) => {
+export const updateLeadNotes = async (leadId, updateData) => {
   try {
-    const response = await api.put(`/api/leads/update/${searchId}/${leadIndex}`, updateData);
+    const response = await api.put(`/api/leads/${leadId}`, updateData);
     return response.data;
   } catch (error) {
     console.error('Error updating lead notes:', error);
@@ -488,10 +572,39 @@ export const updateLeadNotes = async (searchId, leadIndex, updateData) => {
 
 export const deleteSearch = async (id) => {
   try {
-    const response = await api.delete(`/api/leads/delete/${id}`);
+    const response = await api.delete(`/api/leads/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error deleting search:', error);
     throw error;
   }
 };
+
+// === HEALTH CHECK API ===
+export const getHealthStatus = async () => {
+  try {
+    const response = await api.get('/health');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting health status:', error);
+    throw error;
+  }
+};
+
+// === STRUCTURED LEAD API OBJECT ===
+export const leadAPI = {
+  generateLeads: (data) => generateLeads(data),
+  getLeads: (params) => getLeads(params),
+  getSearchDetail: (searchId) => getSearchDetail(searchId),
+  updateLead: (searchId, contactIndex, data) => updateLead(searchId, contactIndex, data),
+  deleteLeadSearch: (searchId) => deleteLeadSearch(searchId),
+  getStats: () => getLeadStats(),
+  
+  // Legacy methods for backward compatibility
+  getHistory: (page, limit) => getLeadHistory(page, limit),
+  getDetails: (id) => getLeadDetails(id),
+  updateNotes: (id, data) => updateLeadNotes(id, data),
+  deleteSearch: (id) => deleteSearch(id),
+};
+
+// Note: Using named exports only to maintain consistency with existing codebase
