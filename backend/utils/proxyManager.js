@@ -4,7 +4,7 @@ class ProxyManager {
   constructor() {
     this.proxyConfig = {
       host: process.env.WEBSHARE_PROXY_HOST,
-      port: parseInt(process.env.WEBSHARE_PROXY_PORT),
+      port: parseInt(process.env.WEBSHARE_PROXY_PORT) || 8000,
       auth: {
         username: process.env.WEBSHARE_PROXY_USERNAME,
         password: process.env.WEBSHARE_PROXY_PASSWORD
@@ -17,6 +17,9 @@ class ProxyManager {
     this.isProxyWorking = null;
     this.lastProxyTest = 0;
     this.proxyTestInterval = 5 * 60 * 1000; // Test every 5 minutes
+    this.successRate = 0;
+    this.currentIp = null;
+    this.testResults = [];
   }
 
   getProxyUrl() {
@@ -29,7 +32,7 @@ class ProxyManager {
   }
 
   async getAnonymizedProxy() {
-    // Since proxy-chain might be causing issues, return direct proxy URL
+    // Return direct proxy URL for simplicity
     const proxyUrl = this.getProxyUrl();
     if (proxyUrl) {
       console.log('Using direct proxy configuration');
@@ -44,31 +47,12 @@ class ProxyManager {
   }
 
   getProxyConfig() {
-    return this.proxyConfig;
-  }
+    const proxyUrl = this.getProxyUrl();
+    if (!proxyUrl) return null;
 
-  async testProxy() {
-    const now = Date.now();
-    
-    // Skip test if recently tested and working
-    if (this.isProxyWorking === true && (now - this.lastProxyTest) < this.proxyTestInterval) {
-      return true;
-    }
-    
     try {
-      console.log('Testing proxy connection...');
-      this.lastProxyTest = now;
-      
-      const proxyUrl = this.getProxyUrl();
-      
-      if (!proxyUrl) {
-        console.log('No proxy URL available');
-        this.isProxyWorking = false;
-        return false;
-      }
-
       const parsedProxy = new URL(proxyUrl);
-      const proxyConfig = {
+      return {
         protocol: parsedProxy.protocol.replace(':', ''),
         host: parsedProxy.hostname,
         port: parseInt(parsedProxy.port),
@@ -77,12 +61,52 @@ class ProxyManager {
           password: parsedProxy.password
         }
       };
+    } catch (error) {
+      console.error('Error parsing proxy URL:', error.message);
+      return null;
+    }
+  }
+
+  async testProxy() {
+    const now = Date.now();
+    
+    // Skip test if recently tested and working
+    if (this.isProxyWorking === true && (now - this.lastProxyTest) < this.proxyTestInterval) {
+      return {
+        isProxyWorking: this.isProxyWorking,
+        successRate: this.successRate,
+        currentIp: this.currentIp
+      };
+    }
+    
+    try {
+      console.log('Testing proxy connection...');
+      this.lastProxyTest = now;
+      
+      const proxyConfig = this.getProxyConfig();
+      
+      if (!proxyConfig) {
+        console.log('No proxy configuration available');
+        this.isProxyWorking = false;
+        this.successRate = 0;
+        return {
+          isProxyWorking: false,
+          successRate: 0,
+          currentIp: null,
+          error: 'No proxy configuration'
+        };
+      }
 
       const testUrls = [
         'http://httpbin.org/ip',
-        'http://icanhazip.com'
+        'http://icanhazip.com',
+        'https://api.ipify.org?format=json'
       ];
 
+      let successfulTests = 0;
+      let currentIp = null;
+      this.testResults = [];
+      
       for (const testUrl of testUrls) {
         try {
           console.log(`Testing proxy with ${testUrl}...`);
@@ -96,29 +120,66 @@ class ProxyManager {
           });
 
           if (response.status === 200) {
-            const responseData = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-            console.log('Proxy test successful. Response:', responseData.substring(0, 100));
+            successfulTests++;
+            const responseData = typeof response.data === 'string' 
+              ? response.data.trim() 
+              : response.data;
+              
+            this.testResults.push({
+              url: testUrl,
+              success: true,
+              data: responseData
+            });
             
-            this.isProxyWorking = true;
-            this.consecutiveFailures = 0;
-            return true;
+            // Extract IP address for tracking
+            if (typeof responseData === 'string' && responseData.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+              currentIp = responseData;
+            } else if (responseData.ip) {
+              currentIp = responseData.ip;
+            } else if (responseData.origin) {
+              currentIp = responseData.origin;
+            }
+            
+            console.log('Proxy test successful. Response:', 
+              JSON.stringify(responseData).substring(0, 100));
           }
         } catch (error) {
           console.log(`Proxy test failed for ${testUrl}:`, error.message);
+          this.testResults.push({
+            url: testUrl,
+            success: false,
+            error: error.message
+          });
           continue;
         }
       }
 
-      console.log('All proxy test URLs failed');
-      this.isProxyWorking = false;
-      this.consecutiveFailures++;
-      return false;
+      this.isProxyWorking = successfulTests >= 1;
+      this.consecutiveFailures = this.isProxyWorking ? 0 : this.consecutiveFailures + 1;
+      this.successRate = (successfulTests / testUrls.length) * 100;
+      this.currentIp = currentIp;
+      
+      console.log(`Proxy test completed: ${successfulTests}/${testUrls.length} successful`);
+      console.log(`Proxy working: ${this.isProxyWorking}, Success rate: ${this.successRate}%`);
+      
+      return {
+        isProxyWorking: this.isProxyWorking,
+        successRate: this.successRate,
+        currentIp: this.currentIp,
+        testResults: this.testResults
+      };
 
     } catch (error) {
       console.error('Proxy test error:', error.message);
       this.isProxyWorking = false;
       this.consecutiveFailures++;
-      return false;
+      this.successRate = 0;
+      return {
+        isProxyWorking: false,
+        successRate: 0,
+        currentIp: null,
+        error: error.message
+      };
     }
   }
 
@@ -126,9 +187,11 @@ class ProxyManager {
     console.log('Proxy rotation requested - resetting proxy state');
     this.isProxyWorking = null;
     this.lastProxyTest = 0;
+    this.consecutiveFailures = 0;
+    this.successRate = 0;
     
     // Add a delay before using proxy again
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 5000));
     
     return await this.testProxy();
   }
@@ -207,7 +270,10 @@ class ProxyManager {
       consecutiveFailures: this.consecutiveFailures,
       isProxyWorking: this.isProxyWorking,
       currentRateLimit: this.rateLimitDelay,
-      lastProxyTest: new Date(this.lastProxyTest).toISOString()
+      lastProxyTest: this.lastProxyTest ? new Date(this.lastProxyTest).toISOString() : null,
+      successRate: Math.round(this.successRate),
+      currentIp: this.currentIp,
+      hasConfiguration: !!(this.proxyConfig.host && this.proxyConfig.auth.username)
     };
   }
 
@@ -218,6 +284,9 @@ class ProxyManager {
     this.rateLimitDelay = 2000;
     this.isProxyWorking = null;
     this.lastProxyTest = 0;
+    this.successRate = 0;
+    this.currentIp = null;
+    this.testResults = [];
     console.log('Proxy manager reset');
   }
 }

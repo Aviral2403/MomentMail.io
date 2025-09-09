@@ -1,55 +1,112 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import './ProtectedRoute.css'
+import "./ProtectedRoute.css";
 
 // Route-specific content configuration
 const routeContent = {
-  '/dashboard': {
-    title: 'Dashboard Access',
-    subtitle: 'Please login to access your dashboard and view your analytics',
-    features: ['View Analytics', 'Manage Projects', 'Track Progress']
+  "/dashboard": {
+    title: "Dashboard Access",
+    subtitle: "Please login to access your dashboard and view your analytics",
+    features: ["View Analytics", "Manage Projects", "Track Progress"],
   },
-  '/lead-generation': {
-    title: 'Lead Management',
-    subtitle: 'Please login to capture, organize, and track your leads',
-    features: [ 'Capture Leads', 'Boost Sales', 'Grow Outreach', 'Increase Conversions']
+  "/lead-generation": {
+    title: "Lead Management",
+    subtitle: "Please login to capture, organize, and track your leads",
+    features: [
+      "Capture Leads",
+      "Boost Sales",
+      "Grow Outreach",
+      "Increase Conversions",
+    ],
   },
-  '/my-templates': {
-    title: 'Saved Templates Collection',
-    subtitle: 'Please login to access your personal template collection',
-    features: ['View Templates', 'Create New', 'Edit Existing']
+  "/my-templates": {
+    title: "Saved Templates Collection",
+    subtitle: "Please login to access your personal template collection",
+    features: ["View Templates", "Create New", "Edit Existing"],
   },
-  '/templates/create/new': {
-    title: 'Template Builder',
-    subtitle: 'Please login to create and customize new templates',
-    features: ['Drag & Drop Builder', 'Custom Components', 'Save Templates']
+  "/templates/create/new": {
+    title: "Template Builder",
+    subtitle: "Please login to create and customize new templates",
+    features: ["Drag & Drop Builder", "Custom Components", "Save Templates"],
   },
-  '/templates/:slug/edit': {
-    title: 'Template Editor',
-    subtitle: 'Please login to edit and customize this template',
-    features: ['Edit Content', 'Customize Design', 'Save Changes']
+  "/templates/:slug/edit": {
+    title: "Template Editor",
+    subtitle: "Please login to edit and customize this template",
+    features: ["Edit Content", "Customize Design", "Save Changes"],
   },
-  '/templates/:slug/recipients': {
-    title: 'Recipient Selection',
-    subtitle: 'Please login to select and manage email recipients',
-    features: ['Select Recipients', 'Manage Contacts', 'Import Lists']
+  "/templates/:slug/recipients": {
+    title: "Recipient Selection",
+    subtitle: "Please login to select and manage email recipients",
+    features: ["Select Recipients", "Manage Contacts", "Import Lists"],
   },
-  '/templates/:slug/preview': {
-    title: 'Email Preview',
-    subtitle: 'Please login to preview your email before sending',
-    features: ['Live Preview', 'Test Sending', 'Final Review']
+  "/templates/:slug/preview": {
+    title: "Email Preview",
+    subtitle: "Please login to preview your email before sending",
+    features: ["Live Preview", "Test Sending", "Final Review"],
   },
-  '/templates/:slug/schedule': {
-    title: 'Schedule Email',
-    subtitle: 'Please login to schedule your email delivery',
-    features: ['Set Date & Time', 'Timezone Selection', 'Recurring Options']
+  "/templates/:slug/schedule": {
+    title: "Schedule Email",
+    subtitle: "Please login to schedule your email delivery",
+    features: ["Set Date & Time", "Timezone Selection", "Recurring Options"],
   },
-  '/my-templates/:templateId/edit': {
-    title: 'Template Editor',
-    subtitle: 'Please login to edit your custom template',
-    features: ['Edit Template', 'Update Content', 'Manage Versions']
-  }
+  "/my-templates/:templateId/edit": {
+    title: "Template Editor",
+    subtitle: "Please login to edit your custom template",
+    features: ["Edit Template", "Update Content", "Manage Versions"],
+  },
+  "/lead-generation/start": {
+    title: "Lead Generation Setup",
+    subtitle:
+      "Please login to start generating high-quality leads for your business",
+    features: [
+      "Target Audience",
+      "Search Criteria",
+      "Advanced Filters",
+      "Data Export",
+    ],
+  },
+  "/lead-generation/progress/:searchId": {
+    title: "Lead Generation Progress",
+    subtitle: "Please login to monitor your lead generation process",
+    features: [
+      "Real-time Progress",
+      "Search Status",
+      "Results Preview",
+      "Quality Metrics",
+    ],
+  },
+  "/lead-generation/results/:searchId": {
+    title: "Lead Generation Results",
+    subtitle: "Please login to view and manage your generated leads",
+    features: [
+      "View Results",
+      "Export Data",
+      "Filter Leads",
+      "Contact Details",
+    ],
+  },
+  "/leads/:searchId": {
+    title: "Leads Management",
+    subtitle: "Please login to access your leads table and manage contacts",
+    features: [
+      "Leads Overview",
+      "Contact Management",
+      "Data Export",
+      "Lead Scoring",
+    ],
+  },
+  "/lead-generation/dashboard": {
+    title: "Lead Generation Dashboard",
+    subtitle:
+      "Please login to access your comprehensive lead generation analytics",
+    features: [
+      "Campaign Analytics",
+      "Performance Metrics",
+      "Lead Pipeline",
+      "ROI Tracking",
+    ],
+  },
 };
 
 // Function to match dynamic routes
@@ -58,27 +115,49 @@ const getRouteContent = (pathname) => {
   if (routeContent[pathname]) {
     return routeContent[pathname];
   }
-  
+
   // Pattern matching for dynamic routes
   const patterns = [
-    { pattern: /^\/templates\/[^\/]+\/edit$/, key: '/templates/:slug/edit' },
-    { pattern: /^\/templates\/[^\/]+\/recipients$/, key: '/templates/:slug/recipients' },
-    { pattern: /^\/templates\/[^\/]+\/preview$/, key: '/templates/:slug/preview' },
-    { pattern: /^\/templates\/[^\/]+\/schedule$/, key: '/templates/:slug/schedule' },
-    { pattern: /^\/my-templates\/[^\/]+\/edit$/, key: '/my-templates/:templateId/edit' }
+    { pattern: /^\/templates\/[^\/]+\/edit$/, key: "/templates/:slug/edit" },
+    {
+      pattern: /^\/templates\/[^\/]+\/recipients$/,
+      key: "/templates/:slug/recipients",
+    },
+    {
+      pattern: /^\/templates\/[^\/]+\/preview$/,
+      key: "/templates/:slug/preview",
+    },
+    {
+      pattern: /^\/templates\/[^\/]+\/schedule$/,
+      key: "/templates/:slug/schedule",
+    },
+    {
+      pattern: /^\/my-templates\/[^\/]+\/edit$/,
+      key: "/my-templates/:templateId/edit",
+    },
+    {
+      pattern: /^\/lead-generation\/progress\/[^\/]+$/,
+      key: "/lead-generation/progress/:searchId",
+    },
+    {
+      pattern: /^\/lead-generation\/results\/[^\/]+$/,
+      key: "/lead-generation/results/:searchId",
+    },
+    { pattern: /^\/leads\/[^\/]+$/, key: "/leads/:searchId" },
   ];
-  
+
   for (const { pattern, key } of patterns) {
     if (pattern.test(pathname)) {
       return routeContent[key];
     }
   }
-  
+
   // Default fallback
   return {
-    title: 'Protected Content',
-    subtitle: 'Please login to access this page and continue with your workflow',
-    features: ['Secure Access', 'User Authentication', 'Protected Features']
+    title: "Protected Content",
+    subtitle:
+      "Please login to access this page and continue with your workflow",
+    features: ["Secure Access", "User Authentication", "Protected Features"],
   };
 };
 
@@ -122,6 +201,8 @@ const ProtectedRoute = ({ children }) => {
   if (loading) {
     return (
       <div className="protected-page-container">
+        <div className="protected-grid-overlay"></div>
+
         <div className="protected-floating-images">
           <div className="protected-floating-image protected-image-1">
             <img src="/bento-8.jpg" loading="lazy" alt="Image 1" />
@@ -136,7 +217,7 @@ const ProtectedRoute = ({ children }) => {
             <img src="/template-10.webp" loading="lazy" alt="Image 4" />
           </div>
         </div>
-        
+
         <div className="protected-content">
           <div className="protected-loading">
             <div className="protected-spinner"></div>
@@ -150,6 +231,8 @@ const ProtectedRoute = ({ children }) => {
   if (!isAuthenticated) {
     return (
       <div className="protected-page-container">
+        <div className="protected-grid-overlay"></div>
+
         <div className="protected-floating-images">
           <div className="protected-floating-image protected-image-1">
             <img src="/bento-8.jpg" loading="lazy" alt="Image 1" />
@@ -189,12 +272,12 @@ const ProtectedRoute = ({ children }) => {
                   alt="Authentication required"
                 />
                 <h1 className="protected-auth-title">
-                  {currentContent.title.split(' ')[0]}
+                  {currentContent.title.split(" ")[0]}
                   <span className="protected-gradient-text">
-                    {' ' + currentContent.title.split(' ').slice(1).join(' ')}
+                    {" " + currentContent.title.split(" ").slice(1).join(" ")}
                   </span>
                 </h1>
-                
+
                 <p className="protected-auth-subtitle">
                   {currentContent.subtitle}
                 </p>
@@ -208,14 +291,14 @@ const ProtectedRoute = ({ children }) => {
                     </div>
                   ))}
                 </div>
-                
+
                 <div className="protected-auth-buttons">
                   <Link to="/login" className="protected-btn-primary">
                     Login to Continue
                   </Link>
                 </div>
               </div>
-              
+
               {error && (
                 <div className="protected-error-message">
                   <svg

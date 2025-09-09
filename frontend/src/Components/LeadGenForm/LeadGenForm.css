@@ -1,0 +1,304 @@
+/* LeadGenForm.css */
+/* Font Awesome for icons */
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css");
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ---------- Page Background (subtle gradients) ---------- */
+.lg-container {
+  --safe-width: 560px;                /* central safe band ~ form width */
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  background:
+    radial-gradient(900px 600px at 12% 85%, rgba(37,99,235,0.18), transparent 60%),
+    radial-gradient(800px 540px at 88% 18%, rgba(37,99,235,0.18), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.05)),
+    #000;
+  padding-top: 6rem; /* in case of sticky header */
+}
+
+/* ---------- Blobs (redesigned for rectangular images) ---------- */
+.blob {
+  position: absolute;
+  width: clamp(240px, 32vw, 480px);
+  height: clamp(180px, 24vw, 360px);
+  background: #2556eb5f;
+  display: grid;
+  place-items: center;
+  z-index: 0;
+  animation: blobFloat 7s ease-in-out infinite;
+  overflow: hidden;
+}
+
+.blob--top-left { 
+  top: 6%; 
+  left: 4%; 
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+}
+
+.blob--bottom-right { 
+  bottom: 6%; 
+  right: 4%; 
+  border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%;
+  animation-delay: 2.2s; 
+}
+
+.blob img {
+  width: 90%;
+  height: 90%;
+  object-fit: cover;
+  border-radius: inherit; ; 
+}
+
+@keyframes blobFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-10px) rotate(1deg); }
+  66% { transform: translateY(5px) rotate(-1deg); }
+}
+
+/* ---------- Scattered decorative icons (repositioned to avoid overlap) ---------- */
+.decor-icons { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+.decor-icon {
+  position: absolute;
+  font-size: clamp(18px, 2.2vw, 30px);
+  opacity: 0.95;
+  text-shadow: 0 0 10px rgba(255,255,255,0.06);
+  animation: floatIcon 6s ease-in-out infinite;
+}
+
+/* Repositioned brand icons to avoid overlapping with images */
+.decor-icon--fb { color: #1877F2; top: 55%; left: 15%; animation-delay: .2s; }
+.decor-icon--ig { color: #E1306C; top: 25%; left: 2%; animation-delay: .6s; }
+.decor-icon--li { color: #0A66C2; top: 16%; right: 20%; animation-delay: .8s; }
+.decor-icon--tw { color: #1DA1F2; bottom: 2%; right: 95%; animation-delay: 1.2s; }
+.decor-icon--mail { color: #EA4335; bottom: 22%; left: 20%; animation-delay: 1.5s; }
+.decor-icon--yt { color: #FF0000; bottom: 40%; right: 8%; animation-delay: 1.9s; }
+.decor-icon--pin { color: #E60023; top: 8%; right: 10%; animation-delay: 2.1s; }
+.decor-icon--tt { color: #ffffff; top: 32%; right: 6%; animation-delay: 2.5s; }
+
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+  50% { transform: translateY(-8px) scale(1.05) rotate(5deg); }
+}
+
+/* ---------- Main Form (safe band) ---------- */
+.lg-form {
+  position: relative;
+  z-index: 2;                /* decor sits underneath, but we also keep decor out of the safe band */
+  min-height: 100vh;
+  padding: 2rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  margin-top: 4rem;
+}
+
+.lg-form h1 {
+  margin-bottom: 2rem;
+  font-size: clamp(2rem, 3.5vw, 2.7rem);
+  font-weight: 300;
+  text-align: center;
+  background: white;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-top: 4rem;
+}
+
+/* Card with no backdrop-filter (per your request) */
+.lg-form__card {
+  padding: clamp(1.5rem, 3.5vw, 2.5rem);
+  max-width: var(--safe-width);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.form-group label {
+  color: #dbe4ff;
+  font-size: 0.92rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.lg-form input[type="text"],
+.lg-form input[type="number"] {
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 10px;
+  background: rgba(10,12,20,0.25);
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.lg-form input:focus {
+  border-color: #2555eb;
+  box-shadow: 0 0 0 2px rgba(37,85,235,0.25);
+}
+
+/* ---------- Platforms (icons only) ---------- */
+.lg-form__platforms {
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 12px;
+  padding: 1.2rem;
+  background: rgba(255,255,255,0.01);
+}
+.lg-form__platforms legend {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 0 .4rem;
+}
+
+/* 3 per row on large; 2 per row on small */
+.platform-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem 1rem;
+  margin-top: 0.9rem;
+}
+@media (max-width: 768px) {
+  .platform-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.platform-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #e5e7eb;
+  user-select: none;
+}
+.platform-checkbox i { font-size: 1.15rem; }
+
+/* custom square check next to icons */
+.platform-checkbox input[type="checkbox"] { display: none; }
+.checkmark {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  position: relative;
+  flex-shrink: 0;
+  transition: all .2s ease;
+}
+.platform-checkbox input[type="checkbox"]:checked + .checkmark {
+  background: #2555eb;
+  border-color: #2555eb;
+}
+.platform-checkbox input[type="checkbox"]:checked + .checkmark::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ---------- Enable AI (visible native checkbox) ---------- */
+.lg-form__checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  color: #e5e7eb;
+}
+.lg-form__checkbox input[type="checkbox"] {
+  inline-size: 18px;
+  block-size: 18px;
+  accent-color: #2555eb;
+  cursor: pointer;
+}
+
+/* ---------- Errors & Button ---------- */
+.lg-form__error {
+  color: #ff6b6b;
+  font-size: 0.92rem;
+  padding: 0.5rem;
+  background: rgba(255, 71, 87, 0.08);
+  border: 1px solid rgba(255, 71, 87, 0.3);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.lg-btn--primary {
+  background: linear-gradient(135deg, #2555eb, #4f46e5);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease;
+}
+.lg-btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(37,85,235,0.35);
+}
+.lg-btn--primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ---------- Responsive adjustments: keep decor out of safe band ---------- */
+@media (max-width: 1024px) {
+  /* Adjust blob positioning */
+  .blob--top-left { top: 5%; left: 3%; }
+  .blob--bottom-right { bottom: 5%; right: 3%; }
+  
+  /* Further adjust social icons to prevent overlap */
+  .decor-icon--fb { left: 20%; top: 30%; }
+  .decor-icon--ig { left: 6%; top: 55%; }
+  .decor-icon--li { right: 16%; top: 35%; }
+  .decor-icon--tw { right: 15%; bottom: 0%; }
+  .decor-icon--mail { left: 16%; bottom: 20%; }
+  .decor-icon--yt { right: 95%; bottom: 6%; }
+  .decor-icon--pin { right: 8%; top: 20%; }
+  .decor-icon--tt { right: 4%; top: 55%; }
+}
+
+@media (max-width: 768px) {
+  /* Make blobs slightly smaller on tablet */
+  .blob { 
+    width: clamp(200px, 38vw, 300px); 
+    height: clamp(150px, 28vw, 225px); 
+  }
+}
+
+@media (max-width: 640px) {
+  /* Further shrink blobs on mobile */
+  .blob { 
+    width: clamp(180px, 40vw, 240px); 
+    height: clamp(135px, 30vw, 180px); 
+  }
+  .blob--top-left { top: 4%; left: 2%; }
+  .blob--bottom-right { bottom: 4%; right: 2%; }
+
+  /* Reduce number of decor icons to avoid clutter on very small screens */
+  .decor-icon--pin, .decor-icon--tt, .decor-icon--yt { display: none; }
+  .decor-icon { font-size: clamp(18px, 4.2vw, 22px); }
+  
+  /* Reposition remaining icons for mobile */
+  .decor-icon--fb { left: 90%; top: 40%; }
+  .decor-icon--ig { left: 4%; top: 20%; }
+  .decor-icon--li { right: 20%; top: 12%; }
+  .decor-icon--tw { right: 10%; bottom: 0%; }
+  .decor-icon--mail { left: 2%; bottom: 18%; }
+  /* .decor-icon--yt { right: 4%; bottom: 4%; } */
+}
+
+/* Motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .blob, .decor-icon { animation: none; }
+}

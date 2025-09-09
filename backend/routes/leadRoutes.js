@@ -10,5 +10,7 @@ router.get('/search/:searchId', verifyToken, leadController.getSearchDetail);
 router.put('/:searchId/contact/:contactIndex', verifyToken, leadController.updateLead);
 router.delete('/:searchId', verifyToken, leadController.deleteLeadSearch);
 router.get('/stats', verifyToken, leadController.getStats);
+router.get('/progress/:searchId', verifyToken , leadController.getSearchProgress);
+
 
 module.exports = router;

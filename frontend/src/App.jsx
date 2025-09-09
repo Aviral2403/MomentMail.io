@@ -22,7 +22,13 @@ import TemplatesList from "./Pages/TemplatesList/TemplatesList";
 import TemplateBuilder from "./Pages/TemplateBuilder/TemplateBuilder";
 import Demo from "./Pages/Demo/Demo";
 import ProtectedRoute from "./Components/ProtectedRoute/ProtectedRoute";
-import LeadGeneration from "./Pages/LeadGeneration/LeadGeneration";
+// import LeadGeneration from "./Pages/LeadGeneration/LeadGeneration";
+import LeadGenHero from "./Pages/LeadGenHero/LeadGenHero";
+import LeadGenForm from "./Components/LeadGenForm/LeadGenForm";
+import LeadGenProgress from "./Components/LeadGenProgress/LeadGenProgress";
+import LeadGenResults from "./Pages/LeadGenResults/LeadGenResults";
+// import LeadsTable from "./Components/LeadsTable/LeadsTable";
+import LeadGenDashboard from "./Pages/LeadGenDashboard/LeadGenDashboard";
 
 // Scroll to top component with multiple approaches
 const ScrollToTop = () => {
@@ -255,9 +261,70 @@ const App = () => {
           path="/lead-generation"
           element={
             <Layout>
+              <LeadGenHero />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/lead-generation/start"
+          element={
+            <Layout>
               <GoogleOAuthWrapper>
                 <ProtectedRoute>
-                  <LeadGeneration />
+                  <LeadGenForm />
+                </ProtectedRoute>
+              </GoogleOAuthWrapper>
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/lead-generation/progress/:searchId"
+          element={
+            <Layout>
+              <GoogleOAuthWrapper>
+                <ProtectedRoute>
+                  <LeadGenProgress />
+                </ProtectedRoute>
+              </GoogleOAuthWrapper>
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/lead-generation/results/:searchId"
+          element={
+            <Layout>
+              <GoogleOAuthWrapper>
+                <ProtectedRoute>
+                  <LeadGenResults />
+                </ProtectedRoute>
+              </GoogleOAuthWrapper>
+            </Layout>
+          }
+        />
+
+        {/* <Route
+          path="/leads/:searchId"
+          element={
+            <Layout>
+              <GoogleOAuthWrapper>
+                <ProtectedRoute>
+                  <LeadsTable />
+                </ProtectedRoute>
+              </GoogleOAuthWrapper>
+            </Layout>
+          }
+        /> */}
+
+        <Route
+          path="/lead-generation/dashboard"
+          element={
+            <Layout>
+              <GoogleOAuthWrapper>
+                <ProtectedRoute>
+                  <LeadGenDashboard />
                 </ProtectedRoute>
               </GoogleOAuthWrapper>
             </Layout>

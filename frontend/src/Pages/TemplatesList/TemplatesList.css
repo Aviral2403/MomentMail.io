@@ -8,6 +8,11 @@
     color: #fff;
     box-sizing: border-box;
     margin-top: 6rem;
+    background: radial-gradient(circle at 15% 20%, rgba(37, 85, 235, 0.03) 0%, transparent 75%),
+              radial-gradient(circle at 85% 30%, rgba(79, 127, 255, 0.02) 0%, transparent 75%),
+              radial-gradient(circle at 40% 80%, rgba(37, 85, 235, 0.04) 0%, transparent 75%),
+              radial-gradient(circle at 60% 10%, rgba(20, 40, 150, 0.02) 0%, transparent 75%),
+              linear-gradient(135deg, rgba(5, 10, 25, 1) 0%, rgba(0, 0, 0, 1) 50%, rgba(10, 15, 35, 1) 100%);
     
   }
   

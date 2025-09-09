@@ -8,6 +8,11 @@ html,body{
   min-height: 100vh;
   min-width: 100vw;
   overflow-x: hidden;
+  background:
+    radial-gradient(900px 600px at 12% 85%, rgba(37,99,235,0.18), transparent 60%),
+    radial-gradient(800px 540px at 88% 18%, rgba(37,99,235,0.18), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.05)),
+    #000;
 }
 
 button:focus {

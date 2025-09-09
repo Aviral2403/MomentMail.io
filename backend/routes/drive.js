@@ -13,19 +13,19 @@ const {
 } = require("../controllers/driveControllers");
 const verifyTokens = require("../middleware/verifyTokens");
 
-// Google Drive connection
+// FIXED: Google Drive connection route (no /api prefix needed since route already includes it in index.js)
 router.get('/connect-drive', connectGoogleDrive);
 
 // Spreadsheet operations
-router.get('/spreadsheets', verifyTokens , listSpreadsheets);
-router.get('/spreadsheets/:spreadsheetId/columns', verifyTokens , getSpreadsheetColumns);
-router.get('/spreadsheets/:spreadsheetId/columns/:column/data', verifyTokens , getColumnData);
+router.get('/spreadsheets', verifyTokens, listSpreadsheets);
+router.get('/spreadsheets/:spreadsheetId/columns', verifyTokens, getSpreadsheetColumns);
+router.get('/spreadsheets/:spreadsheetId/columns/:column/data', verifyTokens, getColumnData);
 
 // Email operations
-router.post('/send-emails', verifyTokens , sendBulkEmails);
-router.get('/scheduled-emails', verifyTokens , getScheduledEmails);
-router.get('/email-history', verifyTokens , getEmailHistory);
-router.delete('/scheduled-emails/:scheduledEmailId', verifyTokens , cancelScheduledEmail);
-router.post('/email-status', verifyTokens , checkEmailStatus);
+router.post('/send-emails', verifyTokens, sendBulkEmails);
+router.get('/scheduled-emails', verifyTokens, getScheduledEmails);
+router.get('/email-history', verifyTokens, getEmailHistory);
+router.delete('/scheduled-emails/:scheduledEmailId', verifyTokens, cancelScheduledEmail);
+router.post('/email-status', verifyTokens, checkEmailStatus);
 
 module.exports = router;

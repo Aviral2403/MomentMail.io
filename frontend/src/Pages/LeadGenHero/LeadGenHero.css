@@ -1,0 +1,668 @@
+:root {
+  --lg-primary-blue: #2555eb;
+  --lg-text: #ffffff;
+  --lg-muted: #a0a9c0;
+  --lg-bg-dark: #000000;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.lg-hero {
+  position: relative;
+  min-height: 100vh;
+  background: var(--lg-bg-dark);
+  color: var(--lg-text);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Background with arcs */
+.lg-hero__background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: radial-gradient(circle at 15% 20%, rgba(37, 85, 235, 0.03) 0%, transparent 75%),
+              radial-gradient(circle at 85% 30%, rgba(79, 127, 255, 0.02) 0%, transparent 75%),
+              radial-gradient(circle at 40% 80%, rgba(37, 85, 235, 0.04) 0%, transparent 75%),
+              radial-gradient(circle at 60% 10%, rgba(20, 40, 150, 0.02) 0%, transparent 75%),
+              linear-gradient(135deg, rgba(5, 10, 25, 1) 0%, rgba(0, 0, 0, 1) 50%, rgba(10, 15, 35, 1) 100%);
+}
+
+/* Semi-circle arcs at bottom - Fixed positioning */
+/* .lg-arc {
+  position: absolute;
+  bottom: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  border: 1px solid rgba(37, 85, 235, 0.25);
+  background: transparent;
+  box-shadow: 0 0 50px rgba(37, 85, 235, 0.1);
+}
+
+.lg-arc--outer {
+  width: 1400px;
+  height: 1400px;
+  border-color: rgba(37, 85, 235, 0.3);
+  box-shadow: 0 0 80px rgba(37, 85, 235, 0.15);
+  animation: rotate-clockwise 60s linear infinite;
+}
+
+.lg-arc--middle {
+  width: 1100px;
+  height: 1100px;
+  border-color: rgba(37, 85, 235, 0.35);
+  box-shadow: 0 0 60px rgba(37, 85, 235, 0.12);
+  animation: rotate-counter 45s linear infinite;
+}
+
+.lg-arc--inner {
+  width: 800px;
+  height: 800px;
+  border-color: rgba(37, 85, 235, 0.4);
+  background: linear-gradient(135deg, rgba(37, 85, 235, 0.08), transparent);
+  box-shadow: 0 0 40px rgba(37, 85, 235, 0.2);
+  animation: rotate-clockwise 30s linear infinite;
+} */
+
+/* Floating icons with brand-specific colors */
+.lg-floating-icon {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(20px);
+  animation: float-gentle 4s ease-in-out infinite;
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Instagram - Pink/Orange gradient */
+.lg-icon--instagram {
+  background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  box-shadow: 0 8px 32px rgba(240, 148, 51, 0.3);
+}
+
+/* LinkedIn - Blue gradient */
+.lg-icon--linkedin {
+  background: linear-gradient(135deg, #0077b5 0%, #005885 100%);
+  box-shadow: 0 8px 32px rgba(0, 119, 181, 0.3);
+}
+
+/* Gmail - Red gradient */
+.lg-icon--gmail {
+  background: linear-gradient(135deg, #ea4335 0%, #d33b2c 100%);
+  box-shadow: 0 8px 32px rgba(234, 67, 53, 0.3);
+}
+
+/* Phone - Green gradient */
+.lg-icon--phone {
+  background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+  box-shadow: 0 8px 32px rgba(37, 211, 102, 0.3);
+}
+
+/* Facebook - Blue gradient */
+.lg-icon--facebook {
+  background: linear-gradient(135deg, #1877f2 0%, #166fe5 100%);
+  box-shadow: 0 8px 32px rgba(24, 119, 242, 0.3);
+}
+
+/* Google - Multi-color gradient */
+.lg-icon--google {
+  background: linear-gradient(135deg, #4285F4, #34A853, #FBBC05, #EA4335);
+  box-shadow: 0 8px 32px rgba(66, 133, 244, 0.3);
+}
+
+/* Internet - Blue gradient */
+.lg-icon--internet {
+  background: linear-gradient(135deg, #3366CC, #3B5998);
+  box-shadow: 0 8px 32px rgba(51, 102, 204, 0.3);
+}
+
+/* Twitter - Blue gradient */
+.lg-icon--twitter {
+  background: linear-gradient(135deg, #1DA1F2, #0C85D0);
+  box-shadow: 0 8px 32px rgba(29, 161, 242, 0.3);
+}
+
+/* YouTube - Red gradient */
+.lg-icon--youtube {
+  background: linear-gradient(135deg, #FF0000, #CC0000);
+  box-shadow: 0 8px 32px rgba(255, 0, 0, 0.3);
+}
+
+.lg-floating-icon svg {
+  width: 22px;
+  height: 22px;
+  color: rgba(255, 255, 255, 0.95);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Icon positioning on circle paths - Positioned exactly on arc perimeters */
+/* Outer circle icons - radius 700px, positioned at angles 30°, 90°, 150° */
+.lg-icon--outer-1 {
+  bottom: calc(50% - 700px + 350px);
+  left: calc(50% - 606px);
+  animation-delay: 0s;
+  transform: translate(50%, 50%);
+}
+
+.lg-icon--outer-2 {
+  bottom: calc(50% - 200px);
+  left: calc(50% - 75px);
+  animation-delay: -1.5s;
+  transform: translate(50%, 50%);
+}
+
+.lg-icon--outer-3 {
+  bottom: calc(50% - 700px + 350px);
+  left: calc(50% + 556px);
+  animation-delay: -3s;
+  transform: translate(-50%, 50%);
+}
+
+/* Middle circle icons - radius 550px, positioned at angles 45°, 105°, 135° */
+.lg-icon--middle-1 {
+  bottom: calc(50% - 550px + 389px);
+  left: calc(50% - 389px);
+  animation-delay: -0.5s;
+  transform: translate(50%, 50%);
+}
+
+.lg-icon--middle-2 {
+  bottom: calc(50% - 550px + 142px);
+  left: calc(50% + 528px);
+  animation-delay: -2s;
+  transform: translate(-50%, 50%);
+}
+
+.lg-icon--middle-3 {
+  bottom: calc(50% - 550px + 389px);
+  left: calc(50% + 389px);
+  animation-delay: -3.5s;
+  transform: translate(-50%, 50%);
+}
+
+/* Inner circle icons - radius 400px, positioned at angles 60°, 120°, 180° */
+.lg-icon--inner-1 {
+  bottom: calc(50% - 400px + 200px);
+  left: calc(50% - 346px);
+  animation-delay: -1s;
+  transform: translate(50%, 50%);
+}
+
+.lg-icon--inner-2 {
+  bottom: calc(50% - 400px + 200px);
+  left: calc(50% + 346px);
+  animation-delay: -2.5s;
+  transform: translate(-50%, 50%);
+}
+
+.lg-icon--inner-3 {
+  bottom: calc(50% - 400px);
+  left: calc(50% - 25px);
+  animation-delay: -4s;
+  transform: translate(50%, 50%);
+}
+
+/* Main Content */
+.lg-hero__content {
+  position: relative;
+  z-index: 10;
+  max-width: 900px;
+  text-align: center;
+  margin-top: -5vh;
+}
+
+.lg-hero h1 {
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.lg-hero h1 span {
+  background: linear-gradient(135deg, var(--lg-primary-blue), #4f7fff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 10px rgba(37, 85, 235, 0.3));
+}
+
+.lg-hero__tagline {
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  color: var(--lg-muted);
+  line-height: 1.6;
+  margin-bottom: 3rem;
+  max-width: 650px;
+  margin-left: auto;
+  margin-right: auto;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.lg-hero__cta {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+}
+
+.lg-btn {
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  min-width: 160px;
+}
+
+.lg-btn--primary {
+  background: linear-gradient(135deg, var(--lg-primary-blue), #2555eb);
+  color: white;
+  box-shadow: 0 6px 30px rgba(37, 85, 235, 0.4);
+}
+
+.lg-btn--primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 35px rgba(37, 85, 235, 0.5);
+}
+
+.lg-btn--ghost {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--lg-text);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+}
+
+.lg-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.lg-hero__footnote {
+  color: var(--lg-muted);
+  font-size: 0.95rem;
+  opacity: 0.8;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Animations */
+@keyframes rotate-clockwise {
+  from { transform: translateX(-50%) rotate(0deg); }
+  to { transform: translateX(-50%) rotate(360deg); }
+}
+
+@keyframes rotate-counter {
+  from { transform: translateX(-50%) rotate(0deg); }
+  to { transform: translateX(-50%) rotate(-360deg); }
+}
+
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .lg-arc--outer {
+    width: 1000px;
+    height: 1000px;
+  }
+  
+  .lg-arc--middle {
+    width: 800px;
+    height: 800px;
+  }
+  
+  .lg-arc--inner {
+    width: 600px;
+    height: 600px;
+  }
+
+  /* Recalculate positions for smaller outer circle - radius 500px */
+  .lg-icon--outer-1 {
+    bottom: calc(50% - 500px + 250px);
+    left: calc(50% - 433px);
+  }
+
+  .lg-icon--outer-2 {
+    bottom: calc(50% - 265px);
+    left: calc(50% - 55px);
+  }
+
+  .lg-icon--outer-3 {
+    bottom: calc(50% - 500px + 250px);
+    left: calc(50% + 383px);
+  }
+
+  /* Recalculate positions for smaller middle circle - radius 400px */
+  .lg-icon--middle-1 {
+    bottom: calc(50% - 400px + 283px);
+    left: calc(50% - 283px);
+  }
+
+  .lg-icon--middle-2 {
+    bottom: calc(50% - 400px + 103px);
+    left: calc(50% + 383px);
+  }
+
+  .lg-icon--middle-3 {
+    bottom: calc(50% - 400px + 283px);
+    left: calc(50% + 283px);
+  }
+
+  /* Recalculate positions for smaller inner circle - radius 300px */
+  .lg-icon--inner-1 {
+    bottom: calc(50% - 300px + 150px);
+    left: calc(50% - 260px);
+  }
+
+  .lg-icon--inner-2 {
+    bottom: calc(50% - 300px + 150px);
+    left: calc(50% + 260px);
+  }
+
+  .lg-icon--inner-3 {
+    bottom: calc(50% - 300px);
+    left: calc(50% - 25px);
+  }
+}
+
+@media (max-width: 1200px) {
+  .lg-floating-icon {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .lg-floating-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 992px) {
+  /* Further adjust circles for tablets */
+  .lg-arc--outer {
+    width: 800px;
+    height: 800px;
+  }
+  
+  .lg-arc--middle {
+    width: 650px;
+    height: 650px;
+  }
+  
+  .lg-arc--inner {
+    width: 500px;
+    height: 500px;
+  }
+
+  /* Recalculate positions for tablet outer circle - radius 400px */
+  .lg-icon--outer-1 {
+    bottom: calc(50% - 400px + 200px);
+    left: calc(50% - 346px);
+  }
+
+  .lg-icon--outer-2 {
+    bottom: calc(50% - 150px);
+    left: calc(50% - 75px);
+  }
+
+  .lg-icon--outer-3 {
+    bottom: calc(50% - 400px + 200px);
+    left: calc(50% + 296px);
+  }
+
+  /* Recalculate positions for tablet middle circle - radius 325px */
+  .lg-icon--middle-1 {
+    bottom: calc(50% - 325px + 230px);
+    left: calc(50% - 230px);
+  }
+
+  .lg-icon--middle-2 {
+    bottom: calc(50% - 325px + 84px);
+    left: calc(50% + 311px);
+  }
+
+  .lg-icon--middle-3 {
+    bottom: calc(50% - 325px + 230px);
+    left: calc(50% + 230px);
+  }
+
+  /* Recalculate positions for tablet inner circle - radius 250px */
+  .lg-icon--inner-1 {
+    bottom: calc(50% - 250px + 125px);
+    left: calc(50% - 217px);
+  }
+
+  .lg-icon--inner-2 {
+    bottom: calc(50% - 250px + 125px);
+    left: calc(50% + 217px);
+  }
+
+  .lg-icon--inner-3 {
+    bottom: calc(50% - 250px);
+    left: calc(50% - 25px);
+  }
+}
+
+@media (max-width: 768px) {
+  .lg-hero {
+    padding: 1.5rem;
+  }
+  
+  .lg-hero__content {
+    margin-top: 0;
+  }
+  
+  .lg-floating-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .lg-floating-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .lg-hero__cta {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  
+  .lg-btn {
+    width: 100%;
+    max-width: 280px;
+    padding: 0.9rem 1.5rem;
+  }
+  
+  /* Further adjust circles for mobile */
+  .lg-arc--outer {
+    width: 600px;
+    height: 600px;
+  }
+  
+  .lg-arc--middle {
+    width: 480px;
+    height: 480px;
+  }
+  
+  .lg-arc--inner {
+    width: 360px;
+    height: 360px;
+  }
+
+  /* Recalculate positions for mobile outer circle - radius 300px */
+  .lg-icon--outer-1 {
+    bottom: calc(50% - 300px + 150px);
+    left: calc(50% - 260px);
+  }
+
+  .lg-icon--outer-2 {
+    bottom: calc(50% - 300px);
+    left: calc(50% - 75px);
+  }
+
+  .lg-icon--outer-3 {
+    bottom: calc(50% - 300px + 150px);
+    left: calc(50% + 210px);
+  }
+
+  /* Recalculate positions for mobile middle circle - radius 240px */
+  .lg-icon--middle-1 {
+    bottom: calc(50% - 240px + 170px);
+    left: calc(50% - 170px);
+  }
+
+  .lg-icon--middle-2 {
+    bottom: calc(50% - 240px + 62px);
+    left: calc(50% + 230px);
+  }
+
+  .lg-icon--middle-3 {
+    bottom: calc(50% - 240px + 170px);
+    left: calc(50% + 170px);
+  }
+
+  /* Recalculate positions for mobile inner circle - radius 180px */
+  .lg-icon--inner-1 {
+    bottom: calc(50% - 180px + 90px);
+    left: calc(50% - 156px);
+  }
+
+  .lg-icon--inner-2 {
+    bottom: calc(50% - 180px + 90px);
+    left: calc(50% + 156px);
+  }
+
+  .lg-icon--inner-3 {
+    bottom: calc(50% - 180px);
+    left: calc(50% - 25px);
+  }
+}
+
+@media (max-width: 480px) {
+  .lg-hero {
+    padding: 1rem;
+  }
+  
+  .lg-floating-icon {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .lg-floating-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .lg-hero h1 {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+  
+  .lg-hero__tagline {
+    font-size: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  /* Further reduce circles for very small screens */
+  .lg-arc--outer {
+    width: 480px;
+    height: 480px;
+  }
+  
+  .lg-arc--middle {
+    width: 380px;
+    height: 380px;
+  }
+  
+  .lg-arc--inner {
+    width: 280px;
+    height: 280px;
+  }
+
+  /* Recalculate positions for very small screens - outer circle radius 240px, angles 30°, 90°, 150° */
+  .lg-icon--outer-1 {
+    bottom: calc(50% - 240px + 60px);
+    left: calc(50% - 219px);
+  }
+
+  .lg-icon--outer-2 {
+    bottom: calc(50% - 240px + 180px);
+    left: calc(50% - 25px);
+  }
+
+  .lg-icon--outer-3 {
+    bottom: calc(50% - 240px + 60px);
+    left: calc(50% + 169px);
+  }
+
+  /* Hide middle circle icons on very small screens to prevent clutter */
+  .lg-icon--middle-1,
+  .lg-icon--middle-2,
+  .lg-icon--middle-3 {
+    display: none;
+  }
+
+  /* Recalculate positions for very small screens - inner circle radius 140px, angles 45°, 135°, 225° */
+  .lg-icon--inner-1 {
+    bottom: calc(50% - 140px + 99px);
+    left: calc(50% - 99px);
+  }
+
+  .lg-icon--inner-2 {
+    bottom: calc(50% - 140px + 99px);
+    left: calc(50% + 49px);
+  }
+
+  .lg-icon--inner-3 {
+    bottom: calc(50% - 140px - 29px);
+    left: calc(50% - 99px);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .lg-arc, .lg-floating-icon {
+    animation: none !important;
+  }
+}
+
+
+.lg-btn--ghost.lg-btn--hero{
+    color: white!important;
+    border: 1px solid white!important;
+}
+
+.lg-btn--ghost.lg-btn--hero:hover{
+    color: #ffffff!important;
+      box-shadow: 0 6px 30px rgba(37, 85, 235, 0.4)!important;
+    border: 1px solid #2555eb!important;
+}
+

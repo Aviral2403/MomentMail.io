@@ -1,11 +1,9 @@
 const express = require("express");
 const { googleAuth, refreshToken } = require("../controllers/authControllers");
-const { connectGoogleDrive } = require("../controllers/driveControllers");
 const router = express.Router();
 
+// FIXED: Removed duplicate drive connection route since it's now in /api/drive
 router.get('/google', googleAuth);
-router.get('/connect-drive', connectGoogleDrive);
 router.post('/refresh-token', refreshToken);
-
 
 module.exports = router;

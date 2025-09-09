@@ -59,7 +59,7 @@ const DualScroll = () => {
             isTilted={true}
             tiltDirection="left"
             autoplay={true}
-            autoplaySpeed={3.5}
+            autoplaySpeed={4.5}
             autoplayDirection="down"
             pauseOnHover={true}
             itemMinHeight={250}
@@ -72,7 +72,7 @@ const DualScroll = () => {
             isTilted={true}
             tiltDirection="left"
             autoplay={true}
-            autoplaySpeed={3.5}
+            autoplaySpeed={3.0}
             autoplayDirection="up"
             pauseOnHover={true}
             itemMinHeight={250}

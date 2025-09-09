@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+
 .protected-auth-title {
   font-size: 2.8rem;
   font-weight: 500;
@@ -5,10 +7,10 @@
   margin-bottom: 18px;
   line-height: 1.1;
   font-family: "Montserrat", sans-serif;
-}@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+}
 
 .protected-page-container {
-  height: 76vh;
+  height: 95vh;
   width: 100%;
   background: #000;
   position: relative;
@@ -19,6 +21,7 @@
   margin-top: 3.5rem;
 }
 
+/* 3D Isometric Grid Background Pattern */
 .protected-page-container::before {
   content: "";
   position: absolute;
@@ -26,12 +29,18 @@
   left: 0;
   right: 0;
   height: 75vh;
-  background: radial-gradient(
-    ellipse 120% 80% at 50% 0%,
-    rgba(37, 85, 235, 0.3) 0%,
-    rgba(37, 85, 235, 0.1) 40%,
-    transparent 80%
-  );
+  background: 
+    linear-gradient(60deg, rgba(37, 85, 235, 0.08) 1px, transparent 1px),
+    linear-gradient(-60deg, rgba(37, 85, 235, 0.08) 1px, transparent 1px),
+    linear-gradient(30deg, rgba(37, 85, 235, 0.06) 1px, transparent 1px),
+    radial-gradient(
+      ellipse 120% 80% at 50% 0%,
+      rgba(37, 85, 235, 0.3) 0%,
+      rgba(37, 85, 235, 0.1) 40%,
+      transparent 80%
+    );
+  background-size: 120px 120px, 120px 120px, 180px 180px, 100% 100%;
+  background-position: 0 0, 0 0, 0 0, 0 0;
   z-index: 1;
 }
 
@@ -597,3 +606,54 @@
     font-size: 0.8rem;
   }
 }
+
+/* .protected-page-container::before,
+.protected-page-container::after {
+  pointer-events: none;
+}
+
+.protected-grid-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: #000;
+
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      rgba(255,255,255,0.06) 0px,
+      rgba(255,255,255,0.06) 1px,
+      transparent 1px,
+      transparent 200px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.06) 0px,
+      rgba(255,255,255,0.06) 1px,
+      transparent 1px,
+      transparent 200px
+    ),
+
+    repeating-linear-gradient(
+      to right,
+      rgba(255,255,255,0.02) 0px,
+      rgba(255,255,255,0.02) 1px,
+      transparent 1px,
+      transparent 40px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.02) 0px,
+      rgba(255,255,255,0.02) 1px,
+      transparent 1px,
+      transparent 40px
+    ),
+
+    linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0.3));
+  
+  background-size: 200px 200px, 200px 200px, 40px 40px, 40px 40px, cover;
+
+  transform: perspective(1200px) rotateX(70deg) rotateY(20deg);
+  transform-origin: center top;
+} */

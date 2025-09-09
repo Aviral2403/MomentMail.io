@@ -1,0 +1,746 @@
+/* LeadGenProgress.css */
+.lg-progress {
+  margin-top: 6rem;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 15% 20%, rgba(37, 85, 235, 0.03) 0%, transparent 75%),
+              radial-gradient(circle at 85% 30%, rgba(79, 127, 255, 0.02) 0%, transparent 75%),
+              radial-gradient(circle at 40% 80%, rgba(37, 85, 235, 0.04) 0%, transparent 75%),
+              radial-gradient(circle at 60% 10%, rgba(20, 40, 150, 0.02) 0%, transparent 75%),
+              linear-gradient(135deg, rgba(5, 10, 25, 1) 0%, rgba(0, 0, 0, 1) 50%, rgba(10, 15, 35, 1) 100%);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background with floating icons */
+.lg-progress__background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Process floating icons with brand-specific colors - positioned randomly across screen */
+.process-icon {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(20px);
+  animation: process-icon-float 4s ease-in-out infinite;
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Instagram - Pink/Orange gradient */
+.process-icon--instagram {
+  background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  box-shadow: 0 8px 32px rgba(240, 148, 51, 0.3);
+}
+
+/* LinkedIn - Blue gradient */
+.process-icon--linkedin {
+  background: linear-gradient(135deg, #0077b5 0%, #005885 100%);
+  box-shadow: 0 8px 32px rgba(0, 119, 181, 0.3);
+}
+
+/* Gmail - Red gradient */
+.process-icon--gmail {
+  background: linear-gradient(135deg, #ea4335 0%, #d33b2c 100%);
+  box-shadow: 0 8px 32px rgba(234, 67, 53, 0.3);
+}
+
+/* Phone - Green gradient */
+.process-icon--phone {
+  background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+  box-shadow: 0 8px 32px rgba(37, 211, 102, 0.3);
+}
+
+/* Facebook - Blue gradient */
+.process-icon--facebook {
+  background: linear-gradient(135deg, #1877f2 0%, #166fe5 100%);
+  box-shadow: 0 8px 32px rgba(24, 119, 242, 0.3);
+}
+
+/* Google - Multi-color gradient */
+.process-icon--google {
+  background: linear-gradient(135deg, #4285F4, #34A853, #FBBC05, #EA4335);
+  box-shadow: 0 8px 32px rgba(66, 133, 244, 0.3);
+}
+
+/* Internet - Blue gradient */
+.process-icon--internet {
+  background: linear-gradient(135deg, #3366CC, #3B5998);
+  box-shadow: 0 8px 32px rgba(51, 102, 204, 0.3);
+}
+
+/* Twitter - Blue gradient */
+.process-icon--twitter {
+  background: linear-gradient(135deg, #1DA1F2, #0C85D0);
+  box-shadow: 0 8px 32px rgba(29, 161, 242, 0.3);
+}
+
+/* YouTube - Red gradient */
+.process-icon--youtube {
+  background: linear-gradient(135deg, #FF0000, #CC0000);
+  box-shadow: 0 8px 32px rgba(255, 0, 0, 0.3);
+}
+
+.process-icon svg {
+  width: 22px;
+  height: 22px;
+  color: rgba(255, 255, 255, 0.95);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Random positioning system - avoiding center content area */
+/* Large screens (1400px+) - spread across full screen with safe zones */
+.process-icon--instagram {
+  top: 12%;
+  left: 8%;
+  animation-delay: 0s;
+}
+
+.process-icon--google {
+  top: 8%;
+  right: 15%;
+  animation-delay: -1.5s;
+}
+
+.process-icon--linkedin {
+  top: 25%;
+  right: 6%;
+  animation-delay: -3s;
+}
+
+.process-icon--gmail {
+  top: 45%;
+  left: 4%;
+  animation-delay: -0.5s;
+}
+
+.process-icon--facebook {
+  bottom: 35%;
+  left: 12%;
+  animation-delay: -2.5s;
+}
+
+.process-icon--phone {
+  bottom: 15%;
+  left: 25%;
+  animation-delay: -1s;
+}
+
+.process-icon--twitter {
+  bottom: 8%;
+  right: 20%;
+  animation-delay: -3.5s;
+}
+
+.process-icon--youtube {
+  bottom: 25%;
+  right: 8%;
+  animation-delay: -2s;
+}
+
+.process-icon--internet {
+  top: 35%;
+  right: 25%;
+  animation-delay: -4s;
+}
+
+.lg-progress__card {
+  position: relative;
+  z-index: 10;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.lg-progress__header h1 {
+  color: #2555eb;
+  margin-bottom: 8px;
+  font-size: 28px;
+  font-weight: 400;
+  margin-bottom: 2rem;
+}
+
+.lg-progress__query {
+  color: #4a5568;
+  font-size: 16px;
+  margin-bottom: 30px;
+}
+
+.lg-progress__query strong {
+  color: #2b6cb0;
+}
+
+.lg-progress__bar-container {
+  margin: 30px 0;
+}
+
+.lg-progress__bar {
+  width: 100%;
+  height: 12px;
+  background: #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.lg-progress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2555eb, #11308d);
+  border-radius: 6px;
+  transition: width 0.5s ease-in-out;
+  position: relative;
+}
+
+.lg-progress__fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shine 2s infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.lg-progress__percentage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.lg-progress__status {
+  margin: 20px 0;
+}
+
+.lg-progress__message {
+  font-size: 16px;
+  color: #ffffff;
+  font-weight: 200;
+  margin-bottom: 8px;
+}
+
+.lg-progress__phase {
+  font-size: 18px;
+  color: #2555eb;
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.lg-progress__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 20px;
+  margin: 30px 0;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.lg-progress__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.lg-progress__stat-label {
+  font-size: 12px;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.lg-progress__stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2555eb;
+}
+
+.lg-progress__error {
+  background: #fed7d7;
+  border: 1px solid #fc8181;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  color: #c53030;
+}
+
+.lg-progress__error p {
+  margin-bottom: 15px;
+}
+
+.lg-progress__success {
+  background: #c6f6d5;
+  border: 1px solid #68d391;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  color: #22543d;
+}
+
+.lg-progress__actions {
+  margin-top: 30px;
+}
+
+.lg-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lg-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lg-btn--primary {
+  background: #2555eb;
+  color: white;
+}
+
+.lg-btn--primary:hover:not(:disabled) {
+  background: #3182ce;
+  transform: translateY(-1px);
+}
+
+.lg-btn--ghost {
+  background: transparent;
+  color: #4a5568;
+  border: 1px solid #cbd5e0;
+}
+
+.lg-btn--ghost:hover:not(:disabled) {
+  background: #f7fafc;
+  border-color: #a0aec0;
+}
+
+.lg-progress__footer {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lg-progress__footer p {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.lg-progress__debug {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.lg-progress__debug label {
+  color: #ffffff;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.lg-progress__debug select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.lg-progress__debug select option {
+  background: #1a1a1a;
+  color: #ffffff;
+}
+
+/* Loading animation for the card */
+.lg-progress__card {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Process icon float animation */
+@keyframes process-icon-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Responsive Design with Random Positioning */
+@media (max-width: 1400px) {
+  /* Medium-large screens - adjust positions to avoid center content */
+  .process-icon--instagram {
+    top: 15%;
+    left: 10%;
+  }
+
+  .process-icon--google {
+    top: 10%;
+    right: 18%;
+  }
+
+  .process-icon--linkedin {
+    top: 28%;
+    right: 8%;
+  }
+
+  .process-icon--gmail {
+    top: 50%;
+    left: 6%;
+  }
+
+  .process-icon--facebook {
+    bottom: 40%;
+    left: 15%;
+  }
+
+  .process-icon--phone {
+    bottom: 18%;
+    left: 28%;
+  }
+
+  .process-icon--twitter {
+    bottom: 12%;
+    right: 22%;
+  }
+
+  .process-icon--youtube {
+    bottom: 30%;
+    right: 10%;
+  }
+
+  .process-icon--internet {
+    top: 38%;
+    right: 28%;
+  }
+}
+
+@media (max-width: 1200px) {
+  .process-icon {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .process-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Large tablets - spread icons with more spacing from center */
+  .process-icon--instagram {
+    top: 18%;
+    left: 12%;
+  }
+
+  .process-icon--google {
+    top: 12%;
+    right: 20%;
+  }
+
+  .process-icon--linkedin {
+    top: 32%;
+    right: 10%;
+  }
+
+  .process-icon--gmail {
+    top: 55%;
+    left: 8%;
+  }
+
+  .process-icon--facebook {
+    bottom: 45%;
+    left: 18%;
+  }
+
+  .process-icon--phone {
+    bottom: 20%;
+    left: 32%;
+  }
+
+  .process-icon--twitter {
+    bottom: 15%;
+    right: 25%;
+  }
+
+  .process-icon--youtube {
+    bottom: 35%;
+    right: 12%;
+  }
+
+  .process-icon--internet {
+    top: 42%;
+    right: 32%;
+  }
+}
+
+@media (max-width: 992px) {
+  /* Tablets - reposition with more distance from center */
+  .process-icon--instagram {
+    top: 22%;
+    left: 15%;
+  }
+
+  .process-icon--google {
+    top: 15%;
+    right: 25%;
+  }
+
+  .process-icon--linkedin {
+    top: 38%;
+    right: 12%;
+  }
+
+  .process-icon--gmail {
+    top: 60%;
+    left: 10%;
+  }
+
+  .process-icon--facebook {
+    bottom: 50%;
+    left: 20%;
+  }
+
+  .process-icon--phone {
+    bottom: 25%;
+    left: 35%;
+  }
+
+  .process-icon--twitter {
+    bottom: 18%;
+    right: 30%;
+  }
+
+  .process-icon--youtube {
+    bottom: 40%;
+    right: 15%;
+  }
+
+  .process-icon--internet {
+    top: 45%;
+    right: 35%;
+  }
+}
+
+@media (max-width: 768px) {
+  .lg-progress {
+    padding: 10px;
+  }
+  
+  .lg-progress__card {
+    padding: 30px 20px;
+  }
+  
+  .lg-progress__header h1 {
+    font-size: 24px;
+  }
+  
+  .lg-progress__stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .lg-progress__stat-value {
+    font-size: 16px;
+  }
+  
+  .process-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .process-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Mobile - strategic positioning around content */
+  .process-icon--instagram {
+    top: 8%;
+    left: 5%;
+  }
+
+  .process-icon--google {
+    top: 5%;
+    right: 8%;
+  }
+
+  .process-icon--linkedin {
+    top: 18%;
+    right: 3%;
+  }
+
+  .process-icon--gmail {
+    top: 35%;
+    left: 2%;
+  }
+
+  .process-icon--facebook {
+    bottom: 35%;
+    left: 5%;
+  }
+
+  .process-icon--phone {
+    bottom: 20%;
+    left: 15%;
+  }
+
+  .process-icon--twitter {
+    bottom: 8%;
+    right: 12%;
+  }
+
+  .process-icon--youtube {
+    bottom: 25%;
+    right: 3%;
+  }
+
+  .process-icon--internet {
+    top: 28%;
+    right: 15%;
+  }
+}
+
+@media (max-width: 480px) {
+  .lg-progress {
+    padding: 1rem;
+  }
+  
+  .process-icon {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .process-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .lg-progress__header h1 {
+    font-size: 22px;
+  }
+
+  /* Small mobile - fewer icons, better spacing */
+  .process-icon--instagram {
+    top: 6%;
+    left: 8%;
+  }
+
+  .process-icon--google {
+    top: 4%;
+    right: 12%;
+  }
+
+  .process-icon--linkedin {
+    top: 20%;
+    right: 5%;
+  }
+
+  .process-icon--gmail {
+    top: 38%;
+    left: 3%;
+  }
+
+  /* Hide some icons on very small screens to reduce clutter */
+  .process-icon--facebook,
+  .process-icon--internet {
+    display: none;
+  }
+
+  .process-icon--phone {
+    bottom: 18%;
+    left: 18%;
+  }
+
+  .process-icon--twitter {
+    bottom: 6%;
+    right: 15%;
+  }
+
+  .process-icon--youtube {
+    bottom: 22%;
+    right: 5%;
+  }
+}
+
+@media (max-width: 360px) {
+  /* Extra small screens - minimal icons with maximum spacing */
+  .process-icon--instagram {
+    top: 8%;
+    left: 12%;
+  }
+
+  .process-icon--google {
+    top: 6%;
+    right: 15%;
+  }
+
+  /* Hide more icons for extreme small screens */
+  .process-icon--linkedin,
+  .process-icon--gmail,
+  .process-icon--youtube {
+    display: none;
+  }
+
+  .process-icon--phone {
+    bottom: 15%;
+    left: 25%;
+  }
+
+  .process-icon--twitter {
+    bottom: 8%;
+    right: 20%;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .process-icon {
+    animation: none !important;
+  }
+  
+  .lg-progress__fill::after {
+    animation: none !important;
+  }
+}
