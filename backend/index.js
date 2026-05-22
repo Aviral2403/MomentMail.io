@@ -1,3 +1,8 @@
+// Polyfill for SlowBuffer which is removed in Node.js 25+
+const _buffer = require('buffer');
+if (!_buffer.SlowBuffer) {
+  _buffer.SlowBuffer = _buffer.Buffer;
+}
 const dotenv = require('dotenv');
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -16,7 +21,7 @@ const proxyManager = require('./utils/proxyManager');
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174', 'https://momentmail-io.onrender.com/']
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'https://momentmail-io.onrender.com/']
 }));
 
 app.use(express.json());
@@ -220,18 +225,18 @@ mongoose.connect(process.env.MONGO_URL, {
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
 })
-.then(() => {
-  console.log('✅ Database connected successfully!');
-})
-.catch((err) => {
-  console.error('❌ Database connection failed:', err.message);
-  process.exit(1);
-});
+  .then(() => {
+    console.log('✅ Database connected successfully!');
+  })
+  .catch((err) => {
+    console.error('❌ Database connection failed:', err.message);
+    process.exit(1);
+  });
 
 // Initialize services
 async function initializeServices() {
   console.log('\n🔧 Testing external services...');
-  
+
   // Test primary search API
   try {
     const searchApiWorking = await searchApiManager.testConnection();
@@ -275,15 +280,15 @@ const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, async () => {
   console.log('\n🚀 Starting Enhanced Lead Generation Backend Server v2.0...\n');
-  
+
   await initializeServices();
-  
+
   console.log('\n🌟 Enhanced Lead Generation Server successfully started!');
   console.log(`🌐 Access your server at: http://localhost:${PORT}`);
   console.log(`🔧 Health Check: http://localhost:${PORT}/health`);
   console.log(`📊 Statistics: http://localhost:${PORT}/api/leads/stats`);
   console.log('\n🎯 Ready to handle professional lead generation requests!');
-  
+
   console.log('\n📈 Enhanced Features Available:');
   console.log('   - Multi-engine search (Google + alternatives)');
   console.log('   - Advanced contact extraction with AI validation');
