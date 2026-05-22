@@ -21,7 +21,7 @@ const proxyManager = require('./utils/proxyManager');
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'https://momentmail-io.onrender.com/']
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'https://momentmail-io.onrender.com', 'https://momentmail-io.onrender.com/']
 }));
 
 app.use(express.json());

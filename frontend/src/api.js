@@ -1,7 +1,7 @@
 // api.js - Enhanced with NO timeouts and progress tracking - COMPLETE VERSION
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.MODE === 'development' ? "http://localhost:8080" : "https://momentmail-io-backend.onrender.com");
 
 // Enhanced token refresh function
 export const refreshAuthToken = async (token) => {
